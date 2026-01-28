@@ -13,14 +13,15 @@ const Employee = require("./models/Employee");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-/* =========================
+/* ==================================================
    STATIC FILES
-========================= */
+================================================== */
+// uploads (avatar / images)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-/* =========================
-   Middleware
-========================= */
+/* ==================================================
+   MIDDLEWARE
+================================================== */
 app.use(cors({
   origin: "*",
   methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
@@ -31,9 +32,9 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
-/* =========================
-   MongoDB Connect
-========================= */
+/* ==================================================
+   MONGODB CONNECT
+================================================== */
 const mongoUri = process.env.MONGODB_URI;
 if (!mongoUri) {
   console.error("❌ MONGODB_URI not found");
@@ -54,26 +55,24 @@ mongoose.connect(mongoUri)
     process.exit(1);
   });
 
-/* =========================
-   Seed Admin (ครั้งแรกเท่านั้น)
-========================= */
+/* ==================================================
+   SEED ADMIN
+================================================== */
 async function ensureAdmin() {
-  const email = process.env.ADMIN_EMAIL;
-  const password = process.env.ADMIN_PASSWORD;
-
-  if (!email || !password) {
+  if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) {
     console.log("ℹ️ Admin env not set, skip admin seed");
     return;
   }
 
-  const exists = await Employee.findOne({ email });
+  const exists = await Employee.findOne({ email: process.env.ADMIN_EMAIL });
   if (exists) return;
 
-  const hash = await bcrypt.hash(password, 10);
+  const hash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+
   await Employee.create({
     firstName: process.env.ADMIN_FIRSTNAME || "Admin",
     lastName: process.env.ADMIN_LASTNAME || "User",
-    email,
+    email: process.env.ADMIN_EMAIL,
     password: hash,
     role: "admin",
     active: true,
@@ -82,46 +81,55 @@ async function ensureAdmin() {
   console.log("👑 Admin created");
 }
 
-/* =========================
-   API Routes (แยกชัดเจน)
-========================= */
+/* ==================================================
+   API ROUTES
+================================================== */
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/employees", require("./routes/employeeRoutes"));
 app.use("/api/customers", require("./routes/customers"));
 app.use("/api/stocks", require("./routes/stock"));
 app.use("/api/jobs", require("./routes/jobRoutes"));
 
-/* =========================
-   Serve Employee Frontend
-========================= */
+/* ==================================================
+   EMPLOYEE FRONTEND
+================================================== */
 const employeeFrontendPath = path.join(__dirname, "../frontend-employee");
+
 app.use("/employee", express.static(employeeFrontendPath));
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(customerFrontendPath, "home.html"));
+// /employee
+app.get("/employee", (req, res) => {
+  res.sendFile(path.join(employeeFrontendPath, "login.html"));
 });
 
-app.get(/^\/(?!api|employee).*/, (req, res) => {
-  res.sendFile(path.join(customerFrontendPath, "home.html"));
+// /employee/อะไรก็ได้ → login.html
+app.get(/^\/employee\/.*$/, (req, res) => {
+  res.sendFile(path.join(employeeFrontendPath, "login.html"));
 });
 
+/* ==================================================
+   CUSTOMER FRONTEND (ROOT + SEO)
+================================================== */
+const customerFrontendPath = path.join(__dirname, "../frontend-customer");
 
-/* =========================
-   Serve Customer Frontend (ROOT ⭐ สำคัญ)
-========================= */
-const customerFrontendPath = path.join(__dirname, "frontend-customer");
-
-// serve static
+// static (css, js, img)
 app.use(express.static(customerFrontendPath));
 
-// หน้าแรก /
+// หน้าแรก / → index.html (ให้ Google เจอ)
 app.get("/", (req, res) => {
   res.sendFile(path.join(customerFrontendPath, "index.html"));
 });
 
-// fallback (กัน refresh แล้ว 404)
+// fallback สำหรับ customer (ยกเว้น api / employee)
 app.get(/^\/(?!api|employee).*/, (req, res) => {
   res.sendFile(path.join(customerFrontendPath, "index.html"));
+});
+
+/* ==================================================
+   404 API ONLY
+================================================== */
+app.use("/api", (req, res) => {
+  res.status(404).json({ error: "API endpoint not found" });
 });
 
 module.exports = app;
