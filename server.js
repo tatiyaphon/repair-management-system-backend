@@ -14,7 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 /* =========================
-   STATIC FILES (PUBLIC)
+   STATIC FILES (SEO ⭐)
 ========================= */
 const publicPath = path.join(__dirname, "public");
 app.use(express.static(publicPath));
@@ -22,12 +22,7 @@ app.use(express.static(publicPath));
 /* =========================
    Middleware
 ========================= */
-app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-  allowedHeaders: ["Content-Type", "Authorization"],
-}));
-
+app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
@@ -80,7 +75,7 @@ app.use("/api/stocks", require("./routes/stock"));
 app.use("/api/jobs", require("./routes/jobRoutes"));
 
 /* =========================
-   ROOT PAGE (SEO ⭐)
+   ROOT PAGE (Google ใช้ ⭐)
 ========================= */
 app.get("/", (req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
