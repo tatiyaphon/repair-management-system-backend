@@ -13,17 +13,32 @@ const Employee = require("./models/Employee");
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-/* =========================
+/* ==================================================
+   PATH SETUP
+================================================== */
+const publicPath   = path.join(__dirname, "public");              // ลูกค้า
+const employeePath = path.join(__dirname, "../frontend-employee"); // ร้าน
+
+/* ==================================================
    MIDDLEWARE
-========================= */
+================================================== */
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
-/* =========================
+/* ==================================================
+   STATIC FILES
+================================================== */
+// ลูกค้า (SEO / Google)
+app.use(express.static(publicPath));
+
+// ร้าน
+app.use("/employee", express.static(employeePath));
+
+/* ==================================================
    MONGODB
-========================= */
+================================================== */
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log("✅ Connected to MongoDB");
@@ -59,42 +74,46 @@ async function ensureAdmin() {
   console.log("👑 Admin created");
 }
 
-/* =========================
+/* ==================================================
    API ROUTES
-========================= */
+================================================== */
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/employees", require("./routes/employeeRoutes"));
 app.use("/api/customers", require("./routes/customers"));
 app.use("/api/stocks", require("./routes/stock"));
 app.use("/api/jobs", require("./routes/jobRoutes"));
 
-/* =========================
-   PUBLIC (ลูกค้า)
-========================= */
-/* =========================
-   CUSTOMER (PUBLIC)
-========================= */
-const publicPath = path.join(__dirname, "public");
-app.use("/", express.static(publicPath));
-
-app.get(["/", "/customer"], (req, res) => {
+/* ==================================================
+   ROUTING : CUSTOMER (PUBLIC)
+================================================== */
+// หน้าแรก → ตรวจสอบสถานะ
+app.get("/", (req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
 });
 
-/* =========================
-   EMPLOYEE (SHOP ONLY)
-========================= */
-const employeePath = path.join(__dirname, "frontend-employee");
-app.use("/employee", express.static(employeePath));
+// /customer → ใช้หน้าเดียวกัน
+app.get("/customer", (req, res) => {
+  res.sendFile(path.join(publicPath, "index.html"));
+});
 
-app.get("/employee/*", (req, res) => {
+/* ==================================================
+   ROUTING : EMPLOYEE (SHOP ONLY)
+================================================== */
+// /employee → login
+app.get("/employee", (req, res) => {
   res.sendFile(path.join(employeePath, "login.html"));
 });
 
-/* =========================
-   404 API ONLY
-========================= */
-app.use("/api", (req, res) => {
-  res.status(404).json({ message: "API not found" });
+// ทุก path ใต้ /employee (สำคัญ: ห้ามใช้ *)
+app.get(/^\/employee\/.*$/, (req, res) => {
+  res.sendFile(path.join(employeePath, "login.html"));
 });
+
+/* ==================================================
+   FALLBACK (ลูกค้าเท่านั้น)
+================================================== */
+app.use((req, res) => {
+  res.sendFile(path.join(publicPath, "index.html"));
+});
+
 module.exports = app;
