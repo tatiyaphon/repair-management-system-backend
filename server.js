@@ -109,17 +109,17 @@ app.get(/^\/(?!api|employee).*/, (req, res) => {
 /* =========================
    Serve Customer Frontend (ROOT ⭐ สำคัญ)
 ========================= */
-const customerFrontendPath = path.join(__dirname, "../frontend-customer");
+const customerFrontendPath = path.join(__dirname, "frontend-customer");
 
-// static files (css, js, images)
+// serve static
 app.use(express.static(customerFrontendPath));
 
-// หน้าแรก → หน้าเว็บให้ Google index
+// หน้าแรก /
 app.get("/", (req, res) => {
   res.sendFile(path.join(customerFrontendPath, "index.html"));
 });
 
-// fallback สำหรับหน้าอื่น ๆ ของลูกค้า
+// fallback (กัน refresh แล้ว 404)
 app.get(/^\/(?!api|employee).*/, (req, res) => {
   res.sendFile(path.join(customerFrontendPath, "index.html"));
 });
