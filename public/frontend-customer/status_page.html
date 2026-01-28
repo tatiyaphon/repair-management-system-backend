@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สถานะงานซ่อม | ระบบจัดการงานซ่อม</title>
+    <link rel="icon" type="image/png" href="logo1.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* === 1. Variables & Colors === */
+        :root {
+            --primary-color: #2c3e50; /* Dark Blue */
+            --secondary-color: #3498db; /* Bright Blue */
+            --background-color: #ecf0f1; /* Light Gray */
+            --card-background: #ffffff;
+            --text-color: #333;
+            --light-text-color: #7f8c8d;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --line-color: #00b900;
+        }
+
+        /* === 2. Base & Layout === */
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            text-align: center;
+            background-image: linear-gradient(to bottom, #d9e3f0, #e9eff5);
+            padding: 20px 0;
+        }
+
+        .container {
+            background-color: var(--card-background);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 700px;
+            margin: 20px auto;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+        
+        /* === 3. Status Box & Details === */
+        .status-box {
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: left;
+            background-color: #f4f7f9;
+            border: 1px solid #e0e0e0;
+        }
+
+        .status-box h2 {
+            margin-top: 0;
+            color: var(--secondary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+        }
+
+        /* Current Status Display */
+        .status-display {
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            padding: 18px;
+            border-radius: 10px;
+            color: #ffffff;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-complete { background-color: var(--success-color); }
+        .status-in-progress { background-color: var(--warning-color); }
+        .status-new { background-color: var(--secondary-color); }
+
+        .detail-item {
+            margin-bottom: 12px;
+            line-height: 1.6;
+            display: flex;
+        }
+
+        .detail-item strong {
+            color: var(--primary-color);
+            font-weight: 600;
+            display: inline-block;
+            width: 150px;
+            flex-shrink: 0;
+        }
+
+        /* Price Styling */
+        .price-display {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--danger-color);
+            display: block;
+            margin-top: 5px;
+        }
+        
+        /* === 4. Links & Not Found === */
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--primary-color);
+            transform: translateX(-3px);
+        }
+
+        .not-found {
+            color: var(--danger-color);
+            font-size: 1.4rem;
+            margin: 30px 0;
+            font-weight: 600;
+        }
+
+        /* === 5. Contact Info === */
+        .contact-info {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed #ccc;
+        }
+
+        .contact-info h3 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .contact-methods {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .contact-methods a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .contact-methods a:hover {
+            background-color: #e0e0e0;
+        }
+
+        .contact-methods .fa-phone { color: var(--secondary-color); }
+        .contact-methods .fa-line { color: var(--line-color); }
+
+        /* === 6. Animations & Responsiveness === */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 25px;
+            }
+            .detail-item {
+                flex-direction: column;
+            }
+            .detail-item strong {
+                width: 100%;
+                margin-bottom: 3px;
+            }
+            .contact-methods {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="status-container">
+        <h1><i class="fas fa-info-circle"></i> สถานะงานซ่อม</h1>
+        
+        <div id="status-content">
+            </div>
+
+        <div class="contact-info">
+            <h3><i class="fas fa-headset"></i> ช่องทางการติดต่อสอบถามเพิ่มเติม</h3>
+            <div class="contact-methods">
+                <a href="tel:02-123-4567">
+                    <i class="fas fa-phone"></i> โทร: 080-4641677
+                </a>
+                <a href="#" target="_blank">
+                    <i class="fab fa-line"></i> Line ID: @RepairShop
+                </a>
+            </div>
+        </div>
+    </div>
+   <script>
+const API_URL = "http://localhost:5000/api/jobs/receipt";
+
+const urlParams = new URLSearchParams(window.location.search);
+const receiptNumber = urlParams.get("receipt_number");
+const statusContent = document.getElementById("status-content");
+
+function formatDate(dateStr) {
+  if (!dateStr) return "-";
+  return new Date(dateStr).toLocaleDateString("th-TH");
+}
+
+function formatPrice(price) {
+  if (price === null || price === undefined) return "-";
+  return `${Number(price).toLocaleString("th-TH")} บาท`;
+}
+
+function mapStatus(status) {
+  const map = {
+    "รับเครื่อง": { text: "รับเครื่อง", class: "status-new", icon: "⏳" },
+    "กำลังซ่อม": { text: "กำลังซ่อม", class: "status-in-progress", icon: "⚙️" },
+    "รออะไหล่": { text: "รออะไหล่", class: "status-in-progress", icon: "🧩" },
+    "ซ่อมเสร็จ": { text: "ซ่อมเสร็จแล้ว", class: "status-complete", icon: "✅" },
+    "ยกเลิก": { text: "ยกเลิก", class: "status-new", icon: "❌" }
+  };
+  return map[status] || { text: status, class: "status-new", icon: "" };
+}
+
+async function loadStatus() {
+  if (!receiptNumber) {
+    statusContent.innerHTML = `
+      <p class="not-found">❌ ไม่พบเลขที่ใบเสร็จ</p>
+      <a href="check_status.html" class="back-link">⬅ กลับ</a>
+    `;
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_URL}/${receiptNumber}`);
+    if (!res.ok) throw new Error("NOT_FOUND");
+
+    const data = await res.json();
+    const statusInfo = mapStatus(data.status);
+
+    statusContent.innerHTML = `
+      <div class="status-box">
+        <h2>สถานะปัจจุบัน</h2>
+        <div class="status-display ${statusInfo.class}">
+          ${statusInfo.icon} ${statusInfo.text}
+        </div>
+      </div>
+
+      <div class="status-box">
+        <h2>ข้อมูลงานซ่อม</h2>
+        <div class="detail-item"><strong>เลขที่ใบเสร็จ:</strong> #${data.receiptNumber}</div>
+        <div class="detail-item"><strong>ลูกค้า:</strong> ${data.customerName}</div>
+        <div class="detail-item"><strong>เบอร์โทร:</strong> ${data.customerPhone || "-"}</div>
+      </div>
+
+      <div class="status-box">
+        <h2>รายละเอียดเครื่อง</h2>
+        <div class="detail-item"><strong>อุปกรณ์:</strong> ${data.deviceType} (${data.deviceModel})</div>
+        <div class="detail-item"><strong>อาการ:</strong> ${data.symptom}</div>
+        <div class="detail-item"><strong>รายละเอียดซ่อม:</strong> ${data.repairDetail || "-"}</div>
+      </div>
+
+      <div class="status-box">
+        <h2>ราคาและกำหนดการ</h2>
+        <div class="detail-item"><strong>ค่าซ่อม:</strong> <span class="price-display">${formatPrice(data.priceQuoted)}</span></div>
+        <div class="detail-item"><strong>วันที่รับเครื่อง:</strong> ${formatDate(data.receivedDate)}</div>
+        <div class="detail-item"><strong>วันที่เริ่มซ่อม:</strong> ${formatDate(data.startDate)}</div>
+        <div class="detail-item"><strong>วันที่ซ่อมเสร็จ:</strong> ${formatDate(data.finishDate) || "กำลังดำเนินการ"}</div>
+      </div>
+
+      <a href="check_status.html" class="back-link">⬅ ตรวจสอบงานอื่น</a>
+    `;
+  } catch (err) {
+    statusContent.innerHTML = `
+      <p class="not-found">❌ ไม่พบข้อมูลงานซ่อมสำหรับเลขที่ใบเสร็จ #${receiptNumber}</p>
+      <a href="check_status.html" class="back-link">⬅ กลับ</a>
+    `;
+  }
+}
+
+loadStatus();
+</script>
+
+</body>
+</html>

@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ตรวจสอบสถานะงานซ่อม | ระบบจัดการงานซ่อม</title>
+<link rel="icon" type="image/png" href="logo1.png">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+:root{
+    --primary:#1f2937;
+    --accent:#2563eb;
+    --success:#16a34a;
+    --warning:#f59e0b;
+    --bg:#f4f6fa;
+    --card:#ffffff;
+    --muted:#6b7280;
+    --border:#e5e7eb;
+}
+
+*{box-sizing:border-box;}
+body{
+    margin:0;
+    font-family:'Kanit',sans-serif;
+    background:var(--bg);
+    color:#111827;
+}
+
+/* HEADER */
+header{
+    background:#fff;
+    border-bottom:1px solid var(--border);
+    padding:15px 30px;
+    display:flex;
+    align-items:center;
+    gap:15px;
+}
+header img{height:42px;}
+header h1{font-size:1.2rem;margin:0}
+
+/* BREADCRUMB */
+.breadcrumb{
+    max-width:1200px;
+    margin:15px auto 0;
+    padding:0 20px;
+    font-size:0.85rem;
+    color:var(--muted);
+}
+
+/* CONTAINER */
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:30px 20px 60px;
+}
+
+/* SUMMARY */
+.summary{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+    gap:20px;
+    margin-bottom:40px;
+}
+.summary-card{
+    background:var(--card);
+    padding:25px;
+    border-radius:14px;
+    border:1px solid var(--border);
+}
+.summary-card i{
+    font-size:1.8rem;
+    color:var(--accent);
+}
+.summary-card h3{margin:10px 0 5px}
+.summary-card span{color:var(--muted);font-size:0.9rem}
+
+/* MAIN */
+.main{
+    display:grid;
+    grid-template-columns:1.3fr 1fr;
+    gap:30px;
+}
+
+/* CHECK CARD */
+.check-card{
+    background:var(--card);
+    padding:35px;
+    border-radius:16px;
+    border:1px solid var(--border);
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+.check-card h2{text-align:center;margin-top:0}
+.check-card p{text-align:center;color:var(--muted)}
+
+input{
+    width:100%;
+    padding:12px;
+    margin-top:15px;
+    border-radius:8px;
+    border:1px solid var(--border);
+}
+input:focus{
+    outline:none;
+    border-color:var(--accent);
+    box-shadow:0 0 0 3px rgba(37,99,235,.15);
+}
+
+button{
+    width:100%;
+    margin-top:20px;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:var(--accent);
+    color:#fff;
+    font-size:1rem;
+    cursor:pointer;
+}
+
+/* STATUS */
+.status-box{
+    background:var(--card);
+    padding:25px;
+    border-radius:14px;
+    border:1px solid var(--border);
+}
+.badge{
+    display:inline-block;
+    padding:6px 14px;
+    border-radius:20px;
+    font-size:.85rem;
+    margin:5px 0;
+}
+.badge.wait{background:#fff7ed;color:var(--warning)}
+.badge.progress{background:#eff6ff;color:var(--accent)}
+.badge.done{background:#ecfdf5;color:var(--success)}
+
+/* FAQ */
+.faq{
+    margin-top:50px;
+}
+.faq h3{margin-bottom:15px}
+.faq-item{
+    background:var(--card);
+    padding:20px;
+    border-radius:12px;
+    border:1px solid var(--border);
+    margin-bottom:10px;
+}
+
+/* FOOTER */
+footer{
+    text-align:center;
+    padding:25px;
+    color:var(--muted);
+    font-size:.85rem;
+}
+
+/* MOBILE */
+@media(max-width:900px){
+    .main{grid-template-columns:1fr;}
+}
+/* HEADER (NEW) */
+.topbar{
+    background:#ffffff;
+    border-bottom:1px solid var(--border);
+    padding:15px 30px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+}
+
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+
+.brand img{
+    height:42px;
+}
+
+.brand h1{
+    font-size:1.2rem;
+    margin:0;
+    font-weight:600;
+    color:var(--primary);
+}
+
+/* RIGHT NAV */
+.nav-right{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.nav-link{
+    text-decoration:none;
+    color:var(--primary);
+    font-size:0.95rem;
+    font-weight:500;
+    display:flex;
+    align-items:center;
+    gap:6px;
+    padding:8px 14px;
+    border-radius:8px;
+    transition:all .25s ease;
+}
+
+.nav-link:hover{
+    background:#f1f5f9;
+    color:var(--accent);
+}
+
+.nav-link.contact{
+    background:var(--accent);
+    color:#fff;
+}
+
+.nav-link.contact:hover{
+    background:#1d4ed8;
+    color:#fff;
+}
+
+/* MOBILE */
+@media(max-width:600px){
+    .topbar{
+        flex-direction:column;
+        gap:10px;
+        align-items:flex-start;
+    }
+
+    .nav-right{
+        width:100%;
+        justify-content:flex-end;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<header class="topbar">
+    <div class="brand">
+        <img src="logo1.png" alt="logo">
+        <h1>ระบบจัดการงานซ่อม</h1>
+    </div>
+
+    <nav class="nav-right">
+        <a href="index.html" class="nav-link">
+            <i class=""></i> หน้าแรก
+        </a>
+    </nav>
+</header>
+
+
+<div class="breadcrumb">
+    หน้าแรก / ตรวจสอบสถานะงานซ่อม
+</div>
+
+<div class="container">
+
+    <!-- SUMMARY -->
+    <section class="summary">
+        <div class="summary-card">
+            <i class="fas fa-tools"></i>
+            <h3>ซ่อมมาตรฐาน</h3>
+            <span>ตรวจสอบทุกขั้นตอน</span>
+        </div>
+        <div class="summary-card">
+            <i class="fas fa-clock"></i>
+            <h3>อัปเดตสถานะ</h3>
+            <span>ลูกค้าตรวจสอบได้เอง</span>
+        </div>
+        <div class="summary-card">
+            <i class="fas fa-shield-alt"></i>
+            <h3>ข้อมูลปลอดภัย</h3>
+            <span>ไม่แสดงข้อมูลผู้อื่น</span>
+        </div>
+    </section>
+
+    <!-- MAIN -->
+    <section class="main">
+
+        <div class="check-card">
+            <h2>🔍 ตรวจสอบสถานะงานซ่อม</h2>
+            <p>กรอกเลขที่ใบเสร็จ 6 หลัก</p>
+
+            <input id="receipt_number" placeholder="เช่น 123456">
+            <button>ตรวจสอบสถานะ</button>
+        </div>
+
+        <div class="status-box">
+            <h3>ตัวอย่างสถานะงานซ่อม</h3>
+            <div class="badge wait">รอการตรวจสอบ</div><br>
+            <div class="badge progress">กำลังซ่อม</div><br>
+            <div class="badge done">ซ่อมเสร็จแล้ว</div>
+        </div>
+
+    </section>
+
+    <!-- FAQ -->
+    <section class="faq">
+        <h3>❓ คำถามที่พบบ่อย</h3>
+        <div class="faq-item">เลขใบเสร็จหาได้จากไหน? → ดูจากใบรับเครื่อง</div>
+        <div class="faq-item">สถานะไม่อัปเดตทำอย่างไร? → ติดต่อร้าน</div>
+    </section>
+
+</div>
+
+<footer>
+    © 2025 ร้านตุ้ยไอที | Computer Repair Tracking System
+</footer>
+
+<script>
+const API_BASE = "http://localhost:5000/api/jobs/receipt";
+
+const receiptInput = document.getElementById("receipt_number");
+const button = document.querySelector("button");
+
+function showError(msg) {
+    alert(msg);
+}
+
+button.addEventListener("click", async () => {
+    const receiptNumber = receiptInput.value.trim();
+
+    // ตรวจเลขใบเสร็จ (อย่างน้อย 3 ตัวอักษร ปรับได้)
+    if (receiptNumber.length < 3) {
+        showError("กรุณากรอกเลขที่ใบเสร็จให้ถูกต้อง");
+        return;
+    }
+
+    try {
+        const res = await fetch(`${API_BASE}/${receiptNumber}`);
+
+        // ❌ ไม่พบงาน
+        if (!res.ok) {
+            showError("ไม่พบข้อมูลงานซ่อมในระบบ");
+            return;
+        }
+
+        // ✅ พบงาน → ไปหน้าแสดงสถานะ
+        window.location.href = `status_page.html?receipt_number=${receiptNumber}`;
+
+    } catch (err) {
+        console.error(err);
+        showError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่");
+    }
+});
+</script>
+
+</body>
+</html>
