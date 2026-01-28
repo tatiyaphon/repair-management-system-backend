@@ -87,9 +87,9 @@ app.get("/", (req, res) => {
 });
 
 /* =========================
-   FALLBACK (SPA / Google)
+   FALLBACK (ห้ามใช้ "*")
 ========================= */
-app.get("*", (req, res) => {
+app.use((req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
 });
 
