@@ -14,13 +14,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 /* =========================
-   STATIC FILES (SEO ⭐)
-========================= */
-const publicPath = path.join(__dirname, "public");
-app.use(express.static(publicPath));
-
-/* =========================
-   Middleware
+   MIDDLEWARE
 ========================= */
 app.use(cors());
 app.use(express.json());
@@ -28,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
 /* =========================
-   MongoDB
+   MONGODB
 ========================= */
 mongoose.connect(process.env.MONGODB_URI)
   .then(async () => {
@@ -75,17 +69,34 @@ app.use("/api/stocks", require("./routes/stock"));
 app.use("/api/jobs", require("./routes/jobRoutes"));
 
 /* =========================
-   ROOT PAGE (Google ใช้ ⭐)
+   PUBLIC (ลูกค้า)
 ========================= */
+const publicPath = path.join(__dirname, "public");
+app.use(express.static(publicPath));
+
 app.get("/", (req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
 });
 
+app.get("/check", (req, res) => {
+  res.sendFile(path.join(publicPath, "check_status.html"));
+});
+
 /* =========================
-   FALLBACK (ห้ามใช้ "*")
+   EMPLOYEE (ร้าน)
+========================= */
+const employeePath = path.join(__dirname, "../frontend-employee");
+app.use("/employee", express.static(employeePath));
+
+app.get("/employee", (req, res) => {
+  res.sendFile(path.join(employeePath, "login.html"));
+});
+
+/* =========================
+   404 (อย่า fallback ไปลูกค้า)
 ========================= */
 app.use((req, res) => {
-  res.sendFile(path.join(publicPath, "index.html"));
+  res.status(404).send("Not Found");
 });
 
 module.exports = app;
