@@ -71,32 +71,30 @@ app.use("/api/jobs", require("./routes/jobRoutes"));
 /* =========================
    PUBLIC (ลูกค้า)
 ========================= */
+/* =========================
+   CUSTOMER (PUBLIC)
+========================= */
 const publicPath = path.join(__dirname, "public");
-app.use(express.static(publicPath));
+app.use("/", express.static(publicPath));
 
-app.get("/", (req, res) => {
+app.get(["/", "/customer"], (req, res) => {
   res.sendFile(path.join(publicPath, "index.html"));
 });
 
-app.get("/check", (req, res) => {
-  res.sendFile(path.join(publicPath, "check_status.html"));
-});
-
 /* =========================
-   EMPLOYEE (ร้าน)
+   EMPLOYEE (SHOP ONLY)
 ========================= */
-const employeePath = path.join(__dirname, "../frontend-employee");
+const employeePath = path.join(__dirname, "frontend-employee");
 app.use("/employee", express.static(employeePath));
 
-app.get("/employee", (req, res) => {
+app.get("/employee/*", (req, res) => {
   res.sendFile(path.join(employeePath, "login.html"));
 });
 
 /* =========================
-   404 (อย่า fallback ไปลูกค้า)
+   404 API ONLY
 ========================= */
-app.use((req, res) => {
-  res.status(404).send("Not Found");
+app.use("/api", (req, res) => {
+  res.status(404).json({ message: "API not found" });
 });
-
 module.exports = app;
