@@ -97,13 +97,14 @@ app.use("/api/jobs", require("./routes/jobRoutes"));
 const employeeFrontendPath = path.join(__dirname, "../frontend-employee");
 app.use("/employee", express.static(employeeFrontendPath));
 
-app.get("/employee", (req, res) => {
-  res.sendFile(path.join(employeeFrontendPath, "login.html"));
+app.get("/", (req, res) => {
+  res.sendFile(path.join(customerFrontendPath, "home.html"));
 });
 
-app.get(/^\/employee\/.*$/, (req, res) => {
-  res.sendFile(path.join(employeeFrontendPath, "login.html"));
+app.get(/^\/(?!api|employee).*/, (req, res) => {
+  res.sendFile(path.join(customerFrontendPath, "home.html"));
 });
+
 
 /* =========================
    Serve Customer Frontend (ROOT ⭐ สำคัญ)
