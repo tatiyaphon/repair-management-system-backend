@@ -55,19 +55,24 @@ mongoose.connect(mongoUri)
   });
 
 /* =========================
-   Seed Admin
+   Seed Admin (ครั้งแรกเท่านั้น)
 ========================= */
 async function ensureAdmin() {
-  const email = process.env.ADMIN_EMAIL || "admin@example.com";
-  const password = process.env.ADMIN_PASSWORD || "Admin@123";
+  const email = process.env.ADMIN_EMAIL;
+  const password = process.env.ADMIN_PASSWORD;
+
+  if (!email || !password) {
+    console.log("ℹ️ Admin env not set, skip admin seed");
+    return;
+  }
 
   const exists = await Employee.findOne({ email });
   if (exists) return;
 
   const hash = await bcrypt.hash(password, 10);
   await Employee.create({
-    firstName: "Admin",
-    lastName: "User",
+    firstName: process.env.ADMIN_FIRSTNAME || "Admin",
+    lastName: process.env.ADMIN_LASTNAME || "User",
     email,
     password: hash,
     role: "admin",
@@ -78,7 +83,7 @@ async function ensureAdmin() {
 }
 
 /* =========================
-   API Routes
+   API Routes (แยกชัดเจน)
 ========================= */
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/employees", require("./routes/employeeRoutes"));
@@ -101,17 +106,19 @@ app.get(/^\/employee\/.*$/, (req, res) => {
 });
 
 /* =========================
-   Serve Customer Frontend (ROOT ⭐)
+   Serve Customer Frontend (ROOT ⭐ สำคัญ)
 ========================= */
 const customerFrontendPath = path.join(__dirname, "../frontend-customer");
+
+// static files (css, js, images)
 app.use(express.static(customerFrontendPath));
 
-// หน้าแรก / → หน้าเช็คสถานะ (Google ใช้อันนี้)
+// หน้าแรก → หน้าเว็บให้ Google index
 app.get("/", (req, res) => {
   res.sendFile(path.join(customerFrontendPath, "index.html"));
 });
 
-// fallback
+// fallback สำหรับหน้าอื่น ๆ ของลูกค้า
 app.get(/^\/(?!api|employee).*/, (req, res) => {
   res.sendFile(path.join(customerFrontendPath, "index.html"));
 });
