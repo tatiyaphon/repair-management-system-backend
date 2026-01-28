@@ -7,18 +7,14 @@ const cors = require("cors");
 const path = require("path");
 const morgan = require("morgan");
 const bcrypt = require("bcryptjs");
-const fs = require("fs");
 
 const Employee = require("./models/Employee");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-});
 /* =========================
-   🔥 STATIC UPLOADS (ต้องอยู่บนสุด)
+   STATIC FILES
 ========================= */
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -35,11 +31,6 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
-console.log(
-  "FILE EXISTS?",
-  fs.existsSync(path.join(__dirname, "uploads/profile/default.jpg"))
-);
-
 /* =========================
    MongoDB Connect
 ========================= */
@@ -53,7 +44,8 @@ mongoose.connect(mongoUri)
   .then(async () => {
     console.log("✅ Connected to MongoDB");
     await ensureAdmin();
-    app.listen(PORT, () => {
+
+    app.listen(PORT, "0.0.0.0", () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
   })
@@ -88,10 +80,6 @@ async function ensureAdmin() {
 /* =========================
    API Routes
 ========================= */
-app.get("/", (_req, res) => {
-  res.json({ message: "API running 🚀" });
-});
-
 app.use("/api/auth", require("./routes/auth"));
 app.use("/api/employees", require("./routes/employeeRoutes"));
 app.use("/api/customers", require("./routes/customers"));
@@ -102,8 +90,6 @@ app.use("/api/jobs", require("./routes/jobRoutes"));
    Serve Employee Frontend
 ========================= */
 const employeeFrontendPath = path.join(__dirname, "../frontend-employee");
-console.log("📁 Employee frontend path:", employeeFrontendPath);
-
 app.use("/employee", express.static(employeeFrontendPath));
 
 app.get("/employee", (req, res) => {
@@ -115,26 +101,19 @@ app.get(/^\/employee\/.*$/, (req, res) => {
 });
 
 /* =========================
-   Serve Customer Frontend
+   Serve Customer Frontend (ROOT ⭐)
 ========================= */
 const customerFrontendPath = path.join(__dirname, "../frontend-customer");
-console.log("📁 Customer frontend path:", customerFrontendPath);
+app.use(express.static(customerFrontendPath));
 
-app.use("/customer", express.static(customerFrontendPath));
-
-app.get("/customer", (req, res) => {
+// หน้าแรก / → หน้าเช็คสถานะ (Google ใช้อันนี้)
+app.get("/", (req, res) => {
   res.sendFile(path.join(customerFrontendPath, "index.html"));
 });
 
-app.get(/^\/customer\/.*$/, (req, res) => {
+// fallback
+app.get(/^\/(?!api|employee).*/, (req, res) => {
   res.sendFile(path.join(customerFrontendPath, "index.html"));
-});
-
-/* =========================
-   404 Handler (ล่างสุดเท่านั้น)
-========================= */
-app.use((req, res) => {
-  res.status(404).json({ error: "Endpoint not found" });
 });
 
 module.exports = app;
