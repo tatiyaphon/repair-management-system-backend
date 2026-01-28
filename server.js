@@ -112,19 +112,18 @@ app.get(/^\/employee\/.*$/, (req, res) => {
 ================================================== */
 const customerFrontendPath = path.join(__dirname, "../frontend-customer");
 
-// static (css, js, img)
+// static assets (css/js/img)
 app.use(express.static(customerFrontendPath));
 
-// หน้าแรก / → index.html (ให้ Google เจอ)
+// หน้าแรก /
 app.get("/", (req, res) => {
   res.sendFile(path.join(customerFrontendPath, "index.html"));
 });
 
-// fallback สำหรับ customer (ยกเว้น api / employee)
+// fallback สำหรับหน้า customer
 app.get(/^\/(?!api|employee).*/, (req, res) => {
   res.sendFile(path.join(customerFrontendPath, "index.html"));
 });
-
 /* ==================================================
    404 API ONLY
 ================================================== */
