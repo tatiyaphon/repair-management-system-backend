@@ -28,9 +28,9 @@ const customerPath = path.join(__dirname, "public", "customer");
 const uploadsPath  = path.join(__dirname, "public", "uploads");
 
 /* =========================
-   STATIC SERVE (สำคัญ)
+   STATIC SERVE
 ========================= */
-app.use("/employee", express.static(employeePath));   // ✅ ถูก
+app.use("/employee", express.static(employeePath));
 app.use("/customer", express.static(customerPath));
 app.use("/uploads", express.static(uploadsPath));
 
