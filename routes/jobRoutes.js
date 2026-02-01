@@ -333,7 +333,7 @@ tbody td{
 
 <div class="header">
   <div class="shop">
-    <img src="http://localhost:5000/logo1.png" class="logo" />
+    <img src="http://localhost:5000/customer/logo1.png" class="logo" />
     <div>
       <h1>ร้านตุ้ยไอที โคราช</h1>
       <p>ศูนย์ซ่อมและจำหน่ายอุปกรณ์ไอทีครบวงจร</p>

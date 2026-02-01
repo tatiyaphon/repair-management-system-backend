@@ -1,24 +1,17 @@
 const jwt = require("jsonwebtoken");
 
 module.exports = (req, res, next) => {
-  const auth = req.headers.authorization;
-
-  if (!auth || !auth.startsWith("Bearer ")) {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
     return res.status(401).json({ message: "No token" });
   }
 
+  const token = authHeader.split(" ")[1];
   try {
-    const token = auth.split(" ")[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    // ✅ แก้ตรงนี้: ใช้ id ให้ตรงกับทั้งระบบ
-    req.user = {
-      id: decoded.id,
-      role: decoded.role
-    };
-
+    req.user = decoded; // { userId, role }
     next();
-  } catch (err) {
-    return res.status(401).json({ message: "Invalid token" });
+  } catch {
+    res.status(401).json({ message: "Invalid token" });
   }
 };
