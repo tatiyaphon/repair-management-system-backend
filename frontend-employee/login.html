@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>เข้าสู่ระบบสำหรับพนักงาน</title>
+
+    <!-- Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --background-color: #ecf0f1;
+            --card-background: #ffffff;
+            --text-color: #333;
+            --light-text-color: #7f8c8d;
+            --danger-color: #e74c3c;
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: linear-gradient(to bottom, #d9e3f0, #e9eff5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .login-container {
+            background: var(--card-background);
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            border-radius: 15px;
+            box-shadow: var(--box-shadow);
+            animation: fadeIn 0.6s ease;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+        }
+
+        h1 i {
+            color: var(--secondary-color);
+            margin-right: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: 500;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            font-family: 'Kanit', sans-serif;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 1rem;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .error {
+            display: none;
+            color: var(--danger-color);
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            border: none;
+            border-radius: 50px;
+            background: var(--secondary-color);
+            color: white;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #2980b9;
+        }
+
+        /* 🔽 สมัครสมาชิก */
+        .signup-link {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 0.95rem;
+            color: var(--light-text-color);
+        }
+
+        .signup-link a {
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .signup-link a:hover {
+            text-decoration: underline;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-container">
+    <h1><i class="fas fa-user-lock"></i> เข้าสู่ระบบพนักงาน</h1>
+
+    <form id="loginForm">
+        <div class="form-group">
+            <label for="email">อีเมล</label>
+            <input type="email" id="email" placeholder="admin@example.com" required />
+        </div>
+
+        <div class="form-group">
+            <label for="password">รหัสผ่าน</label>
+            <input type="password" id="password" required />
+        </div>
+
+        <div id="login-error" class="error">
+            <i class="fas fa-exclamation-circle"></i> อีเมลหรือรหัสผ่านไม่ถูกต้อง
+        </div>
+
+        <button type="submit">เข้าสู่ระบบ</button>
+    </form>
+
+    <!-- ✅ สมัครสมาชิก -->
+    <div class="signup-link">
+        ยังไม่มีบัญชีใช่ไหม?
+        <a href="signup.html">สมัครสมาชิก</a>
+    </div>
+</div>
+
+<script>
+const API_BASE = "http://localhost:5000";
+
+const form = document.getElementById("loginForm");
+const errorBox = document.getElementById("login-error");
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  errorBox.style.display = "none";
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  try {
+    const res = await fetch(`${API_BASE}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password })
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      errorBox.textContent = data.message || "เข้าสู่ระบบไม่สำเร็จ";
+      errorBox.style.display = "block";
+      return;
+    }
+
+    /* =========================
+       SAVE LOGIN DATA
+    ========================= */
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("role", data.user.role);
+    localStorage.setItem("userId", data.user.id);
+    localStorage.setItem("userName", `${data.user.firstName} ${data.user.lastName}`);
+    localStorage.setItem("userAvatar", data.user.avatar);
+    /* =========================
+       END SAVE LOGIN DATA
+    /* =========================
+       🔑 FORCE CHANGE PASSWORD
+    ========================= */
+    if (data.user.mustChangePassword === true) {
+      window.location.replace("/employee/change_password.html");
+      return;
+    }
+
+    /* =========================
+       REDIRECT BY ROLE
+    ========================= */
+    if (data.user.role === "admin") {
+      window.location.replace("/employee/admin_dashboard.html");
+    } else {
+      // tech / staff
+      window.location.replace("/employee/technician_jobs.html");
+    }
+
+  } catch (err) {
+    console.error(err);
+    errorBox.textContent = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้";
+    errorBox.style.display = "block";
+  }
+});
+</script>
+
+</body>
+</html>

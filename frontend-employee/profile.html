@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ข้อมูลส่วนตัว</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:'Kanit',sans-serif;
+  background:#f4f7f9;
+  color:#2c3e50;
+}
+header{
+  background:#2c3e50;
+  color:#fff;
+  padding:15px 30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header a{
+  color:#fff;
+  text-decoration:none;
+  margin-left:20px;
+}
+.container{
+  max-width:900px;
+  margin:40px auto;
+  background:#fff;
+  padding:30px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.1);
+}
+
+/* profile header */
+.profile-top{
+  display:flex;
+  align-items:center;
+  gap:25px;
+  border-bottom:1px solid #e5e7eb;
+  padding-bottom:25px;
+  margin-bottom:25px;
+}
+.avatar-box{
+  position:relative;
+}
+.avatar-box img{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid #1abc9c;
+}
+.avatar-box label{
+  position:absolute;
+  bottom:0;
+  right:0;
+  background:#1abc9c;
+  color:#fff;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+  font-size:14px;
+}
+.avatar-box input{display:none}
+
+.profile-info h2{
+  margin:0 0 6px;
+}
+.profile-info span{
+  display:inline-block;
+  background:#e0f2fe;
+  color:#0369a1;
+  padding:4px 10px;
+  border-radius:20px;
+  font-size:13px;
+}
+
+/* form */
+form{
+  margin-top:20px;
+}
+.form-group{
+  margin-bottom:18px;
+}
+label{
+  display:block;
+  margin-bottom:6px;
+  font-weight:500;
+}
+input{
+  width:100%;
+  padding:10px 14px;
+  border-radius:8px;
+  border:1px solid #d1d5db;
+  font-family:'Kanit',sans-serif;
+}
+input:disabled{
+  background:#f3f4f6;
+}
+.actions{
+  display:flex;
+  gap:12px;
+  margin-top:25px;
+}
+.btn{
+  padding:10px 22px;
+  border-radius:30px;
+  border:none;
+  cursor:pointer;
+  font-weight:600;
+  font-family:'Kanit',sans-serif;
+}
+.btn.save{
+  background:#1abc9c;
+  color:#fff;
+}
+.btn.cancel{
+  background:#e5e7eb;
+}
+.note{
+  font-size:13px;
+  color:#6b7280;
+  margin-top:10px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div><i class="fas fa-user"></i> ข้อมูลส่วนตัว</div>
+  <nav>
+     <a href="employee_dashboard.html" class="nav-link active" id="dashboard-link">
+                <i class="fas fa-home"></i> หน้าหลัก
+            </a>
+    <a href="technician_jobs.html" class="nav-link">
+        <i class="fas fa-tools"></i> งานของฉัน
+      </a>
+       <a href="repair_history.html" class="nav-link">
+                <i class="fas fa-history"></i> ประวัติการซ่อม
+            </a>
+     <a href="admin_dashboard.html" class="nav-link active">
+                <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
+            </a>
+  </nav>
+</header>
+
+<div class="container">
+
+  <!-- PROFILE HEADER -->
+  <div class="profile-top">
+    <div class="avatar-box">
+      <img id="avatarPreview" src="default-avatar.png">
+      <label>
+        <i class="fas fa-camera"></i>
+        <input type="file" accept="image/*" onchange="changeAvatar(event)">
+      </label>
+    </div>
+
+    <div class="profile-info">
+      <h2 id="displayName">ผู้ใช้งาน</h2>
+      <span id="displayRole">—</span>
+    </div>
+  </div>
+
+  <!-- PROFILE FORM -->
+  <form onsubmit="saveProfile(event)">
+    <div class="form-group">
+      <label>ชื่อ-นามสกุล</label>
+      <input type="text" id="nameInput" required>
+    </div>
+
+    <div class="form-group">
+      <label>อีเมล</label>
+      <input type="email" id="emailInput">
+    </div>
+
+    <div class="form-group">
+      <label>เบอร์โทรศัพท์</label>
+      <input type="text" id="phoneInput">
+    </div>
+
+    <div class="form-group">
+      <label>ตำแหน่ง (Role)</label>
+      <input type="text" id="roleInput" disabled>
+    </div>
+
+    <div class="actions">
+      <button type="submit" class="btn save">บันทึกข้อมูล</button>
+      <button type="button" class="btn cancel" onclick="history.back()">ยกเลิก</button>
+    </div>
+
+    <div class="note">
+      * ข้อมูลตำแหน่งไม่สามารถแก้ไขได้
+    </div>
+  </form>
+
+</div>
+
+<script>
+/* ===============================
+   AUTH GUARD
+=============================== */
+const token = localStorage.getItem("token");
+if (!token) {
+  alert("กรุณาเข้าสู่ระบบ");
+  location.href = "login.html";
+}
+
+/* ===============================
+   LOAD PROFILE DATA
+=============================== */
+document.addEventListener("DOMContentLoaded", () => {
+  const userName = localStorage.getItem("userName") || "ผู้ใช้งาน";
+  const role     = localStorage.getItem("role") || "-";
+  const email    = localStorage.getItem("email") || "";
+  const phone    = localStorage.getItem("phone") || "";
+  const avatar   = localStorage.getItem("avatar");
+
+  // text
+  document.getElementById("displayName").textContent = userName;
+  document.getElementById("displayRole").textContent = role;
+  document.getElementById("nameInput").value  = userName;
+  document.getElementById("emailInput").value = email;
+  document.getElementById("phoneInput").value = phone;
+  document.getElementById("roleInput").value  = role;
+
+  // avatar (สำคัญ)
+  if (avatar) {
+    document.getElementById("avatarPreview").src = avatar;
+  }
+});
+
+/* ===============================
+   CHANGE AVATAR
+=============================== */
+function changeAvatar(e){
+  const file = e.target.files[0];
+  if (!file) return;
+
+  // กันไฟล์ใหญ่เกิน
+  if (file.size > 2 * 1024 * 1024) {
+    alert("ไฟล์ต้องไม่เกิน 2MB");
+    return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = () => {
+    localStorage.setItem("avatar", reader.result);
+    document.getElementById("avatarPreview").src = reader.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+/* ===============================
+   SAVE PROFILE
+=============================== */
+function saveProfile(e){
+  e.preventDefault();
+
+  const name  = document.getElementById("nameInput").value.trim();
+  const email = document.getElementById("emailInput").value.trim();
+  const phone = document.getElementById("phoneInput").value.trim();
+
+  localStorage.setItem("userName", name);
+  localStorage.setItem("email", email);
+  localStorage.setItem("phone", phone);
+
+  alert("บันทึกข้อมูลเรียบร้อย");
+  location.href = "employee_dashboard.html";
+}
+</script>
+
+</body>
+</html>

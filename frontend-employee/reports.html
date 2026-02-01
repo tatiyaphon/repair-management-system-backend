@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>รายงาน | ระบบจัดการงานซ่อม</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="logo1.png">
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+/* ===== GLOBAL ===== */
+body{
+  margin:0;
+  font-family:'Kanit',sans-serif;
+  background:#f4f7f9;
+  color:#2c3e50;
+}
+
+/* ===== HEADER / NAVBAR ===== */
+header{
+  background:#2c3e50;
+  color:#fff;
+  padding:15px 40px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  box-shadow:0 4px 15px rgba(0,0,0,.15);
+}
+.logo{
+  font-size:1.5rem;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+.nav-links{
+  display:flex;
+  gap:20px;
+}
+.nav-link{
+  color:rgba(255,255,255,.75);
+  text-decoration:none;
+  font-weight:500;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.nav-link:hover{
+  color:#fff;
+}
+.nav-link.active{
+  color:#fff;
+  border-bottom:3px solid #1abc9c;
+  padding-bottom:4px;
+}
+
+/* ===== CONTENT ===== */
+.container{
+  max-width:1200px;
+  margin:30px auto;
+  padding:0 20px;
+}
+h1{
+  text-align:center;
+  margin-bottom:30px;
+}
+
+/* ===== CARDS ===== */
+.cards{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:20px;
+  margin-bottom:30px;
+}
+.card{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  box-shadow:0 8px 25px rgba(0,0,0,.08);
+  text-align:center;
+}
+.card h2{
+  margin:0;
+  font-size:32px;
+}
+.card span{
+  color:#6b7280;
+}
+
+/* ===== SECTION ===== */
+.section{
+  background:#fff;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 8px 25px rgba(0,0,0,.08);
+  margin-bottom:30px;
+}
+.section h3{
+  margin-top:0;
+  border-bottom:2px solid #e5e7eb;
+  padding-bottom:10px;
+}
+
+/* ===== TABLE ===== */
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:15px;
+}
+th,td{
+  padding:12px;
+  border-bottom:1px solid #e5e7eb;
+  text-align:left;
+}
+th{
+  background:#2c3e50;
+  color:#fff;
+}
+
+/* ===== BADGE ===== */
+.badge{
+  padding:5px 10px;
+  border-radius:20px;
+  font-size:13px;
+  color:#fff;
+}
+.badge.new{background:#3498db}
+.badge.progress{background:#f39c12}
+.badge.wait{background:#e74c3c}
+.badge.done{background:#2ecc71}
+
+/* ===== FILTER ===== */
+.filter{
+  display:flex;
+  gap:15px;
+  margin-bottom:15px;
+}
+select{
+  padding:8px 12px;
+  border-radius:8px;
+  border:1px solid #d1d5db;
+  font-family:'Kanit',sans-serif;
+}
+.print-btn{
+  background:#1abc9c;
+  color:#fff;
+  border:none;
+  padding:10px 20px;
+  border-radius:30px;
+  cursor:pointer;
+  font-weight:600;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== NAVBAR ===== -->
+<header>
+  <div class="logo">
+    <i class="fas fa-tools"></i> ระบบจัดการงานซ่อม
+  </div>
+
+  <nav class="nav-links">
+    <a href="employee_dashboard.html" class="nav-link">
+      <i class="fas fa-home"></i> หน้าหลัก
+    </a>
+    <a href="new_job.html" class="nav-link">
+      <i class="fas fa-plus-circle"></i> รับเครื่องซ่อม
+    </a>
+    <a href="stock_management.html" class="nav-link">
+      <i class="fas fa-box-open"></i> สต็อก
+    </a>
+    <a href="technician_jobs.html" class="nav-link">
+      <i class="fas fa-tools"></i> งานของฉัน
+    </a>
+    <a href="reports.html" class="nav-link active">
+      <i class="fas fa-chart-bar"></i> รายงาน
+    </a>
+    <a href="repair_history.html" class="nav-link">
+      <i class="fas fa-history"></i> ประวัติการซ่อม
+    </a>
+  </nav>
+</header>
+
+<!-- ===== CONTENT ===== -->
+<div class="container">
+
+<h1><i class="fas fa-chart-bar"></i> รายงานสรุประบบงานซ่อม</h1>
+
+<!-- SUMMARY -->
+<div class="cards">
+  <div class="card"><h2 id="totalJobs">0</h2><span>งานทั้งหมด</span></div>
+  <div class="card"><h2 id="inProgress">0</h2><span>กำลังดำเนินการ</span></div>
+  <div class="card"><h2 id="waiting">0</h2><span>รออะไหล่</span></div>
+  <div class="card"><h2 id="completed">0</h2><span>ซ่อมเสร็จ</span></div>
+</div>
+
+<!-- FILTER -->
+<div class="section">
+  <h3>ตัวกรองรายงาน</h3>
+  <div class="filter">
+    <select id="monthFilter">
+      <option value="all">ทุกเดือน</option>
+    </select>
+    <select id="yearFilter">
+      <option value="all">ทุกปี</option>
+    </select>
+    <button class="print-btn" onclick="window.print()">
+      <i class="fas fa-print"></i> พิมพ์รายงาน
+    </button>
+  </div>
+</div>
+
+<!-- JOB TABLE -->
+<div class="section">
+  <h3>รายงานงานซ่อม</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>เลขงาน</th>
+        <th>ลูกค้า</th>
+        <th>อุปกรณ์</th>
+        <th>สถานะ</th>
+        <th>วันที่รับ</th>
+      </tr>
+    </thead>
+    <tbody id="jobTable"></tbody>
+  </table>
+</div>
+
+<!-- STOCK -->
+<div class="section">
+  <h3>อะไหล่คงเหลือน้อย</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>ชื่ออะไหล่</th>
+        <th>รุ่น</th>
+        <th>คงเหลือ</th>
+      </tr>
+    </thead>
+    <tbody id="stockTable"></tbody>
+  </table>
+</div>
+
+</div>
+
+<script>
+const API = "http://localhost:5000/api";
+const token = localStorage.getItem("token");
+
+async function apiFetch(path){
+  const res = await fetch(API + path,{
+    headers:{ Authorization:`Bearer ${token}` }
+  });
+  return res.json();
+}
+
+async function loadReport(){
+  const jobs = await apiFetch("/jobs");
+  const stocks = await apiFetch("/stocks");
+
+
+  totalJobs.textContent = jobs.length;
+  inProgress.textContent = jobs.filter(j=>j.status==="กำลังซ่อม").length;
+  waiting.textContent = jobs.filter(j=>j.status==="รออะไหล่").length;
+  completed.textContent = jobs.filter(j=>j.status==="ซ่อมเสร็จ").length;
+
+  jobTable.innerHTML="";
+  jobs.forEach(j=>{
+    jobTable.innerHTML+=`
+      <tr>
+        <td>${j.receiptNumber}</td>
+        <td>${j.customerName}</td>
+        <td>${j.deviceType} ${j.deviceModel}</td>
+        <td>
+          <span class="badge ${
+            j.status==="รับเครื่อง"?"new":
+            j.status==="กำลังซ่อม"?"progress":
+            j.status==="รออะไหล่"?"wait":"done"
+          }">${j.status}</span>
+        </td>
+        <td>${new Date(j.receivedDate).toLocaleDateString("th-TH")}</td>
+      </tr>`;
+  });
+
+  stockTable.innerHTML="";
+  stocks.filter(s=>s.quantity<=5).forEach(s=>{
+    stockTable.innerHTML+=`
+      <tr>
+        <td>${s.name}</td>
+        <td>${s.model}</td>
+        <td style="color:red;font-weight:600">${s.quantity}</td>
+      </tr>`;
+  });
+}
+
+loadReport();
+async function loadProfile() {
+  const userId = localStorage.getItem("userId");
+  const token  = localStorage.getItem("token");
+
+  if (!userId || !token) return;
+
+  const res = await fetch(
+    `http://localhost:5000/api/employees/${userId}/profile`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
+  if (!res.ok) return;
+
+  const user = await res.json();
+
+  if (user.avatar) {
+    document.getElementById("profileAvatar").src =
+      `http://localhost:5000${user.avatar}`;
+  }
+
+  if (document.getElementById("profileNameLarge")) {
+    document.getElementById("profileNameLarge").textContent =
+      `${user.firstName} ${user.lastName}`;
+  }
+
+  if (document.getElementById("profileRole")) {
+    document.getElementById("profileRole").textContent = user.role;
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadProfile);
+</script>
+
+</body>
+</html>

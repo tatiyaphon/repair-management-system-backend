@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ประวัติการซ่อม</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:'Kanit',sans-serif;
+  background:#f4f7f9;
+}
+header{
+  background:#2c3e50;
+  color:#fff;
+  padding:15px 30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header a{
+  color:#fff;
+  text-decoration:none;
+  margin-left:20px;
+}
+.container{
+  max-width:1300px;
+  margin:30px auto;
+  padding:0 20px;
+}
+h2{
+  margin-bottom:20px;
+}
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 10px;
+}
+thead tr{
+  background:#2c3e50;
+  color:#fff;
+}
+th,td{
+  padding:12px 15px;
+  text-align:left;
+}
+tbody tr{
+  background:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+.badge{
+  background:#2ecc71;
+  color:#fff;
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:.8rem;
+}
+.action-btn{
+  background:#3498db;
+  color:#fff;
+  padding:6px 14px;
+  border-radius:20px;
+  text-decoration:none;
+  font-size:.85rem;
+}
+.empty{
+  background:#fff;
+  padding:40px;
+  text-align:center;
+  border-radius:12px;
+  color:#7f8c8d;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div><i class="fas fa-history"></i> ประวัติการซ่อม</div>
+  <nav>
+     <a href="employee_dashboard.html" class="nav-link active" id="dashboard-link">
+                <i class="fas fa-home"></i> หน้าหลัก
+            </a>
+    <a href="technician_jobs.html" class="nav-link">
+        <i class="fas fa-tools"></i> งานของฉัน
+      </a>
+     <a href="admin_dashboard.html" class="nav-link active">
+                <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
+            </a>
+  </nav>
+</header>
+
+<div class="container">
+  <h2>รายการงานซ่อมที่เสร็จสิ้น</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>รหัสงาน</th>
+        <th>ลูกค้า</th>
+        <th>เครื่อง</th>
+        <th>อาการ</th>
+        <th>วันที่รับ</th>
+        <th>วันที่ซ่อมเสร็จ</th>
+        <th>สถานะ</th>
+        <th>ดูรายละเอียด</th>
+      </tr>
+    </thead>
+    <tbody id="historyBody"></tbody>
+  </table>
+
+  <div id="emptyBox" class="empty" style="display:none;">
+    <i class="fas fa-box-open"></i><br>
+    ยังไม่มีประวัติการซ่อม
+  </div>
+</div>
+
+<script>
+const API_BASE = "http://localhost:5000/api";
+const token = localStorage.getItem("token");
+
+if (!token) {
+  window.location.href = "login.html";
+}
+
+async function loadHistory() {
+  const res = await fetch(`${API_BASE}/jobs`, {
+    headers:{ Authorization:`Bearer ${token}` }
+  });
+  const jobs = await res.json();
+
+  // ✅ ประวัติ = ซ่อมเสร็จเท่านั้น
+  const historyJobs = jobs.filter(j => j.status === "ซ่อมเสร็จ");
+
+  const tbody = document.getElementById("historyBody");
+  tbody.innerHTML = "";
+
+  if (!historyJobs.length) {
+    document.getElementById("emptyBox").style.display = "block";
+    return;
+  }
+
+  document.getElementById("emptyBox").style.display = "none";
+
+  historyJobs.forEach(job => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${job.receiptNumber}</td>
+        <td>${job.customerName}</td>
+        <td>${job.deviceType} ${job.deviceModel}</td>
+        <td>${job.symptom}</td>
+        <td>${formatDate(job.receivedDate)}</td>
+        <td>${formatDate(job.finishDate)}</td>
+        <td><span class="badge">ซ่อมเสร็จ</span></td>
+        <td>
+          <a class="action-btn" href="manage_job.html?id=${job._id}">
+            ดู
+          </a>
+        </td>
+      </tr>
+    `;
+  });
+}
+
+function formatDate(date){
+  if(!date) return "-";
+  const d = new Date(date);
+  if(isNaN(d)) return "-";
+  return d.toLocaleDateString("th-TH");
+}
+
+document.addEventListener("DOMContentLoaded", loadHistory);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,760 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>ช่างซ่อม | งานของฉัน</title>
+    <link rel="icon" type="image/png" href="logo1.png">
+    <!-- CSP ปรับให้โหลดฟอนต์/สไตล์จาก CDN ได้เหมือนหน้าก่อน -->
+    <meta http-equiv="Content-Security-Policy"
+  content="
+    default-src 'self';
+    script-src 'self' 'unsafe-inline';
+    style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
+    font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com data:;
+    img-src 'self' data: http://localhost:5000;
+    connect-src 'self' http://localhost:5000;
+  ">
+
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* 1. Variables and Base Styles */
+        :root {
+            --primary-color:#2c3e50;
+            --secondary-color:#1abc9c;
+            --accent-color:#3498db;
+            --background-color:#f4f7f9;
+            --card-background:#fff;
+            --text-color:#2c3e50;
+            --light-text-color:#95a5a6;
+            --border-radius:12px;
+            --box-shadow:0 8px 25px rgba(0,0,0,.08);
+            /* Status Colors */
+            --new-color:#3498db;
+            --in_progress-color:#f39c12;
+            --waiting_parts-color:#e74c3c;
+            --completed-color:#2ecc71;
+            --cancelled-color: #95a5a6;
+            /* Job Type Colors */
+            --claim-color: #9b59b6;
+            --new-repair-color: #2c3e50;
+        }
+
+        * {box-sizing:border-box}
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .container { max-width:1300px; margin:30px auto; padding:0 20px; }
+
+        /* 2. Header and Navigation */
+        header {
+            background:var(--primary-color);
+            color:#fff; padding:15px 40px;
+            display:flex; justify-content:space-between; align-items:center;
+            box-shadow:0 4px 15px rgba(0,0,0,.15);
+        }
+
+        .logo { 
+            font-size:1.5rem; 
+            font-weight:700; 
+            display:flex;
+            align-items:center;
+            gap:8px;
+        }
+        header .user {
+            color: rgba(255,255,255,.8); 
+            font-size: .95rem; 
+            margin-left: 20px;
+        }
+
+        .nav-links { 
+            display:flex; 
+            gap:20px; 
+            align-items:center; }
+
+        .nav-link {
+            color:rgba(255,255,255,.7);
+            text-decoration:none; font-weight:500; transition:.3s;
+            display: flex; align-items: center;
+            padding-bottom: 5px;
+        }
+        .nav-link:hover { color:#fff; }
+        .nav-link.active { color:#fff; border-bottom:3px solid var(--secondary-color); }
+        .nav-link i { margin-right: 5px; }
+
+        .logout-btn {
+            border:1px solid var(--secondary-color); color:var(--secondary-color);
+            background:#fff; padding:8px 16px; border-radius:50px; font-weight:600;
+            transition:.3s;
+        }
+        .logout-btn:hover { background:var(--secondary-color); color:#fff; }
+
+        /* 3. Dashboard Cards */
+        .cards {
+            display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+            gap:30px; margin-bottom:30px;
+        }
+
+        .card {
+            background:var(--card-background); border-radius:var(--border-radius);
+            padding:25px; box-shadow:0 4px 15px rgba(0,0,0,.1);
+            display:flex; flex-direction:column;
+            transition:.3s; border-left:5px solid;
+        }
+        .card:hover { transform:translateY(-7px); box-shadow:0 10px 30px rgba(0,0,0,.15); }
+        
+        .card h3 {
+            margin: 0 0 5px 0;
+            font-size: 1rem;
+            color: var(--light-text-color);
+            font-weight: 500;
+        }
+        .card .num { font-size: 2.8rem; font-weight: 700; line-height: 1.2; margin: 0; }
+        
+        .card.primary {border-left-color: var(--primary-color);}
+        .card.new {border-left-color: var(--new-color);}
+        .card.progress-wait {border-left-color: var(--in_progress-color);}
+        .card.success {border-left-color: var(--completed-color);}
+
+        .card.new .num {color: var(--new-color);}
+        .card.progress-wait .num {color: var(--in_progress-color);}
+        .card.success .num {color: var(--completed-color);}
+        .card.primary .num {color: var(--text-color);}
+
+        /* Toolbar */
+        .toolbar {
+            display: flex; gap: 12px; align-items: center; margin: 0 0 20px;
+            padding: 20px; background: var(--card-background); border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+        .toolbar input, .toolbar select {
+            padding: 10px 15px; border: 1px solid #d1d5db; border-radius: 8px;
+            background: #fff; outline: none; 
+            font-family: 'Kanit', sans-serif;
+            color: var(--text-color);
+            transition: .3s;
+        }
+        .toolbar input {flex-grow: 1; max-width: 400px;}
+        .toolbar input:focus, .toolbar select:focus {
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(26, 188, 156, 0.3);
+        }
+
+        /* 4. Content and Table Styles */
+        .content-section {
+            background:var(--card-background); border-radius:var(--border-radius);
+            padding:30px; box-shadow:var(--box-shadow); overflow-x:auto;
+        }
+
+        .styled-table { width: 100%; border-collapse: separate; border-spacing: 0 10px; font-size: .95rem; }
+        .styled-table thead tr { background:var(--primary-color); color:#fff; }
+        .styled-table th,.styled-table td { padding:12px 15px; vertical-align:middle; }
+        .styled-table tbody tr {
+            background:#fff; box-shadow:0 2px 5px rgba(0,0,0,.05);
+            transition:.2s; border-radius:8px;
+        }
+        .styled-table tbody tr:hover { background:#fcfdfe; transform:translateY(-3px); box-shadow:0 6px 20px rgba(0,0,0,.1); }
+
+        /* 5. Status and Type Badges (เหมือนหน้าก่อน) */
+        .status-badge {
+            display:inline-block; padding:5px 10px; border-radius:5px; color:#fff;
+            font-weight:600; font-size:.8rem; min-width:90px; text-align:center;
+        }
+        .status-new{background:var(--new-color);}
+        .status-in_progress{background:var(--in_progress-color);}
+        .status-waiting_parts{background:var(--waiting_parts-color);}
+        .status-completed{background:var(--completed-color);}
+        .status-cancelled{background:var(--cancelled-color);}
+
+        .type-badge {
+            display:inline-block; padding:4px 8px; border-radius:3px; color:#fff;
+            font-weight:500; font-size:.75rem; text-align:center;
+            text-transform: uppercase;
+        }
+        .type-claim { background:var(--claim-color); }
+        .type-new_repair { background:var(--new-repair-color); }
+        
+        /* 6. Action Buttons */
+        .action-group {
+            display: flex;
+            flex-direction: column; 
+            gap: 5px;
+            align-items: flex-start;
+        }
+        .action-btn {
+            background:var(--secondary-color); color:#fff; padding:8px 16px;
+            border-radius:50px; text-decoration:none; font-weight:600;
+            transition:.3s; border: none; cursor: pointer;
+            text-align: center;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .action-btn:hover { background:#16a085; transform:translateY(-1px); }
+
+        .finish-btn {
+            background: var(--completed-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: .3s;
+            text-align: center;
+            display: inline-flex; align-items: center; gap: 5px;
+        }
+        .finish-btn:hover {
+            background: #27ae60;
+            transform:translateY(-1px);
+        }
+
+        .empty {
+            background: var(--card-background); padding: 40px; border-radius: var(--border-radius);
+            color: var(--light-text-color); text-align: center; font-size: 1.1rem; margin-top: 20px;
+            box-shadow: var(--box-shadow);
+        }
+        .note {color: var(--light-text-color); font-size: .9rem; margin: 15px 0;}
+
+        /* Responsive */
+        @media(max-width:992px){
+            .cards { grid-template-columns: repeat(2, 1fr); gap: 15px; }
+            .toolbar { flex-wrap: wrap; }
+            .toolbar input, .toolbar select { width: 100%; max-width: none; }
+            header { flex-direction: column; align-items: flex-start; gap: 10px; padding: 15px 20px; }
+            .nav-links { margin-top: 5px; flex-wrap: wrap; }
+            .user { margin: 0; }
+        }
+        @media(max-width:576px){
+            .cards {grid-template-columns:1fr;}
+        }
+        /* Month / Year Filter */
+#monthFilter, #yearFilter {
+    padding: 10px 15px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    font-family: 'Kanit', sans-serif;
+    color: var(--text-color);
+    transition: .3s;
+}
+#monthFilter:focus, #yearFilter:focus {
+    border-color: var(--secondary-color);
+    box-shadow: 0 0 0 3px rgba(26,188,156,0.3);
+}
+.profile-menu { position: relative; }
+
+.profile-trigger {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  background: #fff;
+  color: #2c3e50;
+  padding: 6px 14px;
+  border-radius: 30px;
+  font-weight: 600;
+}
+
+.profile-trigger img {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-dropdown {
+  position: absolute;
+  right: 0;
+  top: 120%;
+  width: 260px;
+  background: #fff;
+  border-radius: 14px;
+  box-shadow: 0 15px 40px rgba(0,0,0,.15);
+  display: none;
+  z-index: 999;
+}
+
+.profile-dropdown.show { display: block; }
+
+.profile-header {
+  display: flex;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #eee;
+}
+
+.profile-header img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+}
+
+.profile-item {
+  padding: 12px 16px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  background: none;
+  border: none;
+  width: 100%;
+  cursor: pointer;
+  text-decoration: none;
+  color: #2c3e50;
+  font-size: 14px;
+}
+
+.profile-item:hover { background: #f4f7f9; }
+
+.profile-item.logout {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.upload-btn input { display: none; }
+
+.divider {
+  height: 1px;
+  background: #eee;
+  margin: 6px 0;
+}
+.avatar-wrapper {
+  position: relative;
+}
+
+.avatar-wrapper img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid #1abc9c;
+}
+
+/* dropdown */
+.avatar-menu {
+  position: absolute;
+  right: 0;
+  top: 120%;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+  display: none;
+  overflow: hidden;
+  z-index: 1000;
+  min-width: 120px;
+}
+
+.avatar-menu.show {
+  display: block;
+}
+
+.avatar-item {
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.avatar-item:hover {
+  background: #f4f7f9;
+}
+
+.avatar-item.logout {
+  color: #e74c3c;
+  font-weight: 600;
+}
+.profile-menu{
+  position: relative;
+  z-index: 99999; /* กันโดน element อื่นทับ */
+}
+
+.profile-trigger{
+  cursor: pointer;
+}
+
+.profile-trigger img{
+  pointer-events: auto;
+}
+
+    </style>
+</head>
+<body>
+    <header>
+        <div class="logo"><i class="fas fa-tools"></i> ระบบจัดการงานซ่อม</div>
+        <nav class="nav-links">
+            <a href="employee_dashboard.html" class="nav-link"><i class="fas fa-home"></i> หน้าหลัก</a>
+            <a href="new_job.html" class="nav-link"><i class="fas fa-plus-circle"></i> รับเครื่องซ่อม</a>
+            <a href="stock_management.html" class="nav-link"><i class="fas fa-box-open"></i> สต็อก</a>
+            <a href="technician_jobs.html" class="nav-link active"><i class="fas fa-tools"></i> งานของฉัน</a>
+            <a href="repair_history.html" class="nav-link"><i class="fas fa-history"></i> ประวัติการซ่อม</a>
+            <a href="reports.html" class="nav-link" id="reports-link"><i class="fas fa-chart-line"></i> รายงาน</a>
+           <div class="profile-menu" id="profileMenu">
+  <div class="profile-trigger" onclick="toggleProfile()">
+    <!-- รูปเล็ก (มุมขวาบน) -->
+    <!-- รูปเล็ก -->
+<img
+  id="profileAvatarSmall"
+  src=""
+  alt="avatar-small"
+  style="width:36px;height:36px;border-radius:50%;object-fit:cover;"
+>
+
+  </div>
+
+  <div class="profile-dropdown" id="profileDropdown">
+    <div class="profile-header">
+      <!-- ✅ รูปใหญ่ใน dropdown -->
+      <img
+  id="profileAvatarLarge"
+  src=""
+  alt="avatar-large"
+  style="width:60px;height:60px;border-radius:50%;object-fit:cover;"
+>
+
+      <div>
+        <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
+        <small id="profileRole">—</small>
+      </div>
+    </div>
+
+    <label class="profile-item upload-btn">
+      <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
+      <input type="file" accept="image/*" onchange="uploadAvatar(event)">
+    </label>
+
+    <a class="profile-item" href="profile.html">
+      <i class="fas fa-user"></i> ข้อมูลส่วนตัว
+    </a>
+
+    <a class="profile-item" href="change_password.html">
+      <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
+    </a>
+
+    <a class="profile-item" href="repair_history.html">
+      <i class="fas fa-history"></i> ประวัติการซ่อม
+    </a>
+
+    <div class="divider"></div>
+
+    <button class="profile-item logout" onclick="logout()">
+      <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+    </button>
+  </div>
+</div>
+        </nav>
+        <div class="user" id="user-meta">—</div>
+    </header>
+
+    <main class="container">
+        <section class="cards" aria-label="สรุปงานของฉัน">
+            <div class="card primary">
+                <h3>งานทั้งหมดของฉัน</h3>
+                <div class="num" id="my-total">0</div>
+            </div>
+            <div class="card new">
+                <h3>คิวใหม่</h3>
+                <div class="num" id="my-new">0</div>
+            </div>
+            <div class="card progress-wait">
+                <h3>กำลังดำเนินการ / รออะไหล่</h3>
+                <div class="num" id="my-inprogress">0</div>
+            </div>
+            <div class="card success">
+                <h3>เสร็จสิ้น</h3>
+                <div class="num" id="my-completed">0</div>
+            </div>
+        </section>
+
+        <div class="toolbar">
+    <input id="searchInput" type="text" placeholder="ค้นหา: ชื่อลูกค้า / เครื่อง / อาการ / รหัสงาน">
+
+    <select id="statusFilter">
+        <option value="all">ทุกสถานะ</option>
+        <option value="new">คิวงานใหม่</option>
+        <option value="in_progress">กำลังดำเนินการ</option>
+        <option value="waiting_parts">รออะไหล่</option>
+        <option value="completed">เสร็จสิ้น</option>
+        <option value="cancelled">ยกเลิก</option>
+    </select>
+
+    <!-- ฟิลเตอร์เดือน -->
+    <select id="monthFilter"></select>
+
+    <!-- ฟิลเตอร์ปี -->
+    <select id="yearFilter"></select>
+</div>
+
+
+        <section class="content-section">
+            <table id="jobTable" class="styled-table" aria-label="ตารางงานของฉัน">
+                <thead>
+                    <tr>
+                        <th>รหัสงาน</th>
+                        <th>ประเภท</th>
+                        <th>ลูกค้า</th>
+                        <th>เครื่อง</th>
+                        <th>อาการ</th>
+                        <th>สถานะ</th>
+                        <th>วันที่รับ</th>
+                        <th>จัดการ</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+            <div id="emptyBox" class="empty" style="display:none;"><i class="fas fa-box-open"></i> ยังไม่มีงานในรายการของคุณ</div>
+            <div class="note">* ปุ่ม <strong>เสร็จสิ้น</strong> จะปรากฏเฉพาะงานสถานะ 'กำลังดำเนินการ' หรือ 'รออะไหล่'</div>
+        </section>
+    </main>
+
+<script>
+/* ==================================================
+   technician_jobs.html — FIXED (PROFILE ONLY)
+================================================== */
+
+const API_BASE = "http://localhost:5000/api";
+
+/* =====================
+   AUTH + USER DATA
+===================== */
+const token    = localStorage.getItem("token");
+const role     = localStorage.getItem("role");
+const userName = localStorage.getItem("userName");
+
+/* =====================
+   STATUS MAP
+===================== */
+const STATUS_CLASS_MAP = {
+  "รับเครื่อง": "new",
+  "กำลังซ่อม": "in_progress",
+  "รออะไหล่": "waiting_parts",
+  "ซ่อมเสร็จ": "completed",
+  "ยกเลิก": "cancelled"
+};
+
+/* =====================
+   AUTH GUARD
+===================== */
+if (!token) {
+  localStorage.clear();
+  window.location.href = "/employee/login.html";
+}
+
+/* =====================
+   DOM READY
+===================== */
+document.addEventListener("DOMContentLoaded", () => {
+
+  /* ===== USER META ===== */
+  const userMeta = document.getElementById("user-meta");
+  if (userMeta) {
+    userMeta.textContent = `${userName || "ผู้ใช้งาน"} (${role || "-"})`;
+  }
+
+  /* ===== LOAD PROFILE (ใช้ backend อย่างเดียว) ===== */
+  loadProfile();
+
+  /* ===== DROPDOWN CLOSE ON OUTSIDE CLICK ===== */
+  document.addEventListener("click", (e) => {
+    const menu = document.getElementById("profileMenu");
+    const dropdown = document.getElementById("profileDropdown");
+    if (menu && dropdown && !menu.contains(e.target)) {
+      dropdown.classList.remove("show");
+    }
+  });
+
+  /* ===== LOAD JOBS ===== */
+  fetchMyJobs();
+});
+
+/* =====================
+   TOGGLE PROFILE
+===================== */
+function toggleProfile() {
+  const dropdown = document.getElementById("profileDropdown");
+  if (dropdown) dropdown.classList.toggle("show");
+}
+
+/* =====================
+   LOAD PROFILE (FIXED)
+===================== */
+async function loadProfile() {
+  const token  = localStorage.getItem("token");
+  const userId = localStorage.getItem("userId");
+  if (!token || !userId) return;
+
+  const res = await fetch(
+    `http://localhost:5000/api/employees/${userId}/profile`,
+    { headers: { Authorization: `Bearer ${token}` } }
+  );
+  if (!res.ok) return;
+
+  const user = await res.json();
+
+  const avatarPath = user.avatar
+    ? user.avatar
+    : "/uploads/profile/default.jpg";
+
+  const avatarUrl = `http://localhost:5000${avatarPath}`;
+
+ document.getElementById("profileAvatarSmall").src = avatarUrl;
+document.getElementById("profileAvatarLarge").src = avatarUrl;
+
+}
+
+/* =====================
+   UPLOAD AVATAR (ปิด base64)
+===================== */
+async function uploadAvatar(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const fd = new FormData();
+  fd.append("avatar", file);
+
+  const res = await fetch(
+    "http://localhost:5000/api/employees/profile/avatar",
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`
+      },
+      body: fd
+    }
+  );
+
+  if (!res.ok) {
+    alert("อัปโหลดไม่สำเร็จ");
+    return;
+  }
+
+  await loadProfile(); // โหลดจาก DB ใหม่
+}
+
+/* =====================
+   LOGOUT
+===================== */
+function logout() {
+  localStorage.removeItem("token");
+  localStorage.removeItem("role");
+  localStorage.removeItem("userId");
+  localStorage.removeItem("userName");
+  window.location.href = "login.html";
+}
+
+/* =====================
+   FETCH MY JOBS
+===================== */
+async function fetchMyJobs() {
+  try {
+    const res = await fetch(`${API_BASE}/jobs/my`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+      localStorage.clear();
+      window.location.href = "/employee/login.html";
+      return;
+    }
+
+    const jobs = await res.json();
+
+    const activeJobs = jobs.filter(j =>
+      j.status !== "ซ่อมเสร็จ" && j.status !== "ยกเลิก"
+    );
+
+    renderJobs(activeJobs);
+    updateSummaryCards(activeJobs);
+
+  } catch (err) {
+    console.error(err);
+    alert("โหลดข้อมูลงานไม่สำเร็จ");
+  }
+}
+
+/* =====================
+   RENDER TABLE
+===================== */
+function renderJobs(jobs) {
+  const tbody = document.querySelector("#jobTable tbody");
+  const emptyBox = document.getElementById("emptyBox");
+
+  tbody.innerHTML = "";
+
+  if (!jobs.length) {
+    if (emptyBox) emptyBox.style.display = "block";
+    return;
+  }
+  if (emptyBox) emptyBox.style.display = "none";
+
+  jobs.forEach(job => {
+    const statusClass = STATUS_CLASS_MAP[job.status] || "new";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${job.receiptNumber}</td>
+      <td>${job.jobType || "-"}</td>
+      <td>${job.customerName}</td>
+      <td>${job.deviceType} ${job.deviceModel}</td>
+      <td>${job.symptom}</td>
+      <td>
+        <span class="status-badge status-${statusClass}">
+          ${job.status}
+        </span>
+      </td>
+      <td>${job.receivedDate
+        ? new Date(job.receivedDate).toLocaleDateString("th-TH")
+        : "-"}</td>
+      <td>
+        <a class="action-btn" href="manage_job.html?id=${job._id}">
+          จัดการ
+        </a>
+        ${
+          job.status === "กำลังซ่อม" || job.status === "รออะไหล่"
+            ? `<button class="finish-btn" onclick="finishJob('${job._id}')">
+                 เสร็จสิ้น
+               </button>`
+            : ""
+        }
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+}
+
+/* =====================
+   SUMMARY CARDS
+===================== */
+function updateSummaryCards(jobs) {
+  document.getElementById("my-total").innerText = jobs.length;
+  document.getElementById("my-new").innerText =
+    jobs.filter(j => j.status === "รับเครื่อง").length;
+  document.getElementById("my-inprogress").innerText =
+    jobs.filter(j => j.status === "กำลังซ่อม" || j.status === "รออะไหล่").length;
+  document.getElementById("my-completed").innerText =
+    jobs.filter(j => j.status === "ซ่อมเสร็จ").length;
+}
+
+/* =====================
+   FINISH JOB
+===================== */
+async function finishJob(jobId) {
+  if (!confirm("ยืนยันปิดงานซ่อมนี้?")) return;
+
+  await fetch(`${API_BASE}/jobs/${jobId}/complete`, {
+    method: "PUT",
+    headers: { Authorization: `Bearer ${token}` }
+  });
+
+  fetchMyJobs();
+}
+</script>
+
+</body>
+</html>
