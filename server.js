@@ -1,16 +1,15 @@
-// server.js
 require("dotenv").config();
 
-const express  = require("express");
+const express = require("express");
 const mongoose = require("mongoose");
-const cors     = require("cors");
-const path     = require("path");
-const morgan   = require("morgan");
-const bcrypt   = require("bcryptjs");
+const cors = require("cors");
+const path = require("path");
+const morgan = require("morgan");
+const bcrypt = require("bcryptjs");
 
 const Employee = require("./models/Employee");
 
-const app  = express();
+const app = express();
 const PORT = process.env.PORT || 5000;
 
 /* =========================
@@ -24,22 +23,20 @@ app.use(morgan("dev"));
 /* =========================
    STATIC PATHS
 ========================= */
+const employeePath = path.join(__dirname, "frontend-employee");
 const customerPath = path.join(__dirname, "public", "customer");
-const employeePath = path.join(__dirname, "..", "frontend-employee");
-const uploadsPath = path.join(__dirname, "public", "uploads");
-
+const uploadsPath  = path.join(__dirname, "public", "uploads");
 
 /* =========================
-   STATIC FILE SERVE
+   STATIC SERVE (สำคัญ)
 ========================= */
+app.use("/employee", express.static(employeePath));   // ✅ ถูก
 app.use("/customer", express.static(customerPath));
-app.use("/employee", express.static(employeePath));
 app.use("/uploads", express.static(uploadsPath));
 
 /* =========================
-   PAGE ROUTES
+   ROOT
 ========================= */
-// หน้าแรก → ลูกค้า
 app.get("/", (req, res) => {
   res.redirect("/customer/index.html");
 });
@@ -76,9 +73,7 @@ mongoose
 async function ensureAdmin() {
   if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) return;
 
-  const exists = await Employee.findOne({
-    email: process.env.ADMIN_EMAIL
-  });
+  const exists = await Employee.findOne({ email: process.env.ADMIN_EMAIL });
   if (exists) return;
 
   const hash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
