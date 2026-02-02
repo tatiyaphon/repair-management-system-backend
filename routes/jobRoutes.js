@@ -115,18 +115,20 @@ router.get("/my", auth, async (req, res) => {
 ================================================== */
 router.get("/receipt/:receiptNumber", async (req, res) => {
   try {
-    const receiptNumber = req.params.receiptNumber.trim();
-    const job = await Job.findOne({ receiptNumber });
+    const job = await Job.findOne({
+      receiptNumber: req.params.receiptNumber
+    });
 
     if (!job) {
-      return res.status(404).json({ message: "ไม่พบข้อมูลงานซ่อม" });
+      return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
 
     res.json(job);
   } catch (err) {
-    res.status(500).json({ message: "ไม่สามารถดึงข้อมูลงานซ่อมได้" });
+    res.status(500).json({ message: "Server error" });
   }
 });
+
 /* ==================================================
    PUT /api/jobs/:id/complete
    กดเสร็จสิ้นงาน
