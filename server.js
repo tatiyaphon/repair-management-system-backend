@@ -30,6 +30,8 @@ const uploadsPath  = path.join(__dirname, "public", "uploads");
 /* =========================
    STATIC SERVE
 ========================= */
+app.use(express.static(path.join(__dirname, "public")));
+
 app.use("/employee", express.static(employeePath));
 app.use("/customer", express.static(customerPath));
 app.use("/uploads", express.static(uploadsPath));
@@ -40,7 +42,6 @@ app.get("/google709f6afb95cd178f.html", (req, res) => {
     path.join(__dirname, "public", "customer", "google709f6afb95cd178f.html")
   );
 });
-
 /* =========================
    ROOT
 ========================= */
