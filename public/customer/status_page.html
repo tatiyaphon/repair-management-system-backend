@@ -316,8 +316,34 @@
     <div class="container" id="status-container">
         <h1><i class="fas fa-info-circle"></i> สถานะงานซ่อม</h1>
         
-        <div id="status-content">
-            </div>
+        <div id="statusBox" class="status-box" style="display:none">
+  <h2>ข้อมูลงานซ่อม</h2>
+
+  <div class="detail-item">
+    <strong>เลขที่ใบเสร็จ:</strong>
+    <span id="receipt"></span>
+  </div>
+
+  <div class="detail-item">
+    <strong>ชื่อลูกค้า:</strong>
+    <span id="customer"></span>
+  </div>
+
+  <div class="detail-item">
+    <strong>อุปกรณ์:</strong>
+    <span id="device"></span>
+  </div>
+
+  <div class="detail-item">
+    <strong>อาการ:</strong>
+    <span id="symptom"></span>
+  </div>
+
+  <div class="status-display status-new" id="status"></div>
+</div>
+
+<div id="errorBox" class="not-found" style="display:none"></div>
+
 
         <div class="contact-info">
             <h3><i class="fas fa-headset"></i> ช่องทางการติดต่อสอบถามเพิ่มเติม</h3>
@@ -331,92 +357,57 @@
             </div>
         </div>
     </div>
-   <script>
-const API_BASE = "https://tui-it.org/api/jobs/receipt";
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
 
-const urlParams = new URLSearchParams(window.location.search);
-const receiptNumber = urlParams.get("receipt_number");
-const statusContent = document.getElementById("status-content");
+  const API_BASE = "/api/jobs/receipt";
+  const container = document.getElementById("status-content");
 
-function formatDate(dateStr) {
-  if (!dateStr) return "-";
-  return new Date(dateStr).toLocaleDateString("th-TH");
-}
+  const params = new URLSearchParams(window.location.search);
+  const receiptNumber = params.get("receipt_number");
 
-function formatPrice(price) {
-  if (price === null || price === undefined) return "-";
-  return `${Number(price).toLocaleString("th-TH")} บาท`;
-}
-
-function mapStatus(status) {
-  const map = {
-    "รับเครื่อง": { text: "รับเครื่อง", class: "status-new", icon: "⏳" },
-    "กำลังซ่อม": { text: "กำลังซ่อม", class: "status-in-progress", icon: "⚙️" },
-    "รออะไหล่": { text: "รออะไหล่", class: "status-in-progress", icon: "🧩" },
-    "ซ่อมเสร็จ": { text: "ซ่อมเสร็จแล้ว", class: "status-complete", icon: "✅" },
-    "ยกเลิก": { text: "ยกเลิก", class: "status-new", icon: "❌" }
-  };
-  return map[status] || { text: status, class: "status-new", icon: "" };
-}
-
-async function loadStatus() {
   if (!receiptNumber) {
-    statusContent.innerHTML = `
-      <p class="not-found">❌ ไม่พบเลขที่ใบเสร็จ</p>
-      <a href="check_status.html" class="back-link">⬅ กลับ</a>
-    `;
+    container.innerHTML = `<div class="not-found">❌ ไม่พบเลขที่ใบเสร็จ</div>`;
     return;
   }
 
   try {
-    const res = await fetch(`${API_URL}/${receiptNumber}`);
-    if (!res.ok) throw new Error("NOT_FOUND");
+    const res = await fetch(`${API_BASE}/${receiptNumber}`);
 
-    const data = await res.json();
-    const statusInfo = mapStatus(data.status);
+    if (!res.ok) {
+      container.innerHTML = `
+        <div class="not-found">
+          ❌ ไม่พบข้อมูลงานซ่อมสำหรับเลขที่ใบเสร็จ #${receiptNumber}
+        </div>`;
+      return;
+    }
 
-    statusContent.innerHTML = `
-      <div class="status-box">
-        <h2>สถานะปัจจุบัน</h2>
-        <div class="status-display ${statusInfo.class}">
-          ${statusInfo.icon} ${statusInfo.text}
-        </div>
+    const job = await res.json();
+
+    let statusClass = "status-new";
+    if (job.status === "ซ่อมเสร็จ") statusClass = "status-complete";
+    else if (job.status !== "รับเครื่อง") statusClass = "status-in-progress";
+
+    container.innerHTML = `
+      <h2><i class="fas fa-receipt"></i> ข้อมูลการซ่อม</h2>
+
+      <div class="detail-item"><strong>เลขที่ใบเสร็จ:</strong> ${job.receiptNumber}</div>
+      <div class="detail-item"><strong>ชื่อลูกค้า:</strong> ${job.customerName}</div>
+      <div class="detail-item"><strong>อุปกรณ์:</strong> ${job.deviceType} (${job.deviceModel})</div>
+      <div class="detail-item"><strong>อาการเสีย:</strong> ${job.symptom}</div>
+
+      <div class="status-display ${statusClass}">
+        ${job.status}
       </div>
 
-      <div class="status-box">
-        <h2>ข้อมูลงานซ่อม</h2>
-        <div class="detail-item"><strong>เลขที่ใบเสร็จ:</strong> #${data.receiptNumber}</div>
-        <div class="detail-item"><strong>ลูกค้า:</strong> ${data.customerName}</div>
-        <div class="detail-item"><strong>เบอร์โทร:</strong> ${data.customerPhone || "-"}</div>
-      </div>
-
-      <div class="status-box">
-        <h2>รายละเอียดเครื่อง</h2>
-        <div class="detail-item"><strong>อุปกรณ์:</strong> ${data.deviceType} (${data.deviceModel})</div>
-        <div class="detail-item"><strong>อาการ:</strong> ${data.symptom}</div>
-        <div class="detail-item"><strong>รายละเอียดซ่อม:</strong> ${data.repairDetail || "-"}</div>
-      </div>
-
-      <div class="status-box">
-        <h2>ราคาและกำหนดการ</h2>
-        <div class="detail-item"><strong>ค่าซ่อม:</strong> <span class="price-display">${formatPrice(data.priceQuoted)}</span></div>
-        <div class="detail-item"><strong>วันที่รับเครื่อง:</strong> ${formatDate(data.receivedDate)}</div>
-        <div class="detail-item"><strong>วันที่เริ่มซ่อม:</strong> ${formatDate(data.startDate)}</div>
-        <div class="detail-item"><strong>วันที่ซ่อมเสร็จ:</strong> ${formatDate(data.finishDate) || "กำลังดำเนินการ"}</div>
-      </div>
-
-      <a href="check_status.html" class="back-link">⬅ ตรวจสอบงานอื่น</a>
+      <a href="check_status.html" class="back-link">← กลับ</a>
     `;
+
   } catch (err) {
-    statusContent.innerHTML = `
-      <p class="not-found">❌ ไม่พบข้อมูลงานซ่อมสำหรับเลขที่ใบเสร็จ #${receiptNumber}</p>
-      <a href="check_status.html" class="back-link">⬅ กลับ</a>
-    `;
+    console.error(err);
+    container.innerHTML = `<div class="not-found">❌ เชื่อมต่อเซิร์ฟเวอร์ไม่ได้</div>`;
   }
-}
-
-loadStatus();
+});
 </script>
-
 </body>
 </html>
