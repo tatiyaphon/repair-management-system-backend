@@ -34,6 +34,13 @@ app.use("/employee", express.static(employeePath));
 app.use("/customer", express.static(customerPath));
 app.use("/uploads", express.static(uploadsPath));
 
+// serve google verification file
+app.get("/google709f6afb95cd178f.html", (req, res) => {
+  res.sendFile(
+    path.join(__dirname, "public", "customer", "google709f6afb95cd178f.html")
+  );
+});
+
 /* =========================
    ROOT
 ========================= */
