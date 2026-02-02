@@ -421,7 +421,7 @@ footer{
 </footer>
 
 <script>
-const API_BASE = "http://localhost:5000/api/jobs/receipt";
+const API_BASE = "https://repair-management-system-backend.onrender.com/api/jobs/receipt";
 
 const receiptInput = document.getElementById("receipt_number");
 const button = document.querySelector("button");
@@ -433,7 +433,6 @@ function showError(msg) {
 button.addEventListener("click", async () => {
     const receiptNumber = receiptInput.value.trim();
 
-    // ตรวจเลขใบเสร็จ (อย่างน้อย 3 ตัวอักษร ปรับได้)
     if (receiptNumber.length < 3) {
         showError("กรุณากรอกเลขที่ใบเสร็จให้ถูกต้อง");
         return;
@@ -442,13 +441,11 @@ button.addEventListener("click", async () => {
     try {
         const res = await fetch(`${API_BASE}/${receiptNumber}`);
 
-        // ❌ ไม่พบงาน
         if (!res.ok) {
             showError("ไม่พบข้อมูลงานซ่อมในระบบ");
             return;
         }
 
-        // ✅ พบงาน → ไปหน้าแสดงสถานะ
         window.location.href = `status_page.html?receipt_number=${receiptNumber}`;
 
     } catch (err) {
