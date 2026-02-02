@@ -19,6 +19,12 @@ app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+app.use(cors({
+  origin: [
+    "https://tui-it.org",
+    "https://www.tui-it.org"
+  ]
+}));
 
 /* =========================
    STATIC PATHS
