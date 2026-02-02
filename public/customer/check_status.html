@@ -425,6 +425,8 @@ const API_BASE = "https://repair-management-system-backend.onrender.com/api/jobs
 
 const receiptInput = document.getElementById("receipt_number");
 const button = document.querySelector("button");
+const receiptNumber = receiptInput.value.trim().toUpperCase();
+
 
 function showError(msg) {
     alert(msg);
