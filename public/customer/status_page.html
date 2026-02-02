@@ -316,34 +316,9 @@
     <div class="container" id="status-container">
         <h1><i class="fas fa-info-circle"></i> สถานะงานซ่อม</h1>
         
-        <div id="statusBox" class="status-box" style="display:none">
-  <h2>ข้อมูลงานซ่อม</h2>
-
-  <div class="detail-item">
-    <strong>เลขที่ใบเสร็จ:</strong>
-    <span id="receipt"></span>
-  </div>
-
-  <div class="detail-item">
-    <strong>ชื่อลูกค้า:</strong>
-    <span id="customer"></span>
-  </div>
-
-  <div class="detail-item">
-    <strong>อุปกรณ์:</strong>
-    <span id="device"></span>
-  </div>
-
-  <div class="detail-item">
-    <strong>อาการ:</strong>
-    <span id="symptom"></span>
-  </div>
-
-  <div class="status-display status-new" id="status"></div>
-</div>
-
-<div id="errorBox" class="not-found" style="display:none"></div>
-
+        <div id="status-content" class="status-box">
+            
+            </div>
 
         <div class="contact-info">
             <h3><i class="fas fa-headset"></i> ช่องทางการติดต่อสอบถามเพิ่มเติม</h3>
@@ -360,52 +335,65 @@
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
 
-  const API_BASE = "/api/jobs/receipt";
-  const container = document.getElementById("status-content");
+  const API = "/api/jobs/receipt";
+  const box = document.getElementById("content");
+  const params = new URLSearchParams(location.search);
+  const receipt = params.get("receipt_number");
 
-  const params = new URLSearchParams(window.location.search);
-  const receiptNumber = params.get("receipt_number");
-
-  if (!receiptNumber) {
-    container.innerHTML = `<div class="not-found">❌ ไม่พบเลขที่ใบเสร็จ</div>`;
+  if(!receipt){
+    box.innerHTML = `<div class="not-found">ไม่พบเลขที่ใบเสร็จ</div>`;
     return;
   }
 
-  try {
-    const res = await fetch(`${API_BASE}/${receiptNumber}`);
-
-    if (!res.ok) {
-      container.innerHTML = `
-        <div class="not-found">
-          ❌ ไม่พบข้อมูลงานซ่อมสำหรับเลขที่ใบเสร็จ #${receiptNumber}
-        </div>`;
+  try{
+    const res = await fetch(`${API}/${receipt}`);
+    if(!res.ok){
+      box.innerHTML = `<div class="not-found">ไม่พบข้อมูลงานซ่อม</div>`;
       return;
     }
 
-    const job = await res.json();
+    const j = await res.json();
 
     let statusClass = "status-new";
-    if (job.status === "ซ่อมเสร็จ") statusClass = "status-complete";
-    else if (job.status !== "รับเครื่อง") statusClass = "status-in-progress";
+    if(j.status === "ซ่อมเสร็จ") statusClass = "status-complete";
+    else if(j.status !== "รับเครื่อง") statusClass = "status-in-progress";
 
-    container.innerHTML = `
-      <h2><i class="fas fa-receipt"></i> ข้อมูลการซ่อม</h2>
-
-      <div class="detail-item"><strong>เลขที่ใบเสร็จ:</strong> ${job.receiptNumber}</div>
-      <div class="detail-item"><strong>ชื่อลูกค้า:</strong> ${job.customerName}</div>
-      <div class="detail-item"><strong>อุปกรณ์:</strong> ${job.deviceType} (${job.deviceModel})</div>
-      <div class="detail-item"><strong>อาการเสีย:</strong> ${job.symptom}</div>
-
-      <div class="status-display ${statusClass}">
-        ${job.status}
+    box.innerHTML = `
+      <div class="status ${statusClass}">
+        ${j.status}
       </div>
 
-      <a href="check_status.html" class="back-link">← กลับ</a>
-    `;
+      <div class="section">
+        <h3><i class="fas fa-user"></i> ข้อมูลลูกค้า</h3>
+        <div class="row"><strong>ชื่อ:</strong> ${j.customerName}</div>
+        <div class="row"><strong>เบอร์:</strong> ${j.customerPhone || "-"}</div>
+        <div class="row"><strong>เลขใบเสร็จ:</strong> ${j.receiptNumber}</div>
+      </div>
 
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = `<div class="not-found">❌ เชื่อมต่อเซิร์ฟเวอร์ไม่ได้</div>`;
+      <div class="section">
+        <h3><i class="fas fa-laptop"></i> ข้อมูลเครื่อง</h3>
+        <div class="row"><strong>ประเภท:</strong> ${j.deviceType}</div>
+        <div class="row"><strong>รุ่น:</strong> ${j.deviceModel}</div>
+        <div class="row"><strong>อาการ:</strong> ${j.symptom}</div>
+      </div>
+
+      <div class="section">
+        <h3><i class="fas fa-calendar"></i> กำหนดการ</h3>
+        <div class="row"><strong>รับเครื่อง:</strong> ${new Date(j.receivedDate).toLocaleDateString("th-TH")}</div>
+        <div class="row"><strong>เริ่มซ่อม:</strong> ${j.startDate ? new Date(j.startDate).toLocaleDateString("th-TH") : "-"}</div>
+        <div class="row"><strong>เสร็จ:</strong> ${j.finishDate ? new Date(j.finishDate).toLocaleDateString("th-TH") : "-"}</div>
+      </div>
+
+      <div class="section">
+        <h3><i class="fas fa-baht-sign"></i> ราคาประเมิน</h3>
+        <div class="price">${j.priceQuoted.toLocaleString()} บาท</div>
+      </div>
+
+      <a href="/customer/check_status.html" class="back">← กลับ</a>
+    `;
+  }
+  catch{
+    box.innerHTML = `<div class="not-found">เชื่อมต่อเซิร์ฟเวอร์ไม่ได้</div>`;
   }
 });
 </script>
