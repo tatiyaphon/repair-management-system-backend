@@ -454,4 +454,21 @@ tbody td{
   }
 });
 
+// 🔹 ดึงข้อมูลงานซ่อมตาม ID
+router.get("/:id", async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id)
+      .populate("assignedTo", "firstName lastName");
+
+    if (!job) {
+      return res.status(404).json({ message: "ไม่พบงานซ่อม" });
+    }
+
+    res.json(job);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "ดึงข้อมูลงานไม่สำเร็จ" });
+  }
+});
+
 module.exports = router;

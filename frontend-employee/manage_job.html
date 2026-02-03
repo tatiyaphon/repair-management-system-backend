@@ -344,7 +344,7 @@ async function loadProfile() {
     document.getElementById("profileAvatar").src =
       user.avatar || "/uploads/profile/default.jpg";
   }
-  
+
   if (document.getElementById("profileNameLarge")) {
     document.getElementById("profileNameLarge").textContent =
       `${user.firstName} ${user.lastName}`;
@@ -390,12 +390,21 @@ async function fetchJob() {
   const id = getJobId();
   if (!id) return alert("ไม่พบ Job ID");
 
-  const res = await fetch(`${API_BASE}/jobs/${id}`, { headers });
-  if (!res.ok) return alert("ไม่พบข้อมูลงานซ่อม");
+  // 🔥 ใช้ API ที่มีอยู่จริง
+  const res = await fetch(`${API_BASE}/jobs`, { headers });
+  if (!res.ok) return alert("โหลดข้อมูลงานไม่สำเร็จ");
 
-  currentJob = await res.json();
+  const jobs = await res.json();
+  currentJob = jobs.find(j => j._id === id);
+
+  if (!currentJob) {
+    alert("ไม่พบงานซ่อม");
+    return;
+  }
+
   renderJob();
 }
+
 
 /* =========================
    FETCH STOCK
@@ -464,13 +473,19 @@ function renderJob() {
    UPDATE HELPERS
 ========================= */
 async function updateJob(body) {
-  await fetch(`${API_BASE}/jobs/${currentJob._id}`, {
+  const res = await fetch(`${API_BASE}/jobs/${currentJob._id}`, {
     method: "PUT",
     headers,
     body: JSON.stringify(body)
   });
-  await
-  fetchJob();
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    alert(err.message || "อัปเดตงานไม่สำเร็จ");
+    return;
+  }
+
+  await fetchJob();
 }
 
 /* =========================
