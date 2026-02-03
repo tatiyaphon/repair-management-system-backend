@@ -839,6 +839,31 @@ window.addEventListener("click", e => {
     e.target.style.display = "none";
   }
 });
+router.post("/", auth, requireRole("admin"), async (req, res) => {
+  const { firstName, lastName, email, password, role } = req.body;
+
+  if (!firstName || !lastName || !email || !password) {
+    return res.status(400).json({ message: "ข้อมูลไม่ครบ" });
+  }
+
+  const exists = await Employee.findOne({ email });
+  if (exists) {
+    return res.status(409).json({ message: "อีเมลนี้ถูกใช้แล้ว" });
+  }
+
+  const hash = await bcrypt.hash(password, 10);
+
+  const user = await Employee.create({
+    firstName,
+    lastName,
+    email,
+    password: hash,
+    role,
+    mustChangePassword: true
+  });
+
+  res.status(201).json({ message: "เพิ่มผู้ใช้สำเร็จ", user });
+});
 
 </script>
 

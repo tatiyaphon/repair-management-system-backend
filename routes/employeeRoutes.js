@@ -33,33 +33,30 @@ router.get("/tech", verifyToken, async (req, res) => {
 /* =====================================
    POST /api/employees (admin)
 ===================================== */
-router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
-  const { firstName, lastName, email, phone, role, password } = req.body;
+router.post("/", auth, requireRole("admin"), async (req, res) => {
+  const { firstName, lastName, email, password, role } = req.body;
 
-  if (!firstName || !lastName || !email || !role || !password) {
-    return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบ" });
+  if (!firstName || !lastName || !email || !password) {
+    return res.status(400).json({ message: "ข้อมูลไม่ครบ" });
   }
 
   const exists = await Employee.findOne({ email });
   if (exists) {
-    return res.status(409).json({ message: "อีเมลนี้ถูกใช้งานแล้ว" });
+    return res.status(409).json({ message: "อีเมลนี้ถูกใช้แล้ว" });
   }
 
-  const hashedPassword = await bcrypt.hash(password, 10);
+  const hash = await bcrypt.hash(password, 10);
 
-  const employee = await Employee.create({
+  const user = await Employee.create({
     firstName,
     lastName,
     email,
-    phone,
+    password: hash,
     role,
-    password: hashedPassword,
-    avatar: "/uploads/profile/default.jpg", // ✅ แก้ตรงนี้
-    mustChangePassword: false,
-    active: true
+    mustChangePassword: true
   });
 
-  res.status(201).json({ message: "เพิ่มผู้ใช้สำเร็จ", employee });
+  res.status(201).json({ message: "เพิ่มผู้ใช้สำเร็จ", user });
 });
 
 /* =====================================
