@@ -1474,6 +1474,21 @@ document.getElementById("btn-add-user")?.addEventListener("click", async () => {
   // โหลดตารางใหม่
   init();
 });
+function toggleProfile() {
+  const dropdown = document.getElementById("profileDropdown");
+  dropdown.classList.toggle("show");
+}
+
+document.addEventListener("click", (e) => {
+  const trigger = document.querySelector(".profile-trigger");
+  const dropdown = document.getElementById("profileDropdown");
+
+  if (!trigger || !dropdown) return;
+
+  if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
+    dropdown.classList.remove("show");
+  }
+});
 </script>
 
 
