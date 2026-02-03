@@ -932,6 +932,50 @@
 .profile-trigger img{
   pointer-events: auto;
 }
+/* ===== ตารางผู้ใช้ ===== */
+#admin-users-table td.cell-center {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* ===== role select ===== */
+.role-select {
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-family: 'Kanit', sans-serif;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+/* ===== status badge ===== */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.status-badge.online {
+  color: #16a34a;
+}
+
+/* ===== delete button ===== */
+.btn-delete {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+}
 
   </style>
 </head>
@@ -1160,21 +1204,61 @@
   </div>
 
   <!-- ตารางผู้ใช้ -->
-  <div class="table-wrapper">
-    <table class="styled-table" id="admin-users-table">
-      <thead>
-        <tr>
-          <th>ชื่อผู้ใช้</th>
-          <th>อีเมล</th>
-          <th>เบอร์โทรศัพท์</th>
-          <th>บทบาท</th>
-          <th>สถานะ</th>
-          <th>จัดการ</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
-    </table>
+  <div class="panel">
+  <div class="panel-header">
+    <div>
+      <h2 class="panel-title">
+        <i class="fas fa-users-cog"></i> จัดการบัญชีผู้ใช้
+      </h2>
+      <p class="panel-subtitle">
+        เพิ่มพนักงาน / ช่าง และกำหนดสิทธิ์การใช้งานระบบ
+      </p>
+    </div>
   </div>
+
+  <!-- เพิ่มผู้ใช้ -->
+  <div class="add-user-card">
+    <h3><i class="fas fa-user-plus"></i> เพิ่มผู้ใช้ใหม่</h3>
+
+    <div class="add-user-grid">
+      <input type="text" id="new-user-firstname" placeholder="ชื่อจริง" />
+      <input type="text" id="new-user-lastname" placeholder="นามสกุล" />
+      <input type="email" id="new-user-email" placeholder="อีเมล (ใช้เข้าสู่ระบบ)" />
+      <input type="number" id="new-user-phone" placeholder="เบอร์โทรศัพท์" />
+      <input type="password"id="new-user-password"placeholder="รหัสผ่านเริ่มต้น" />
+
+      <select id="new-user-role">
+        <option value="tech">ช่างซ่อม</option>
+        <option value="staff">พนักงานหน้าร้าน</option>
+        <option value="admin">ผู้ดูแลระบบ</option>
+      </select>
+
+      <button type="button" class="btn-add-user" id="btn-add-user">
+        <i class="fas fa-user-plus"></i> เพิ่มผู้ใช้
+      </button>
+    </div>
+
+    <p class="hint-text">
+      ระบบจะสร้างรหัสผ่านชั่วคราว และบังคับให้ผู้ใช้เปลี่ยนรหัสผ่านเมื่อเข้าสู่ระบบครั้งแรก
+    </p>
+  </div>
+
+  <!-- ตารางผู้ใช้ -->
+  <div class="table-wrapper">
+  <table class="styled-table users-table" id="admin-users-table">
+    <thead>
+      <tr>
+        <th>ชื่อผู้ใช้</th>
+        <th>อีเมล</th>
+        <th>เบอร์โทรศัพท์</th>
+        <th class="center">บทบาท</th>
+        <th class="center">สถานะ</th>
+        <th class="center">จัดการ</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
 
   <div id="users-empty" class="empty-text" style="display:none;">
     <i class="fas fa-user-slash"></i> ยังไม่มีข้อมูลผู้ใช้ในระบบ
@@ -1282,28 +1366,56 @@ function updateCards(jobs, users) {
 ================================================== */
 function renderJobsTable(jobs) {
   const tbody = document.querySelector("#admin-jobs-table tbody");
-
   if (!tbody) return;
 
   tbody.innerHTML = "";
 
   if (!jobs.length) {
-    tbody.innerHTML = `<tr><td colspan="6">ไม่มีข้อมูลงาน</td></tr>`;
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center;color:#6b7280;">
+          ไม่มีข้อมูลงานซ่อม
+        </td>
+      </tr>
+    `;
     return;
   }
 
-
   jobs.slice(0, 10).forEach(j => {
+    let statusClass = "status-new";
+    if (j.status === "กำลังซ่อม") statusClass = "status-in_progress";
+    else if (j.status === "รออะไหล่") statusClass = "status-waiting_parts";
+    else if (j.status === "ซ่อมเสร็จ") statusClass = "status-completed";
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
       <td>${j.receiptNumber || "-"}</td>
-      <td>${j.customerName || "-"}</td>
-      <td>${j.deviceType || ""} ${j.deviceModel || ""}</td>
-      <td>${j.status}</td>
-      <td>${j.assignedTo?.firstName || "-"}</td>
-      <td>${j.receivedDate
-        ? new Date(j.receivedDate).toLocaleDateString("th-TH")
-        : "-"}</td>
+
+      <td>
+        <strong>${j.customerName || "-"}</strong>
+      </td>
+
+      <td>
+        ${j.deviceType || ""} ${j.deviceModel || ""}
+      </td>
+
+      <td style="text-align:center;">
+        <span class="status-badge ${statusClass}">
+          ${j.status}
+        </span>
+      </td>
+
+      <td style="text-align:center;">
+        ${j.assignedTo?.firstName || "-"}
+      </td>
+
+      <td style="text-align:center;">
+        ${
+          j.receivedDate
+            ? new Date(j.receivedDate).toLocaleDateString("th-TH")
+            : "-"
+        }
+      </td>
     `;
     tbody.appendChild(tr);
   });
@@ -1343,8 +1455,11 @@ function renderUsersTable(users) {
         <span class="status-active">
           <span class="status-dot"></span> ออนไลน์
         </span>
+        <td>
+          <button class="btn-edit" onclick="editUser('${u._id}')">แก้ไข</button>
+        </td>
       <td>
-        <button onclick="deleteUser('${u._id}')">ลบ</button>
+        <button class="btn-delete" onclick="deleteUser('${u._id}')">ลบ</button>
       </td>
     `;
 
