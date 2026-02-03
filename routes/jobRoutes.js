@@ -161,9 +161,7 @@ router.put("/:id/complete", auth, async (req, res) => {
 router.get("/:id/receipt", async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
-    if (!job) {
-      return res.status(404).send("ไม่พบงานซ่อม");
-    }
+    if (!job) return res.status(404).send("ไม่พบงานซ่อม");
 
     res.send(`<!DOCTYPE html>
 <html lang="th">
@@ -172,80 +170,104 @@ router.get("/:id/receipt", async (req, res) => {
 <title>ใบรับเครื่องซ่อม</title>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap');
+
 body{
   font-family:'Sarabun',sans-serif;
   background:#eef2f7;
   margin:0;
   padding:30px;
 }
+
 .container{
   max-width:900px;
   margin:auto;
   background:#fff;
-  padding:40px;
+  padding:36px 40px;
   border-radius:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,.15);
-  border-left:10px solid #facc15;
+  box-shadow:0 15px 35px rgba(0,0,0,.12);
+  border-left:10px solid #f6c200;
 }
 
-/* HEADER */
+/* ===== HEADER ===== */
 .header{
   display:flex;
   justify-content:space-between;
-  align-items:flex-start;
-  border-bottom:3px solid #facc15;
-  padding-bottom:20px;
-  margin-bottom:25px;
+  border-bottom:3px solid #f6c200;
+  padding-bottom:18px;
 }
+
 .shop{
   display:flex;
   gap:16px;
   align-items:center;
 }
+
+.logo{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  border:3px solid #0f3c8a;
+  object-fit:contain;
+  background:#fff;
+}
+
 .shop h1{
   margin:0;
-  font-size:24px;
+  font-size:22px;
   color:#0f3c8a;
 }
 .shop p{
-  margin:4px 0;
-  font-size:14px;
+  margin:2px 0;
+  font-size:13px;
 }
+
 .doc{
   text-align:right;
 }
+.doc h2{
+  margin:0;
+  color:#0f3c8a;
+}
 .doc .no{
-  font-size:18px;
-  font-weight:bold;
   color:#b91c1c;
+  font-weight:700;
+  margin-top:4px;
 }
 
-/* INFO */
+/* ===== INFO ===== */
 .info{
   display:grid;
   grid-template-columns:2fr 1fr;
   gap:20px;
-  margin-bottom:20px;
+  margin-top:22px;
 }
+
 .box{
   border:1px solid #d1d5db;
   border-radius:8px;
-  padding:16px;
+  padding:14px 16px;
   background:#f9fafb;
 }
+
 .box h3{
   margin:0 0 10px;
-  font-size:16px;
+  font-size:15px;
   color:#0f3c8a;
+  border-bottom:1px solid #d1d5db;
+  padding-bottom:6px;
 }
+
 .row{
   display:flex;
+  font-size:14px;
   margin-bottom:6px;
 }
 .label{
-  width:100px;
-  font-weight:bold;
+  width:90px;
+  font-weight:600;
 }
+
 .badge{
   background:#dcfce7;
   color:#047857;
@@ -255,65 +277,74 @@ body{
   border:1px solid #10b981;
 }
 
-/* TABLE */
+/* ===== TABLE ===== */
 table{
   width:100%;
   border-collapse:collapse;
-  margin-top:20px;
+  margin-top:22px;
 }
 thead th{
   background:#0f3c8a;
   color:#fff;
   padding:12px;
+  font-size:14px;
 }
 tbody td{
   padding:12px;
   border-bottom:1px solid #e5e7eb;
+  font-size:14px;
 }
 
-/* PRICE */
-.total{
-  margin-top:20px;
+/* ===== PRICE ===== */
+.price-box{
+  margin-top:18px;
   text-align:right;
-  font-size:18px;
+  font-size:16px;
 }
-.total span{
+.price-box span{
+  font-size:18px;
   color:#b91c1c;
-  font-weight:bold;
+  font-weight:700;
 }
 
-/* FOOTER */
+/* ===== TERMS ===== */
 .terms{
-  margin-top:25px;
+  margin-top:22px;
   background:#fff7ed;
-  padding:16px;
-  border-left:5px solid #facc15;
+  border-left:5px solid #f6c200;
+  padding:14px 16px;
   font-size:13px;
 }
+
+/* ===== SIGN ===== */
 .sign{
+  margin-top:60px;
   display:flex;
   justify-content:space-between;
-  margin-top:60px;
   text-align:center;
 }
 .line{
   width:40%;
   border-top:1px solid #000;
   padding-top:6px;
+  font-size:14px;
 }
-.btn-print{
+
+/* PRINT */
+.print-btn{
   display:block;
+  width:200px;
   margin:30px auto 0;
-  padding:12px 26px;
+  padding:12px;
   background:#0f3c8a;
   color:#fff;
-  border-radius:999px;
   text-align:center;
+  border-radius:999px;
   cursor:pointer;
 }
 @media print{
-  .btn-print{display:none;}
-  body{background:#fff;}
+  .print-btn{display:none}
+  body{background:#fff}
 }
 </style>
 </head>
@@ -324,17 +355,7 @@ tbody td{
   <!-- HEADER -->
   <div class="header">
     <div class="shop">
-      <img 
-        src="https://www.tui-it.org/customer/logo1.png"
-        style="
-          width:90px;
-          height:90px;
-          object-fit:contain;
-          border-radius:50%;
-          border:3px solid #0f3c8a;
-          background:#fff;
-        "
-      />
+      <img src="https://www.tui-it.org/customer/logo1.png" class="logo">
       <div>
         <h1>ร้านตุ้ยไอที โคราช</h1>
         <p>ศูนย์ซ่อมและจำหน่ายอุปกรณ์ไอทีครบวงจร</p>
@@ -343,6 +364,7 @@ tbody td{
     </div>
 
     <div class="doc">
+      <h2>ใบรับเครื่องซ่อม</h2>
       <div class="no">No. ${job.receiptNumber}</div>
       <div>วันที่ ${new Date(job.receivedDate).toLocaleDateString("th-TH")}</div>
     </div>
@@ -352,14 +374,17 @@ tbody td{
   <div class="info">
     <div class="box">
       <h3>ข้อมูลลูกค้า</h3>
-      <div class="row"><div class="label">ชื่อ</div>${job.customerName}</div>
-      <div class="row"><div class="label">โทร</div>${job.customerPhone || "-"}</div>
+      <div class="row"><div class="label">ชื่อลูกค้า</div>${job.customerName}</div>
+      <div class="row"><div class="label">เบอร์โทร</div>${job.customerPhone || "-"}</div>
       <div class="row"><div class="label">ที่อยู่</div>${job.customerAddress || "-"}</div>
     </div>
 
     <div class="box">
       <h3>สถานะงาน</h3>
-      <span class="badge">${job.status}</span>
+      <div class="row">
+        <div class="label">สถานะ</div>
+        <span class="badge">${job.status}</span>
+      </div>
     </div>
   </div>
 
@@ -368,41 +393,42 @@ tbody td{
     <thead>
       <tr>
         <th width="10%">ลำดับ</th>
-        <th width="50%">อุปกรณ์</th>
+        <th width="50%">รายละเอียดอุปกรณ์</th>
         <th width="40%">อาการเสีย</th>
       </tr>
     </thead>
     <tbody>
       <tr>
         <td>1</td>
-        <td>${job.deviceType} ${job.deviceModel}</td>
+        <td><strong>${job.deviceType} ${job.deviceModel}</strong></td>
         <td>${job.symptom}</td>
       </tr>
     </tbody>
   </table>
 
   <!-- PRICE -->
-  <div class="total">
-    ราคารวม: <span>${(job.priceQuoted ?? 0).toLocaleString()} บาท</span>
+  <div class="price-box">
+    ราคาประเมินรวม :
+    <span>${(job.priceQuoted ?? 0).toLocaleString()} บาท</span>
   </div>
 
   <!-- TERMS -->
   <div class="terms">
-    <strong>เงื่อนไข</strong><br>
-    1. กรุณานำใบรับเครื่องมาแสดงเมื่อรับเครื่อง<br>
+    <strong>เงื่อนไขการรับบริการ</strong><br>
+    1. กรุณานำใบรับเครื่องมาแสดงเมื่อรับเครื่องคืน<br>
     2. ร้านไม่รับผิดชอบข้อมูลภายในเครื่อง<br>
     3. ไม่มารับเครื่องภายใน 90 วัน ร้านขอสงวนสิทธิ์
   </div>
 
   <!-- SIGN -->
   <div class="sign">
-    <div class="line">ผู้ส่งเครื่อง<br>(${job.customerName})</div>
+    <div class="line">ผู้ส่งเครื่องซ่อม<br>(${job.customerName})</div>
     <div class="line">ผู้รับเครื่อง<br>(ร้านตุ้ยไอที)</div>
   </div>
 
 </div>
 
-<div class="btn-print" onclick="window.print()">พิมพ์เอกสาร</div>
+<div class="print-btn" onclick="window.print()">พิมพ์เอกสาร</div>
 </body>
 </html>`);
   } catch (err) {
@@ -410,6 +436,5 @@ tbody td{
     res.status(500).send("สร้างใบรับเครื่องไม่สำเร็จ");
   }
 });
-
 
 module.exports = router;
