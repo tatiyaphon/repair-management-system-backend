@@ -33,7 +33,7 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/employee", express.static(path.join(__dirname, "frontend-employee")));
 app.use("/customer", express.static(path.join(__dirname, "public/customer")));
 app.use("/uploads",  express.static(path.join(__dirname, "public/uploads")));
-
+app.use("/customer", express.static(path.join(__dirname, "public")));
 /* =========================
    ROOT
 ========================= */
