@@ -165,8 +165,7 @@ router.get("/:id/receipt", async (req, res) => {
       return res.status(404).send("ไม่พบงานซ่อม");
     }
 
-    res.send(`
-<!DOCTYPE html>
+    res.send(`<!DOCTYPE html>
 <html lang="th">
 <head>
 <meta charset="UTF-8">
@@ -179,7 +178,6 @@ body{
   margin:0;
   padding:30px;
 }
-
 .container{
   max-width:900px;
   margin:auto;
@@ -190,83 +188,64 @@ body{
   border-left:10px solid #facc15;
 }
 
-/* ===== HEADER ===== */
+/* HEADER */
 .header{
   display:flex;
   justify-content:space-between;
-  align-items:center;
+  align-items:flex-start;
   border-bottom:3px solid #facc15;
   padding-bottom:20px;
   margin-bottom:25px;
 }
-
 .shop{
   display:flex;
   gap:16px;
   align-items:center;
 }
-
-.logo{
-  width:90px;
-  height:90px;
-  object-fit:contain;
-  border-radius:50%;
-  border:3px solid #0f3c8a;
-  background:#fff;
-}
-
 .shop h1{
   margin:0;
   font-size:24px;
   color:#0f3c8a;
 }
-
 .shop p{
   margin:4px 0;
   font-size:14px;
 }
-
 .doc{
   text-align:right;
 }
-
 .doc .no{
   font-size:18px;
   font-weight:bold;
   color:#b91c1c;
 }
 
-/* ===== INFO ===== */
+/* INFO */
 .info{
   display:grid;
   grid-template-columns:2fr 1fr;
   gap:20px;
   margin-bottom:20px;
 }
-
 .box{
   border:1px solid #d1d5db;
   border-radius:8px;
   padding:16px;
   background:#f9fafb;
 }
-
 .box h3{
   margin:0 0 10px;
   font-size:16px;
   color:#0f3c8a;
 }
-
 .row{
   display:flex;
   margin-bottom:6px;
 }
-
 .label{
   width:100px;
   font-weight:bold;
 }
-
 .badge{
   background:#dcfce7;
   color:#047857;
@@ -276,25 +255,23 @@ body{
   border:1px solid #10b981;
 }
 
-/* ===== TABLE ===== */
+/* TABLE */
 table{
   width:100%;
   border-collapse:collapse;
   margin-top:20px;
 }
-
 thead th{
   background:#0f3c8a;
   color:#fff;
   padding:12px;
 }
-
 tbody td{
   padding:12px;
   border-bottom:1px solid #e5e7eb;
 }
 
-/* ===== PRICE ===== */
+/* PRICE */
 .total{
   margin-top:20px;
   text-align:right;
@@ -305,7 +282,7 @@ tbody td{
   font-weight:bold;
 }
 
-/* ===== FOOTER ===== */
+/* FOOTER */
 .terms{
   margin-top:25px;
   background:#fff7ed;
@@ -313,20 +290,17 @@ tbody td{
   border-left:5px solid #facc15;
   font-size:13px;
 }
-
 .sign{
   display:flex;
   justify-content:space-between;
   margin-top:60px;
   text-align:center;
 }
-
 .line{
   width:40%;
   border-top:1px solid #000;
   padding-top:6px;
 }
-
 .btn-print{
   display:block;
   margin:30px auto 0;
@@ -337,7 +311,6 @@ tbody td{
   text-align:center;
   cursor:pointer;
 }
-
 @media print{
   .btn-print{display:none;}
   body{background:#fff;}
@@ -348,19 +321,21 @@ tbody td{
 <body>
 <div class="container">
 
+  <!-- HEADER -->
   <div class="header">
-    <div class="shop" style="display:flex; gap:16px; align-items:center;">
-  <img 
-    src="https://www.tui-it.org/customer/logo1.png"
-    style="
-      width:90px;
-      height:90px;
-      object-fit:contain;
-      border-radius:50%;
-      border:3px solid #0f3c8a;
-      background:#fff;
-    "
-  />
+    <div class="shop">
+      <img 
+        src="https://www.tui-it.org/customer/logo1.png"
+        style="
+          width:90px;
+          height:90px;
+          object-fit:contain;
+          border-radius:50%;
+          border:3px solid #0f3c8a;
+          background:#fff;
+        "
+      />
+      <div>
         <h1>ร้านตุ้ยไอที โคราช</h1>
         <p>ศูนย์ซ่อมและจำหน่ายอุปกรณ์ไอทีครบวงจร</p>
         <p>โทร 080-4641677</p>
@@ -373,11 +348,12 @@ tbody td{
     </div>
   </div>
 
+  <!-- INFO -->
   <div class="info">
     <div class="box">
       <h3>ข้อมูลลูกค้า</h3>
       <div class="row"><div class="label">ชื่อ</div>${job.customerName}</div>
-      <div class="row"><div class="label">โทร</div>${job.customerPhone}</div>
+      <div class="row"><div class="label">โทร</div>${job.customerPhone || "-"}</div>
       <div class="row"><div class="label">ที่อยู่</div>${job.customerAddress || "-"}</div>
     </div>
 
@@ -387,6 +363,7 @@ tbody td{
     </div>
   </div>
 
+  <!-- TABLE -->
   <table>
     <thead>
       <tr>
@@ -404,10 +381,12 @@ tbody td{
     </tbody>
   </table>
 
+  <!-- PRICE -->
   <div class="total">
-    ราคารวม: <span>${job.priceQuoted?.toLocaleString() || "-"} บาท</span>
+    ราคารวม: <span>${(job.priceQuoted ?? 0).toLocaleString()} บาท</span>
   </div>
 
+  <!-- TERMS -->
   <div class="terms">
     <strong>เงื่อนไข</strong><br>
     1. กรุณานำใบรับเครื่องมาแสดงเมื่อรับเครื่อง<br>
@@ -415,6 +394,7 @@ tbody td{
     3. ไม่มารับเครื่องภายใน 90 วัน ร้านขอสงวนสิทธิ์
   </div>
 
+  <!-- SIGN -->
   <div class="sign">
     <div class="line">ผู้ส่งเครื่อง<br>(${job.customerName})</div>
     <div class="line">ผู้รับเครื่อง<br>(ร้านตุ้ยไอที)</div>
@@ -423,10 +403,8 @@ tbody td{
 </div>
 
 <div class="btn-print" onclick="window.print()">พิมพ์เอกสาร</div>
-
 </body>
-</html>
-`);
+</html>`);
   } catch (err) {
     console.error(err);
     res.status(500).send("สร้างใบรับเครื่องไม่สำเร็จ");
