@@ -33,7 +33,7 @@ router.get("/tech", verifyToken, async (req, res) => {
 /* =====================================
    POST /api/employees (admin)
 ===================================== */
-router.post("/", auth, requireRole("admin"), async (req, res) => {
+router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
   const { firstName, lastName, email, password, role } = req.body;
 
   if (!firstName || !lastName || !email || !password) {
