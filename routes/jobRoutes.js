@@ -161,37 +161,46 @@ router.put("/:id/complete", auth, async (req, res) => {
 router.get("/:id/receipt", async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
-    if (!job) return res.status(404).json({ message: "ไม่พบงานซ่อม" });
+    if (!job) {
+      return res.status(404).send("ไม่พบงานซ่อม");
+    }
 
-    const html = `
-      <h1>ใบรับเครื่องซ่อม</h1>
-      <p>เลขที่: ${job.receiptNumber}</p>
-      <p>ลูกค้า: ${job.customerName}</p>
-      <p>อุปกรณ์: ${job.deviceType} ${job.deviceModel}</p>
-      <p>อาการ: ${job.symptom}</p>
-      <p>สถานะ: ${job.status}</p>
-      <p>ราคา: ${job.priceQuoted.toLocaleString()} บาท</p>
-    `;
+    res.send(`
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ใบรับเครื่องซ่อม</title>
+<style>
+  body { font-family: Sarabun, sans-serif; padding:40px }
+  h1 { color:#0f3c8a }
+  .box { margin-bottom:12px }
+</style>
+</head>
+<body onload="window.print()">
 
-    const browser = await puppeteer.launch({
-      headless: true,
-      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-      args: ["--no-sandbox", "--disable-setuid-sandbox"]
-    });
+<h1>ใบรับเครื่องซ่อม</h1>
 
-    const page = await browser.newPage();
-    await page.setContent(html);
-    const pdf = await page.pdf({ format: "A4" });
-    await browser.close();
+<div class="box"><b>เลขใบรับ:</b> ${job.receiptNumber}</div>
+<div class="box"><b>ลูกค้า:</b> ${job.customerName}</div>
+<div class="box"><b>เบอร์:</b> ${job.customerPhone}</div>
+<div class="box"><b>ที่อยู่:</b> ${job.customerAddress || "-"}</div>
 
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", "inline");
-    res.send(pdf);
+<hr>
+
+<div class="box"><b>อุปกรณ์:</b> ${job.deviceType} ${job.deviceModel}</div>
+<div class="box"><b>อาการ:</b> ${job.symptom}</div>
+<div class="box"><b>สถานะ:</b> ${job.status}</div>
+
+</body>
+</html>
+    `);
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "สร้าง PDF ไม่สำเร็จ" });
+    res.status(500).send("ไม่สามารถสร้างใบเสร็จได้");
   }
 });
+
 
 module.exports = router;
