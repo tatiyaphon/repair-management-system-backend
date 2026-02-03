@@ -686,19 +686,20 @@
             <div style="overflow-x:auto;">
                 <table class="styled-table" id="job-list-table">
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>ประเภท</th>
-                            <th>ลูกค้า</th>
-                            <th>เครื่อง</th>
-                            <th>อาการเสีย</th>
-                            <th>สถานะ</th>
-                            <th>วันที่รับ</th>
-                            <th>วันเริ่มซ่อม</th>
-                            <th>วันซ่อมเสร็จ</th>
-                            <th>การจัดการ</th>
-                        </tr>
+                      <tr>
+                        <th>ID</th>
+                        <th>ประเภท</th>
+                        <th>ลูกค้า</th>
+                        <th>เครื่อง</th>
+                        <th>อาการเสีย</th>
+                        <th>สถานะ</th>
+                        <th>วันที่รับ</th>
+                        <th>วันเริ่มซ่อม</th>
+                        <th>วันซ่อมเสร็จ</th>
+                        <th>การจัดการ</th>
+                      </tr>
                     </thead>
+
                     <tbody>
                         <!-- จะถูกเติมด้วย JS -->
                     </tbody>
@@ -854,20 +855,26 @@ function renderTable() {
   filteredJobs.forEach(job => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${job.receiptNumber || "-"}</td>
-      <td>${job.customerName || "-"}</td>
-      <td>${job.deviceType} ${job.deviceModel || ""}</td>
-      <td>${job.symptom || "-"}</td>
-      <td>
-        <span class="status-badge ${statusClass(job.status)}">
-          ${job.status}
-        </span>
-      </td>
-      <td>${formatDate(job.receivedDate)}</td>
-      <td>
-        <a href="manage_job.html?id=${job._id}" class="action-btn">จัดการ</a>
-      </td>
-    `;
+  <td>${job.receiptNumber}</td>
+  <td>${job.jobType || "-"}</td>
+  <td>${job.customerName}</td>
+  <td>${job.deviceType} ${job.deviceModel}</td>
+  <td>${job.symptom}</td>
+  <td>
+    <span class="status-badge ${statusClass(job.status)}">
+      ${job.status}
+    </span>
+  </td>
+  <td>${formatDate(job.receivedDate)}</td>
+  <td>${formatDate(job.startDate)}</td>
+  <td>${formatDate(job.finishDate)}</td>
+  <td>
+    <a class="btn-manage" href="manage_job.html?id=${job._id}">
+      จัดการ
+    </a>
+  </td>
+`;
+
     tbody.appendChild(tr);
   });
 }
