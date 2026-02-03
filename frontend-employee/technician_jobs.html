@@ -569,6 +569,54 @@ const STATUS_CLASS_MAP = {
   "ยกเลิก": "cancelled"
 };
 
+/* =============================
+   MONTH / YEAR FILTER
+============================= */
+function initMonthYearFilter() {
+  const monthSel = document.getElementById("monthFilter");
+  const yearSel  = document.getElementById("yearFilter");
+
+  monthSel.innerHTML = `<option value="all">ทุกเดือน</option>`;
+  yearSel.innerHTML  = `<option value="all">ทุกปี</option>`;
+
+  for (let m = 1; m <= 12; m++) {
+    monthSel.innerHTML += `<option value="${m}">${m}</option>`;
+  }
+
+  const years = [...new Set(
+    jobs.map(j => new Date(j.receivedDate))
+        .filter(d => !isNaN(d))
+        .map(d => d.getFullYear())
+  )].sort((a,b) => b - a);
+
+  years.forEach(y => {
+    yearSel.innerHTML += `<option value="${y}">${y}</option>`;
+  });
+}
+
+function applyFilter() {
+  const month = document.getElementById("monthFilter").value;
+  const year  = document.getElementById("yearFilter").value;
+
+  filteredJobs = jobs.filter(j => {
+    if (j.status === "ซ่อมเสร็จ") return false;
+
+    const d = new Date(j.receivedDate);
+    if (isNaN(d)) return false;
+
+    if (month !== "all" && d.getMonth() + 1 !== Number(month)) return false;
+    if (year !== "all" && d.getFullYear() !== Number(year)) return false;
+
+    return true;
+  });
+
+  updateCards();
+  renderTable();
+}
+
+document.getElementById("monthFilter")?.addEventListener("change", applyFilter);
+document.getElementById("yearFilter")?.addEventListener("change", applyFilter);
+
 /* =====================
    API FETCH (กลาง)
 ===================== */
