@@ -1571,8 +1571,7 @@ function renderUsersTable(users) {
   });
 }
 function editUser(id) {
-  alert("แก้ไขผู้ใช้ ID: " + id);
-  // ต่อยอดเป็น modal / หน้าแก้ไขได้
+  window.location.href = `edit_user.html?id=${id}`;
 }
 /* ==================================================
    UPDATE USER ROLE

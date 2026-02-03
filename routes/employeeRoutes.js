@@ -5,7 +5,6 @@ const Employee = require("../models/Employee");
 const multer = require("multer");
 const verifyToken = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
-const uploadAvatar = require("../middleware/uploadAvatar");
 
 const router = express.Router();
 
@@ -17,6 +16,10 @@ router.get("/", verifyToken, requireRole("admin"), async (req, res) => {
     .select("_id firstName lastName email role phone active avatar");
   res.json(employees);
 });
+
+/* =====================================
+   GET /api/employees/tech
+===================================== */
 router.get("/tech", verifyToken, async (req, res) => {
   try {
     const techs = await Employee.find({
@@ -34,8 +37,7 @@ router.get("/tech", verifyToken, async (req, res) => {
    POST /api/employees (admin)
 ===================================== */
 router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
-
-  const { firstName, lastName, email, password, role } = req.body;
+  const { firstName, lastName, email, password, role, phone } = req.body;
 
   if (!firstName || !lastName || !email || !password) {
     return res.status(400).json({ message: "ข้อมูลไม่ครบ" });
@@ -52,8 +54,10 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
     firstName,
     lastName,
     email,
+    phone,
     password: hash,
     role,
+    active: true,
     mustChangePassword: true
   });
 
@@ -61,18 +65,55 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
 });
 
 /* =====================================
-   POST /api/employees/profile/avatar
+   PUT /api/employees/:id (admin)
+   แก้ไขสมาชิก
 ===================================== */
-/* =========================
-   MULTER CONFIG
-========================= */
+router.put(
+  "/:id",
+  verifyToken,
+  requireRole("admin"),
+  async (req, res) => {
+    try {
+      const { firstName, lastName, phone, role, active } = req.body;
+
+      const user = await Employee.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ message: "ไม่พบผู้ใช้นี้" });
+      }
+
+      // ❌ ป้องกัน admin แก้ role ตัวเอง
+      if (req.user.userId === req.params.id && role && role !== "admin") {
+        return res.status(400).json({
+          message: "ไม่สามารถเปลี่ยนสิทธิ์ของตัวเองได้"
+        });
+      }
+
+      await Employee.findByIdAndUpdate(req.params.id, {
+        firstName,
+        lastName,
+        phone,
+        role,
+        active
+      });
+
+      res.json({ message: "แก้ไขข้อมูลผู้ใช้เรียบร้อย" });
+    } catch (err) {
+      console.error("UPDATE EMPLOYEE ERROR:", err);
+      res.status(500).json({ message: "แก้ไขผู้ใช้ไม่สำเร็จ" });
+    }
+  }
+);
+
+/* =====================================
+   UPLOAD AVATAR
+===================================== */
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "public/uploads/profile"); // ✅ ตรงกับ static
+    cb(null, "public/uploads/profile");
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
-    cb(null, `user_${req.user.id}${ext}`); // ✅ ไม่มี undefined
+    cb(null, `user_${req.user.userId}${ext}`);
   }
 });
 
@@ -80,14 +121,12 @@ const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
     if (!file.mimetype.startsWith("image/")) {
-      cb(new Error("ไฟล์ต้องเป็นรูปภาพ"));
+      return cb(new Error("ไฟล์ต้องเป็นรูปภาพ"));
     }
     cb(null, true);
   }
 });
-/* =========================
-   UPLOAD AVATAR
-========================= */
+
 router.post(
   "/profile/avatar",
   verifyToken,
@@ -110,13 +149,14 @@ router.post(
     }
   }
 );
-// =========================
-// GET /api/employees/:id/profile
-// =========================
+
+/* =====================================
+   GET PROFILE
+===================================== */
 router.get("/:id/profile", verifyToken, async (req, res) => {
   try {
     const user = await Employee.findById(req.params.id).select(
-      "firstName lastName role avatar"
+      "firstName lastName role avatar phone active"
     );
 
     if (!user) {
@@ -125,35 +165,26 @@ router.get("/:id/profile", verifyToken, async (req, res) => {
 
     res.json(user);
   } catch (err) {
-    console.error("GET PROFILE ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ===============================
-// DELETE EMPLOYEE (admin only)
-// ===============================
+/* =====================================
+   DELETE EMPLOYEE
+===================================== */
 router.delete(
   "/:id",
   verifyToken,
   requireRole("admin"),
   async (req, res) => {
     try {
-      const user = await Employee.findById(req.params.id);
-      if (!user) {
-        return res.status(404).json({ message: "ไม่พบผู้ใช้นี้" });
-      }
-
-      // ❌ ป้องกันลบ admin ตัวเอง
       if (req.user.userId === req.params.id) {
         return res.status(400).json({ message: "ไม่สามารถลบตัวเองได้" });
       }
 
       await Employee.findByIdAndDelete(req.params.id);
-
       res.json({ message: "ลบผู้ใช้เรียบร้อยแล้ว" });
     } catch (err) {
-      console.error(err);
       res.status(500).json({ message: "ลบผู้ใช้ไม่สำเร็จ" });
     }
   }
