@@ -708,16 +708,15 @@
     </main>
  <script>
 /* ==========================================================
-   DASHBOARD SCRIPT (PRODUCTION READY)
+   DASHBOARD SCRIPT (FIXED + PRODUCTION READY)
 ========================================================== */
 
 /* =============================
    CONFIG
 ============================= */
-const API_BASE = ""; // ✅ ใช้ relative path
+const API_BASE = "";
 let jobs = [];
 let filteredJobs = [];
-
 
 /* =============================
    AUTH
@@ -796,11 +795,9 @@ function initMonthYearFilter() {
   monthSel.innerHTML = `<option value="all">ทุกเดือน</option>`;
   yearSel.innerHTML  = `<option value="all">ทุกปี</option>`;
 
-
   for (let m = 1; m <= 12; m++) {
     monthSel.innerHTML += `<option value="${m}">${m}</option>`;
   }
-
 
   const years = [...new Set(
     jobs.map(j => new Date(j.receivedDate))
@@ -833,8 +830,8 @@ function applyFilter() {
   renderTable();
 }
 
-document.getElementById("monthFilter").addEventListener("change", applyFilter);
-document.getElementById("yearFilter").addEventListener("change", applyFilter);
+document.getElementById("monthFilter")?.addEventListener("change", applyFilter);
+document.getElementById("yearFilter")?.addEventListener("change", applyFilter);
 
 /* =============================
    DASHBOARD CARDS
@@ -873,7 +870,6 @@ function renderTable() {
     `;
     tbody.appendChild(tr);
   });
-  
 }
 
 /* =============================
@@ -900,23 +896,24 @@ async function loadProfile() {
 }
 
 /* =============================
-   AVATAR UPLOAD
+   PROFILE TOGGLE ✅ (ตัวที่ขาด)
 ============================= */
-async function uploadAvatar(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-
-  const fd = new FormData();
-  fd.append("avatar", file);
-
-  await apiFetch("/api/employees/profile/avatar", {
-    method: "POST",
-    body: fd,
-  });
-
-  await loadProfile();
-  alert("✅ เปลี่ยนรูปโปรไฟล์เรียบร้อย");
+function toggleProfile() {
+  const dropdown = document.getElementById("profileDropdown");
+  if (!dropdown) return;
+  dropdown.classList.toggle("show");
 }
+
+/* ปิด dropdown เมื่อคลิกข้างนอก */
+document.addEventListener("click", (e) => {
+  const menu = document.getElementById("profileMenu");
+  const dropdown = document.getElementById("profileDropdown");
+  if (!menu || !dropdown) return;
+
+  if (!menu.contains(e.target)) {
+    dropdown.classList.remove("show");
+  }
+});
 
 /* =============================
    LOGOUT
