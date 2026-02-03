@@ -60,6 +60,9 @@
             color:#fff; padding:15px 40px;
             display:flex; justify-content:space-between; align-items:center;
             box-shadow:0 4px 15px rgba(0,0,0,.15);
+            position: sticky;
+            top: 0;
+            z-index: 999;
         }
 
         .logo { 
@@ -382,6 +385,34 @@
 .profile-trigger img{
   pointer-events: auto;
 }
+/* ===== MOBILE FIX : PROFILE DROPDOWN ===== */
+@media (max-width: 768px) {
+
+  .nav-links {
+    position: relative;
+  }
+
+  .profile-dropdown {
+    position: fixed;          /* 🔴 เปลี่ยนจาก absolute */
+    top: 70px;                /* ใต้ header */
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: none;
+    border-radius: 0;
+    box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    z-index: 10000;
+  }
+
+  .profile-header {
+    padding: 16px;
+  }
+
+  .profile-item {
+    font-size: 16px;          /* แตะง่าย */
+    padding: 14px 18px;
+  }
+}
 
     </style>
 </head>
@@ -570,7 +601,7 @@ async function apiFetch(path, options = {}) {
    DOM READY
 ===================== */
 document.addEventListener("DOMContentLoaded", () => {
-  
+
   const userMeta = document.getElementById("user-meta");
   if (userMeta) {
     userMeta.textContent = `${userName || "ผู้ใช้งาน"} (${role || "-"})`;
