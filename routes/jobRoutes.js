@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Job = require("../models/Job");
 const auth = require("../middleware/auth");
-const puppeteer = require("puppeteer-core");
+const puppeteer = require("puppeteer");
+
 
 console.log("✅ jobRoutes loaded");
 

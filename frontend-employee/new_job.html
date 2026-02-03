@@ -481,10 +481,9 @@ document.getElementById("new-job-form")?.addEventListener("submit", async e => {
     ========================= */
     if (data.job?._id) {
       window.open(
-  `/customer/receipt.html?id=${data.job._id}`,
-  "_blank"
-);
-
+        `/api/jobs/${data.job._id}/receipt`,
+        "_blank"
+      );
     }
 
     /* =========================
