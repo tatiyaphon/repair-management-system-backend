@@ -355,43 +355,57 @@ document.addEventListener("DOMContentLoaded", async () => {
     const j = await res.json();
 
     let statusClass = "status-new";
-    if(j.status === "ซ่อมเสร็จ") statusClass = "status-complete";
-    else if(j.status !== "รับเครื่อง") statusClass = "status-in-progress";
+let statusText  = j.status;
 
-    box.innerHTML = `
-      <div class="status ${statusClass}">
-        ${j.status}
-      </div>
+if (j.status === "ซ่อมเสร็จ") {
+  statusClass = "status-complete";
+} else if (j.status !== "รับเครื่อง") {
+  statusClass = "status-in-progress";
+}
 
-      <div class="section">
-        <h3><i class="fas fa-user"></i> ข้อมูลลูกค้า</h3>
-        <div class="row"><strong>ชื่อ:</strong> ${j.customerName}</div>
-        <div class="row"><strong>เบอร์:</strong> ${j.customerPhone || "-"}</div>
-        <div class="row"><strong>เลขใบเสร็จ:</strong> ${j.receiptNumber}</div>
-      </div>
+box.innerHTML = `
+  <!-- สถานะปัจจุบัน -->
+  <div class="status-box">
+    <h2><i class="fas fa-sync-alt"></i> สถานะปัจจุบัน</h2>
+    <div class="status-display ${statusClass}">
+      ${statusText}
+    </div>
+  </div>
 
-      <div class="section">
-        <h3><i class="fas fa-laptop"></i> ข้อมูลเครื่อง</h3>
-        <div class="row"><strong>ประเภท:</strong> ${j.deviceType}</div>
-        <div class="row"><strong>รุ่น:</strong> ${j.deviceModel}</div>
-        <div class="row"><strong>อาการ:</strong> ${j.symptom}</div>
-      </div>
+  <!-- ข้อมูลลูกค้า -->
+  <div class="status-box">
+    <h2><i class="fas fa-user"></i> ข้อมูลลูกค้า</h2>
+    <div class="detail-item"><strong>เลขใบเสร็จ:</strong> ${j.receiptNumber}</div>
+    <div class="detail-item"><strong>ชื่อ:</strong> ${j.customerName}</div>
+    <div class="detail-item"><strong>เบอร์:</strong> ${j.customerPhone || "-"}</div>
+  </div>
 
-      <div class="section">
-        <h3><i class="fas fa-calendar"></i> กำหนดการ</h3>
-        <div class="row"><strong>รับเครื่อง:</strong> ${new Date(j.receivedDate).toLocaleDateString("th-TH")}</div>
-        <div class="row"><strong>เริ่มซ่อม:</strong> ${j.startDate ? new Date(j.startDate).toLocaleDateString("th-TH") : "-"}</div>
-        <div class="row"><strong>เสร็จ:</strong> ${j.finishDate ? new Date(j.finishDate).toLocaleDateString("th-TH") : "-"}</div>
-      </div>
+  <!-- ข้อมูลเครื่อง -->
+  <div class="status-box">
+    <h2><i class="fas fa-laptop"></i> รายละเอียดเครื่อง</h2>
+    <div class="detail-item"><strong>ประเภท:</strong> ${j.deviceType}</div>
+    <div class="detail-item"><strong>รุ่น:</strong> ${j.deviceModel}</div>
+    <div class="detail-item"><strong>อาการ:</strong> ${j.symptom}</div>
+  </div>
 
-      <div class="section">
-        <h3><i class="fas fa-baht-sign"></i> ราคาประเมิน</h3>
-        <div class="price">${j.priceQuoted.toLocaleString()} บาท</div>
-      </div>
+  <!-- ราคา -->
+  <div class="status-box">
+    <h2><i class="fas fa-baht-sign"></i> ราคาและกำหนดการ</h2>
+    <span class="price-display">${j.priceQuoted.toLocaleString()} บาท</span>
+    <div class="detail-item">
+      <strong>วันที่รับเครื่อง:</strong>
+      ${new Date(j.receivedDate).toLocaleDateString("th-TH")}
+    </div>
+    <div class="detail-item">
+      <strong>วันที่ซ่อมเสร็จ:</strong>
+      ${j.finishDate ? new Date(j.finishDate).toLocaleDateString("th-TH") : "-"}
+    </div>
+  </div>
 
-      <a href="/customer/check_status.html" class="back">← กลับ</a>
-    `;
-  
+  <a href="/customer/check_status.html" class="back-link">
+    ← กลับไปตรวจสอบงานอื่น
+  </a>
+`;
 });
 </script>
 </body>
