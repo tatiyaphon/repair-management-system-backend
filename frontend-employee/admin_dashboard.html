@@ -482,15 +482,18 @@
       }
     }
 
-    @media (max-width: 576px) {
+   @media (max-width: 576px) {
   .profile-dropdown {
     position: fixed;
-    top: 70px;              /* ใต้ header */
+    top: 64px;          /* ใต้ header */
+    left: 12px;
     right: 12px;
-    left: 12px;             /* กันล้นซ้าย */
-    width: auto;            /* ไม่ fix 260px */
-    max-width: 100%;
-    border-radius: 12px;
+    width: auto;
+    max-width: none;
+    max-height: calc(100vh - 80px);
+    overflow-y: auto;
+    border-radius: 14px;
+    z-index: 10000;
   }
 
       .panel {
