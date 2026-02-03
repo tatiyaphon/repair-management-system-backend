@@ -483,9 +483,15 @@
     }
 
     @media (max-width: 576px) {
-      .dashboard-grid {
-        grid-template-columns: 1fr;
-      }
+  .profile-dropdown {
+    position: fixed;
+    top: 70px;              /* ใต้ header */
+    right: 12px;
+    left: 12px;             /* กันล้นซ้าย */
+    width: auto;            /* ไม่ fix 260px */
+    max-width: 100%;
+    border-radius: 12px;
+  }
 
       .panel {
         padding: 18px;
@@ -564,7 +570,10 @@
     border-collapse: separate;
     border-spacing: 0 10px;
   }
-  .profile-menu { position: relative; }
+  .profile-menu {
+  position: relative;
+  z-index: 99999;
+}
 
 .profile-trigger {
   display: flex;
