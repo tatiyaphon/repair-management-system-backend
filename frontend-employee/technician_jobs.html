@@ -826,6 +826,14 @@ function applyFilters() {
 
   renderJobs(result);
 }
+["searchInput", "statusFilter", "monthFilter", "yearFilter"]
+  .forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    el.addEventListener("input", applyFilters);
+    el.addEventListener("change", applyFilters);
+  });
 
 </script>
 
