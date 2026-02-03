@@ -976,6 +976,88 @@
 .btn-delete:hover {
   background: #dc2626;
 }
+/* จัดกลางคอลัมน์ */
+.center {
+  text-align: center;
+  vertical-align: middle;
+}
+
+/* กลุ่มปุ่มจัดการ */
+.action-group {
+  display: inline-flex;
+  gap: 8px;
+}
+
+/* ปุ่มแก้ไข */
+.btn-edit {
+  background: #e5e7eb;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  padding: 5px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-edit:hover {
+  background: #d1d5db;
+}
+
+/* ปุ่มลบ */
+.btn-delete {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 5px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-delete:hover {
+  background: #dc2626;
+}
+
+/* สถานะ */
+.status-active {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(22,163,74,.12);
+  color: #16a34a;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  background: #16a34a;
+  border-radius: 50%;
+}
+
+/* dropdown บทบาท */
+.role-select {
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid #d1d5db;
+  font-family: 'Kanit', sans-serif;
+}
+.status-inactive {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(220,38,38,.12);
+  color: #dc2626;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.status-dot.offline {
+  background: #dc2626;
+}
 
   </style>
 </head>
@@ -1441,27 +1523,49 @@ function renderUsersTable(users) {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
-      <td>${u.firstName} ${u.lastName}</td>
-      <td>${u.email}</td>
+  <td class="user-name">${u.firstName} ${u.lastName}</td>
 
-      <td>
-        <select onchange="updateUserRole('${u._id}', this.value)">
-          <option value="admin" ${u.role==="admin"?"selected":""}>ผู้ดูแลระบบ</option>
-          <option value="staff" ${u.role==="staff"?"selected":""}>พนักงาน</option>
-          <option value="tech" ${u.role==="tech"?"selected":""}>ช่าง</option>
-        </select>
-      </td>
-      <td>
-        <span class="status-active">
-          <span class="status-dot"></span> ออนไลน์
-        </span>
-        <td>
-          <button class="btn-edit" onclick="editUser('${u._id}')">แก้ไข</button>
-        </td>
-      <td>
-        <button class="btn-delete" onclick="deleteUser('${u._id}')">ลบ</button>
-      </td>
-    `;
+  <td class="user-email">${u.email}</td>
+
+  <td class="user-phone">${u.phone || "-"}</td>
+
+  <!-- บทบาท -->
+  <td class="center">
+    <select class="role-select"
+      onchange="updateUserRole('${u._id}', this.value)">
+      <option value="admin" ${u.role==="admin"?"selected":""}>ผู้ดูแลระบบ</option>
+      <option value="staff" ${u.role==="staff"?"selected":""}>พนักงาน</option>
+      <option value="tech"  ${u.role==="tech" ?"selected":""}>ช่าง</option>
+    </select>
+  </td>
+
+  <!-- สถานะ -->
+  ${
+    u.online
+      ? `<span class="status-active">
+           <span class="status-dot"></span> ออนไลน์
+         </span>`
+      : `<span class="status-inactive">
+           <span class="status-dot offline"></span> ออฟไลน์
+         </span>`
+  }
+
+  <!-- จัดการ -->
+  <td class="center">
+    <div class="action-group">
+      <button class="btn-edit"
+        onclick="editUser('${u._id}')">
+        แก้ไข
+      </button>
+
+      <button class="btn-delete"
+        onclick="deleteUser('${u._id}')">
+        ลบ
+      </button>
+    </div>
+  </td>
+`;
+
 
     tbody.appendChild(tr);
   });
@@ -1546,10 +1650,20 @@ async function init() {
 /* ==================================================
    LOGOUT
 ================================================== */
-function logout() {
+async function logout() {
+  try {
+    await fetch("/api/auth/logout", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+  } catch (e) {}
+
   localStorage.clear();
   location.href = "login.html";
 }
+
 
 /* ==================================================
    ON LOAD

@@ -40,6 +40,10 @@ router.post("/login", async (req, res) => {
       });
     }
 
+    // หลังตรวจรหัสผ่านผ่านแล้ว
+      user.online = true;
+      await user.save();
+
     // upgrade password เป็น bcrypt ถ้ายังไม่ใช่
     if (!user.password.startsWith("$2")) {
       user.password = await bcrypt.hash(password, 10);
@@ -69,6 +73,13 @@ router.post("/login", async (req, res) => {
     console.error("LOGIN ERROR:", err);
     res.status(500).json({ error: "Login failed" });
   }
+});
+router.post("/logout", verifyToken, async (req, res) => {
+  await Employee.findByIdAndUpdate(req.user.userId, {
+    online: false
+  });
+
+  res.json({ message: "ออกจากระบบแล้ว" });
 });
 
 /* =========================

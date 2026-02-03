@@ -14,7 +14,7 @@ const router = express.Router();
 ===================================== */
 router.get("/", verifyToken, requireRole("admin"), async (req, res) => {
   const employees = await Employee.find()
-    .select("_id firstName lastName email role active avatar");
+    .select("_id firstName lastName email role phone active avatar");
   res.json(employees);
 });
 router.get("/tech", verifyToken, async (req, res) => {
