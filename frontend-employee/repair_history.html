@@ -120,59 +120,101 @@ tbody tr{
 </div>
 
 <script>
-const API_BASE = "http://localhost:5000/api";
+/* ==========================================================
+   repair_history.html — PRODUCTION READY
+========================================================== */
+
+const API_BASE = "/api";
 const token = localStorage.getItem("token");
 
+/* =========================
+   AUTH CHECK
+========================= */
 if (!token) {
-  window.location.href = "login.html";
+  location.replace("login.html");
 }
 
+/* =========================
+   LOAD HISTORY (ซ่อมเสร็จ)
+========================= */
 async function loadHistory() {
-  const res = await fetch(`${API_BASE}/jobs`, {
-    headers:{ Authorization:`Bearer ${token}` }
-  });
-  const jobs = await res.json();
+  const tbody   = document.getElementById("historyBody");
+  const emptyBox = document.getElementById("emptyBox");
 
-  // ✅ ประวัติ = ซ่อมเสร็จเท่านั้น
-  const historyJobs = jobs.filter(j => j.status === "ซ่อมเสร็จ");
+  if (!tbody || !emptyBox) return;
 
-  const tbody = document.getElementById("historyBody");
-  tbody.innerHTML = "";
+  try {
+    const res = await fetch(`${API_BASE}/jobs`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
 
-  if (!historyJobs.length) {
-    document.getElementById("emptyBox").style.display = "block";
-    return;
-  }
+    // session หมด
+    if (res.status === 401 || res.status === 403) {
+      alert("Session หมดอายุ กรุณาเข้าสู่ระบบใหม่");
+      localStorage.clear();
+      location.replace("login.html");
+      return;
+    }
 
-  document.getElementById("emptyBox").style.display = "none";
+    const jobs = await res.json();
 
-  historyJobs.forEach(job => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${job.receiptNumber}</td>
-        <td>${job.customerName}</td>
-        <td>${job.deviceType} ${job.deviceModel}</td>
-        <td>${job.symptom}</td>
+    // ✅ เอาเฉพาะงานที่ซ่อมเสร็จ
+    const historyJobs = Array.isArray(jobs)
+      ? jobs.filter(j => j.status === "ซ่อมเสร็จ")
+      : [];
+
+    tbody.innerHTML = "";
+
+    if (!historyJobs.length) {
+      emptyBox.style.display = "block";
+      return;
+    }
+
+    emptyBox.style.display = "none";
+
+    historyJobs.forEach(job => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${job.receiptNumber || "-"}</td>
+        <td>${job.customerName || "-"}</td>
+        <td>${job.deviceType || "-"} ${job.deviceModel || ""}</td>
+        <td>${job.symptom || "-"}</td>
         <td>${formatDate(job.receivedDate)}</td>
         <td>${formatDate(job.finishDate)}</td>
-        <td><span class="badge">ซ่อมเสร็จ</span></td>
+        <td><span class="badge badge-success">ซ่อมเสร็จ</span></td>
         <td>
           <a class="action-btn" href="manage_job.html?id=${job._id}">
-            ดู
+            ดูรายละเอียด
           </a>
         </td>
-      </tr>
-    `;
-  });
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+  } catch (err) {
+    console.error(err);
+    emptyBox.style.display = "block";
+    emptyBox.textContent = "❌ ไม่สามารถโหลดประวัติการซ่อมได้";
+  }
 }
 
-function formatDate(date){
-  if(!date) return "-";
+/* =========================
+   UTIL
+========================= */
+function formatDate(date) {
+  if (!date) return "-";
   const d = new Date(date);
-  if(isNaN(d)) return "-";
+  if (isNaN(d)) return "-";
   return d.toLocaleDateString("th-TH");
 }
 
+/* =========================
+   INIT
+========================= */
 document.addEventListener("DOMContentLoaded", loadHistory);
 </script>
 

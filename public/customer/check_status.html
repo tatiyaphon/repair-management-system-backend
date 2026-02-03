@@ -424,16 +424,16 @@ footer{
 const API_BASE = "https://repair-management-system-backend.onrender.com/api/jobs/receipt";
 
 const receiptInput = document.getElementById("receipt_number");
+
 const button = document.querySelector("button");
-const receiptNumber = receiptInput.value.trim().toUpperCase();
 
 
 function showError(msg) {
     alert(msg);
 }
 
-button.addEventListener("click", async () => {
-    const receiptNumber = receiptInput.value.trim();
+async function checkStatus() {
+    const receiptNumber = receiptInput.value.trim().toUpperCase();
 
     if (receiptNumber.length < 3) {
         showError("กรุณากรอกเลขที่ใบเสร็จให้ถูกต้อง");
@@ -441,18 +441,31 @@ button.addEventListener("click", async () => {
     }
 
     try {
-        const res = await fetch(`${API_BASE}/${receiptNumber}`);
+        const res = await fetch(`${API_BASE}/${encodeURIComponent(receiptNumber)}`);
 
         if (!res.ok) {
             showError("ไม่พบข้อมูลงานซ่อมในระบบ");
             return;
         }
 
-        window.location.href = `status_page.html?receipt_number=${receiptNumber}`;
+        // ✅ redirect ไปหน้าสถานะ
+        window.location.href =
+  `/customer/status_page.html?receipt_number=${encodeURIComponent(receiptNumber)}`;
+
 
     } catch (err) {
         console.error(err);
         showError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่");
+    }
+}
+
+// คลิกปุ่ม
+button.addEventListener("click", checkStatus);
+
+// กด Enter ในช่อง input
+receiptInput.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+        checkStatus();
     }
 });
 </script>

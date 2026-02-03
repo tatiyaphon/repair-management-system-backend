@@ -3,17 +3,28 @@
 
   <url>
     <loc>https://tui-it.org/</loc>
+    <lastmod>2026-02-02</lastmod>
+    <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <url>
     <loc>https://tui-it.org/customer/index.html</loc>
+    <lastmod>2026-02-02</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
 
   <url>
     <loc>https://tui-it.org/customer/check_status.html</loc>
+    <lastmod>2026-02-02</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.9</priority>
+  </url>
+
+  <url>
+  <loc>https://tui-it.org/customer/status_page.html</loc>
+  <priority>0.8</priority>
   </url>
 
 </urlset>

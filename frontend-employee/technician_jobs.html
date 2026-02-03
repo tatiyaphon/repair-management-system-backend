@@ -515,17 +515,23 @@
 
 <script>
 /* ==================================================
-   technician_jobs.html — FIXED (PROFILE ONLY)
+   technician_jobs.html — FINAL / PRODUCTION READY
 ================================================== */
 
-const API_BASE = "http://localhost:5000/api";
+const API_BASE = "/api";
 
 /* =====================
-   AUTH + USER DATA
+   AUTH
 ===================== */
 const token    = localStorage.getItem("token");
 const role     = localStorage.getItem("role");
+const userId   = localStorage.getItem("userId");
 const userName = localStorage.getItem("userName");
+
+if (!token || !userId) {
+  localStorage.clear();
+  location.replace("/employee/login.html");
+}
 
 /* =====================
    STATUS MAP
@@ -539,29 +545,42 @@ const STATUS_CLASS_MAP = {
 };
 
 /* =====================
-   AUTH GUARD
+   API FETCH (กลาง)
 ===================== */
-if (!token) {
-  localStorage.clear();
-  window.location.href = "/employee/login.html";
+async function apiFetch(path, options = {}) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      ...(options.headers || {})
+    },
+    ...options
+  });
+
+  if (res.status === 401 || res.status === 403) {
+    alert("Session หมดอายุ");
+    localStorage.clear();
+    location.replace("/employee/login.html");
+    return null;
+  }
+
+  return res.ok ? res.json() : null;
 }
 
 /* =====================
    DOM READY
 ===================== */
 document.addEventListener("DOMContentLoaded", () => {
-
-  /* ===== USER META ===== */
+  
   const userMeta = document.getElementById("user-meta");
   if (userMeta) {
     userMeta.textContent = `${userName || "ผู้ใช้งาน"} (${role || "-"})`;
   }
 
-  /* ===== LOAD PROFILE (ใช้ backend อย่างเดียว) ===== */
-  loadProfile();
 
-  /* ===== DROPDOWN CLOSE ON OUTSIDE CLICK ===== */
-  document.addEventListener("click", (e) => {
+  loadProfile();
+  fetchMyJobs();
+
+  document.addEventListener("click", e => {
     const menu = document.getElementById("profileMenu");
     const dropdown = document.getElementById("profileDropdown");
     if (menu && dropdown && !menu.contains(e.target)) {
@@ -569,47 +588,33 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  /* ===== LOAD JOBS ===== */
-  fetchMyJobs();
 });
 
 /* =====================
    TOGGLE PROFILE
 ===================== */
 function toggleProfile() {
-  const dropdown = document.getElementById("profileDropdown");
-  if (dropdown) dropdown.classList.toggle("show");
+  document.getElementById("profileDropdown")?.classList.toggle("show");
 }
 
 /* =====================
-   LOAD PROFILE (FIXED)
+   LOAD PROFILE
 ===================== */
 async function loadProfile() {
-  const token  = localStorage.getItem("token");
-  const userId = localStorage.getItem("userId");
-  if (!token || !userId) return;
+  const user = await apiFetch(`/employees/${userId}/profile`);
+  if (!user) return;
 
-  const res = await fetch(
-    `http://localhost:5000/api/employees/${userId}/profile`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
-  if (!res.ok) return;
+  const avatar = user.avatar || "/uploads/profile/default.jpg";
+  const avatarUrl = avatar.startsWith("http")
+    ? avatar
+    : `${location.origin}${avatar}`;
 
-  const user = await res.json();
-
-  const avatarPath = user.avatar
-    ? user.avatar
-    : "/uploads/profile/default.jpg";
-
-  const avatarUrl = `http://localhost:5000${avatarPath}`;
-
- document.getElementById("profileAvatarSmall").src = avatarUrl;
-document.getElementById("profileAvatarLarge").src = avatarUrl;
-
+  document.getElementById("profileAvatarSmall").src = avatarUrl;
+  document.getElementById("profileAvatarLarge").src = avatarUrl;
 }
 
 /* =====================
-   UPLOAD AVATAR (ปิด base64)
+   UPLOAD AVATAR
 ===================== */
 async function uploadAvatar(e) {
   const file = e.target.files[0];
@@ -618,64 +623,42 @@ async function uploadAvatar(e) {
   const fd = new FormData();
   fd.append("avatar", file);
 
-  const res = await fetch(
-    "http://localhost:5000/api/employees/profile/avatar",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      },
-      body: fd
-    }
-  );
+  const res = await fetch(`${API_BASE}/employees/profile/avatar`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: fd
+  });
 
   if (!res.ok) {
     alert("อัปโหลดไม่สำเร็จ");
     return;
   }
 
-  await loadProfile(); // โหลดจาก DB ใหม่
+  alert("✅ เปลี่ยนรูปโปรไฟล์เรียบร้อย");
+  loadProfile();
 }
 
 /* =====================
    LOGOUT
 ===================== */
 function logout() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("role");
-  localStorage.removeItem("userId");
-  localStorage.removeItem("userName");
-  window.location.href = "login.html";
+  localStorage.clear();
+  location.replace("login.html");
 }
 
 /* =====================
    FETCH MY JOBS
 ===================== */
 async function fetchMyJobs() {
-  try {
-    const res = await fetch(`${API_BASE}/jobs/my`, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
+  const jobs = await apiFetch("/jobs/my");
+  if (!jobs) return;
 
-    if (!res.ok) {
-      localStorage.clear();
-      window.location.href = "/employee/login.html";
-      return;
-    }
+  const activeJobs = jobs.filter(j =>
+    j.status !== "ซ่อมเสร็จ" && j.status !== "ยกเลิก"
+  );
 
-    const jobs = await res.json();
-
-    const activeJobs = jobs.filter(j =>
-      j.status !== "ซ่อมเสร็จ" && j.status !== "ยกเลิก"
-    );
-
-    renderJobs(activeJobs);
-    updateSummaryCards(activeJobs);
-
-  } catch (err) {
-    console.error(err);
-    alert("โหลดข้อมูลงานไม่สำเร็จ");
-  }
+  renderJobs(activeJobs);
+  updateSummaryCards(activeJobs);
 }
 
 /* =====================
@@ -688,10 +671,10 @@ function renderJobs(jobs) {
   tbody.innerHTML = "";
 
   if (!jobs.length) {
-    if (emptyBox) emptyBox.style.display = "block";
+    emptyBox && (emptyBox.style.display = "block");
     return;
   }
-  if (emptyBox) emptyBox.style.display = "none";
+  emptyBox && (emptyBox.style.display = "none");
 
   jobs.forEach(job => {
     const statusClass = STATUS_CLASS_MAP[job.status] || "new";
@@ -716,10 +699,9 @@ function renderJobs(jobs) {
           จัดการ
         </a>
         ${
-          job.status === "กำลังซ่อม" || job.status === "รออะไหล่"
-            ? `<button class="finish-btn" onclick="finishJob('${job._id}')">
-                 เสร็จสิ้น
-               </button>`
+          ["กำลังซ่อม","รออะไหล่"].includes(job.status)
+            ? `<button class="finish-btn"
+                onclick="finishJob('${job._id}')">เสร็จสิ้น</button>`
             : ""
         }
       </td>
@@ -729,14 +711,14 @@ function renderJobs(jobs) {
 }
 
 /* =====================
-   SUMMARY CARDS
+   SUMMARY
 ===================== */
 function updateSummaryCards(jobs) {
   document.getElementById("my-total").innerText = jobs.length;
   document.getElementById("my-new").innerText =
     jobs.filter(j => j.status === "รับเครื่อง").length;
   document.getElementById("my-inprogress").innerText =
-    jobs.filter(j => j.status === "กำลังซ่อม" || j.status === "รออะไหล่").length;
+    jobs.filter(j => ["กำลังซ่อม","รออะไหล่"].includes(j.status)).length;
   document.getElementById("my-completed").innerText =
     jobs.filter(j => j.status === "ซ่อมเสร็จ").length;
 }
@@ -747,14 +729,16 @@ function updateSummaryCards(jobs) {
 async function finishJob(jobId) {
   if (!confirm("ยืนยันปิดงานซ่อมนี้?")) return;
 
-  await fetch(`${API_BASE}/jobs/${jobId}/complete`, {
+  await apiFetch(`/jobs/${jobId}`, {
     method: "PUT",
-    headers: { Authorization: `Bearer ${token}` }
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status: "ซ่อมเสร็จ" })
   });
 
   fetchMyJobs();
 }
 </script>
+
 
 </body>
 </html>

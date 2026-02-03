@@ -586,18 +586,18 @@
         </div>
     </div>
 
- <script>
+<script>
 /* ==========================================================
-   stock_management.html — REAL API MODE
+   stock_management.html — PRODUCTION READY
 ========================================================== */
 
-/* ================= CONFIG ================= */
-const API_URL = "http://localhost:5000/api/stocks";
+const API_BASE = "/api";
 const token = localStorage.getItem("token");
 
+/* ================= AUTH ================= */
 if (!token) {
   alert("กรุณาเข้าสู่ระบบใหม่");
-  // window.location.href = "login.html";
+  location.replace("login.html");
 }
 
 /* ================= DOM ================= */
@@ -618,6 +618,7 @@ const itemTypeInput = document.getElementById("itemType");
 const itemModelInput = document.getElementById("itemModel");
 const itemQuantityInput = document.getElementById("itemQuantity");
 const itemPriceInput = document.getElementById("itemPrice");
+const itemStockCodeInput = document.getElementById("itemStockCode");
 
 const withdrawStockIdInput = document.getElementById("withdrawStockId");
 const withdrawItemNameDisplay = document.getElementById("withdrawItemName");
@@ -629,18 +630,34 @@ const withdrawJobIdInput = document.getElementById("withdrawJobId");
 
 let stockData = [];
 
-/* ================= FETCH ================= */
-async function fetchStockData() {
+/* ================= API FETCH ================= */
+async function apiFetch(path, options = {}) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`
+    },
+    ...options
+  });
+
+  if (res.status === 401 || res.status === 403) {
+    alert("Session หมดอายุ กรุณาเข้าสู่ระบบใหม่");
+    localStorage.clear();
+    location.replace("login.html");
+    return [];
+  }
+
+  return res.ok ? res.json() : [];
+}
+
+/* ================= LOAD STOCK ================= */
+async function loadStock() {
   try {
-    const res = await fetch(API_URL, {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    if (!res.ok) throw new Error();
-    stockData = await res.json();
+    stockData = await apiFetch("/stocks");
     renderStock(stockData);
     populateTypeFilter();
   } catch {
-    alert("โหลดข้อมูลสต็อกไม่สำเร็จ");
+    alert("❌ โหลดข้อมูลสต็อกไม่สำเร็จ");
   }
 }
 
@@ -653,35 +670,32 @@ function renderStock(data) {
     if (item.quantity === 0) qtyClass = "low-stock out-of-stock";
     else if (item.quantity <= 3) qtyClass = "low-stock";
 
-   const priceText =
-  item.price !== undefined
-    ? item.price.toLocaleString("th-TH") + " ฿"
-    : "-";
+    const priceText = item.price != null
+      ? item.price.toLocaleString("th-TH") + " ฿"
+      : "-";
 
-
-    tableBody.innerHTML += `
-  <tr>
-    <td>${item.stockCode || "-"}</td>
-    <td>${item.name}</td>
-    <td>${item.type}</td>
-    <td>${item.model}</td>
-    <td class="${qtyClass}">${item.quantity}</td>
-    <td>${priceText}</td>
-    <td>
-      <div class="action-group">
-        <button class="action-btn-withdraw"
-          onclick="openWithdrawModal('${item._id}')"
-          ${item.quantity === 0 ? "disabled" : ""}>
-          เบิก
-        </button>
-        <a href="#" class="action-link"
-          onclick="openEditModal('${item._id}');return false;">แก้ไข</a>
-        <a href="#" class="action-link"
-          style="color:#e74c3c"
-          onclick="deleteStock('${item._id}');return false;">ลบ</a>
-      </div>
-    </td>
-  </tr>`;
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${item.stockCode || "-"}</td>
+      <td>${item.name}</td>
+      <td>${item.type}</td>
+      <td>${item.model}</td>
+      <td class="${qtyClass}">${item.quantity}</td>
+      <td>${priceText}</td>
+      <td>
+        <div class="action-group">
+          <button class="action-btn-withdraw"
+            onclick="openWithdrawModal('${item._id}')"
+            ${item.quantity === 0 ? "disabled" : ""}>
+            เบิก
+          </button>
+          <a href="#" onclick="openEditModal('${item._id}');return false;">แก้ไข</a>
+          <a href="#" style="color:#e74c3c"
+            onclick="deleteStock('${item._id}');return false;">ลบ</a>
+        </div>
+      </td>
+    `;
+    tableBody.appendChild(tr);
   });
 }
 
@@ -701,10 +715,10 @@ function populateTypeFilter() {
   const types = [...new Set(stockData.map(i => i.type))];
   typeFilterSelect.innerHTML = `<option value="all">ทั้งหมด</option>`;
   types.forEach(t => {
-    const o = document.createElement("option");
-    o.value = t;
-    o.textContent = t;
-    typeFilterSelect.appendChild(o);
+    const opt = document.createElement("option");
+    opt.value = t;
+    opt.textContent = t;
+    typeFilterSelect.appendChild(opt);
   });
 }
 
@@ -722,61 +736,50 @@ function openEditModal(id) {
 
   modalTitle.textContent = "แก้ไขอะไหล่";
   stockIdInput.value = item._id;
+  itemStockCodeInput.value = item.stockCode || "";
   itemNameInput.value = item.name;
   itemTypeInput.value = item.type;
   itemModelInput.value = item.model;
   itemQuantityInput.value = item.quantity;
   itemPriceInput.value = item.price || 0;
+
   stockModal.style.display = "block";
 }
 
 stockForm.onsubmit = async e => {
   e.preventDefault();
 
-  const item = {
-  stockCode: document.getElementById("itemStockCode").value,
-  name: itemNameInput.value,
-  type: itemTypeInput.value,
-  model: itemModelInput.value,
-  quantity: Number(itemQuantityInput.value),
-  price: Number(itemPriceInput.value)
-};
+  const body = {
+    stockCode: itemStockCodeInput.value.trim(),
+    name: itemNameInput.value.trim(),
+    type: itemTypeInput.value.trim(),
+    model: itemModelInput.value.trim(),
+    quantity: Number(itemQuantityInput.value),
+    price: Number(itemPriceInput.value)
+  };
 
   const id = stockIdInput.value;
   const method = id ? "PUT" : "POST";
-  const url = id ? `${API_URL}/${id}` : API_URL;
+  const path = id ? `/stocks/${id}` : "/stocks";
 
-  const res = await fetch(url, {
+  const res = await apiFetch(path, {
     method,
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(item)
+    body: JSON.stringify(body)
   });
 
-  if (res.ok) {
+  if (res) {
     alert("✅ บันทึกสำเร็จ");
     stockModal.style.display = "none";
-    fetchStockData();
-  } else {
-    alert("❌ บันทึกไม่สำเร็จ");
+    loadStock();
   }
 };
 
 /* ================= DELETE ================= */
 async function deleteStock(id) {
-  if (!confirm("ยืนยันลบ?")) return;
-
-  const res = await fetch(`${API_URL}/${id}`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` }
-  });
-
-  if (res.ok) {
-    alert("ลบแล้ว");
-    fetchStockData();
-  }
+  if (!confirm("ยืนยันลบอะไหล่นี้?")) return;
+  await apiFetch(`/stocks/${id}`, { method: "DELETE" });
+  alert("ลบเรียบร้อย");
+  loadStock();
 }
 
 /* ================= WITHDRAW ================= */
@@ -789,6 +792,7 @@ function openWithdrawModal(id) {
   currentQuantityDisplay.textContent = item.quantity;
   withdrawQuantityInput.max = item.quantity;
   withdrawQuantityInput.value = 1;
+
   withdrawModal.style.display = "block";
 }
 
@@ -798,12 +802,9 @@ withdrawForm.onsubmit = async e => {
   const id = withdrawStockIdInput.value;
   const qty = Number(withdrawQuantityInput.value);
 
-  const res = await fetch(`${API_URL}/${id}/withdraw`, {
+  await apiFetch(`/stocks/${id}/withdraw`, {
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
+
     body: JSON.stringify({
       quantity: qty,
       employeeId: withdrawEmployeeIdInput.value,
@@ -812,76 +813,18 @@ withdrawForm.onsubmit = async e => {
     })
   });
 
-  if (res.ok) {
-    alert("เบิกสำเร็จ");
-    withdrawModal.style.display = "none";
-    fetchStockData();
-  } else {
-    alert("เบิกไม่สำเร็จ");
-  }
+  alert("✅ เบิกสำเร็จ");
+  withdrawModal.style.display = "none";
+  loadStock();
 };
 
 /* ================= INIT ================= */
 document.addEventListener("DOMContentLoaded", () => {
-  fetchStockData();
+  loadStock();
   searchInput.addEventListener("keyup", filterStock);
   typeFilterSelect.addEventListener("change", filterStock);
 });
-// ================= CLOSE MODAL =================
-document.querySelectorAll(".close-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const modalId = btn.getAttribute("data-modal");
-    document.getElementById(modalId).style.display = "none";
 
-    // reset form ถ้าเป็น modal เพิ่ม/แก้ไข
-    if (modalId === "stockModal") {
-      stockForm.reset();
-      document.getElementById("itemStockCode").disabled = false;
-    }
-  });
-});
-
-// คลิกนอกกล่องให้ปิด modal
-window.addEventListener("click", e => {
-  if (e.target.classList.contains("modal")) {
-    e.target.style.display = "none";
-  }
-});
-async function loadProfile() {
-  const userId = localStorage.getItem("userId");
-  const token  = localStorage.getItem("token");
-
-  if (!userId || !token) return;
-
-  const res = await fetch(
-    `http://localhost:5000/api/employees/${userId}/profile`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
-  );
-
-  if (!res.ok) return;
-
-  const user = await res.json();
-
-  if (user.avatar) {
-    document.getElementById("profileAvatar").src =
-      `http://localhost:5000${user.avatar}`;
-  }
-
-  if (document.getElementById("profileNameLarge")) {
-    document.getElementById("profileNameLarge").textContent =
-      `${user.firstName} ${user.lastName}`;
-  }
-
-  if (document.getElementById("profileRole")) {
-    document.getElementById("profileRole").textContent = user.role;
-  }
-}
-
-document.addEventListener("DOMContentLoaded", loadProfile);
 </script>
 
 </body>

@@ -1168,21 +1168,27 @@
 </div>
 
 <script>
-/* =========================
-   CONFIG + AUTH GUARD
-========================= */
-const API_BASE = "http://localhost:5000/api";
+/* ==================================================
+   CONFIG
+================================================== */
+const API_BASE = "/api";
 const token    = localStorage.getItem("token");
 const role     = localStorage.getItem("role");
+const userId   = localStorage.getItem("userId");
 const userName = localStorage.getItem("userName");
 
+/* ==================================================
+   AUTH GUARD
+================================================== */
 if (!token || role !== "admin") {
   alert("หน้านี้สำหรับผู้ดูแลระบบเท่านั้น");
-  window.location.href = "login.html";
+  localStorage.clear();
+  location.href = "login.html";
 }
-/* =========================
-   SAFE SET TEXT (กัน JS พัง)
-========================= */
+
+/* ==================================================
+   SAFE SET
+================================================== */
 function safeSet(id, value) {
   const el = document.getElementById(id);
   if (el) el.textContent = value;
@@ -1190,14 +1196,14 @@ function safeSet(id, value) {
 
 safeSet("user-meta", `${userName || "Admin"} (ผู้ดูแลระบบ)`);
 
-/* =========================
-   API FETCH (กลาง)
-========================= */
+/* ==================================================
+   API FETCH
+================================================== */
 async function apiFetch(path, options = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetch(API_BASE + path, {
     headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
+      ...(options.body ? {} : { "Content-Type": "application/json" })
     },
     ...options
   });
@@ -1205,50 +1211,47 @@ async function apiFetch(path, options = {}) {
   if (res.status === 401 || res.status === 403) {
     alert("Session หมดอายุ");
     localStorage.clear();
-    window.location.href = "login.html";
-    return [];
+    location.href = "login.html";
+    return null;
   }
 
-  return res.ok ? await res.json() : [];
+  return res.ok ? res.json() : null;
 }
 
-/* =========================
+/* ==================================================
+   LOAD PROFILE
+================================================== */
+async function loadProfile() {
+  if (!userId) return;
+
+  const user = await apiFetch(`/employees/${userId}/profile`);
+  if (!user) return;
+
+  const avatar = user.avatar || "/uploads/profile/default.jpg";
+
+  const img1 = document.getElementById("profileAvatar");
+  const img2 = document.getElementById("profileAvatarLarge");
+
+  if (img1) img1.src = avatar;
+  if (img2) img2.src = avatar;
+
+  localStorage.setItem("avatar", avatar);
+}
+
+/* ==================================================
    LOAD DATA
-========================= */
+================================================== */
 async function loadJobs() {
-  return await apiFetch("/jobs");
+  return (await apiFetch("/jobs")) || [];
 }
 
 async function loadUsers() {
-  return await apiFetch("/employees");
-}
-async function loadProfile() {
-  const token  = localStorage.getItem("token");
-  const userId = localStorage.getItem("userId");
-  if (!token || !userId) return;
-
-  const res = await fetch(
-    `http://localhost:5000/api/employees/${userId}/profile`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
-  if (!res.ok) return;
-
-  const user = await res.json();
-
-  const avatarPath = user.avatar
-    ? user.avatar
-    : "/uploads/profile/default.jpg";
-
-  const avatarUrl = `http://localhost:5000${avatarPath}`;
-
-  document.getElementById("profileAvatar").src = avatarUrl;
-  document.getElementById("profileAvatarLarge").src = avatarUrl;
+  return (await apiFetch("/employees")) || [];
 }
 
-document.addEventListener("DOMContentLoaded", loadProfile);
-/* =========================
-   UPDATE CARDS
-========================= */
+/* ==================================================
+   UPDATE DASHBOARD CARDS
+================================================== */
 function updateCards(jobs, users) {
   safeSet("card-total-jobs", jobs.length);
   safeSet("card-new-jobs", jobs.filter(j => j.status === "รับเครื่อง").length);
@@ -1260,22 +1263,21 @@ function updateCards(jobs, users) {
   safeSet("card-users-count", users.length);
 }
 
-/* =========================
+/* ==================================================
    RENDER JOBS TABLE
-========================= */
+================================================== */
 function renderJobsTable(jobs) {
   const tbody = document.querySelector("#admin-jobs-table tbody");
-  const empty = document.getElementById("jobs-empty");
 
   if (!tbody) return;
 
   tbody.innerHTML = "";
 
   if (!jobs.length) {
-    if (empty) empty.style.display = "block";
+    tbody.innerHTML = `<tr><td colspan="6">ไม่มีข้อมูลงาน</td></tr>`;
     return;
   }
-  if (empty) empty.style.display = "none";
+
 
   jobs.slice(0, 10).forEach(j => {
     const tr = document.createElement("tr");
@@ -1293,21 +1295,21 @@ function renderJobsTable(jobs) {
   });
 }
 
-/* =========================
+/* ==================================================
    RENDER USERS TABLE
-========================= */
+================================================== */
 function renderUsersTable(users) {
   const tbody = document.querySelector("#admin-users-table tbody");
-  const empty = document.getElementById("users-empty");
 
   if (!tbody) return;
+
   tbody.innerHTML = "";
 
   if (!users.length) {
-    if (empty) empty.style.display = "block";
+    tbody.innerHTML = `<tr><td colspan="5">ไม่มีผู้ใช้</td></tr>`;
     return;
   }
-  if (empty) empty.style.display = "none";
+
 
   users.forEach(u => {
     const tr = document.createElement("tr");
@@ -1316,270 +1318,73 @@ function renderUsersTable(users) {
       <td>${u.firstName} ${u.lastName}</td>
       <td>${u.email}</td>
 
-      <!-- บทบาท -->
       <td>
-        <select class="role-select"
-          onchange="updateUserRole('${u._id}', this.value)">
+        <select onchange="updateUserRole('${u._id}', this.value)">
           <option value="admin" ${u.role==="admin"?"selected":""}>ผู้ดูแลระบบ</option>
           <option value="staff" ${u.role==="staff"?"selected":""}>พนักงาน</option>
           <option value="tech" ${u.role==="tech"?"selected":""}>ช่าง</option>
         </select>
       </td>
-
-      <!-- สถานะ (แสดงอย่างเดียว) -->
       <td>
-        <span class="status-active">ใช้งานอยู่</span>
-      </td>
-
-      <!-- จัดการ -->
+        <span class="status-active">
+          <span class="status-dot"></span> ออนไลน์
+        </span>
       <td>
-        <button class="btn-delete"
-          onclick="deleteUser('${u._id}', '${u.firstName}')">
-          ลบ
-        </button>
+        <button onclick="deleteUser('${u._id}')">ลบ</button>
       </td>
     `;
-
+    
     tbody.appendChild(tr);
   });
 }
-/* =========================
+
+/* ==================================================
+   UPDATE USER ROLE
+================================================== */
+async function updateUserRole(id, role) {
+  if (!confirm("ต้องการเปลี่ยนสิทธิ์ผู้ใช้นี้หรือไม่?")) return;
+
+  const res = await apiFetch(`/employees/${id}`, {
+    method: "PUT",
+    body: JSON.stringify({ role })
+  });
+
+  if (res) {
+    alert("✅ เปลี่ยนสิทธิ์เรียบร้อย");
+    init();
+  }
+}
+
+/* ==================================================
    DELETE USER
-========================= */
+================================================== */
 async function deleteUser(id) {
   if (!confirm("ต้องการลบผู้ใช้นี้หรือไม่?")) return;
 
   const res = await apiFetch(`/employees/${id}`, { method: "DELETE" });
-  if (res?.message) alert("ลบผู้ใช้เรียบร้อย");
-  init();
-}
-
-/* =========================
-   LOGOUT
-========================= */
-function logout() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("role");
-  localStorage.removeItem("userId");
-  localStorage.removeItem("userName");
-  // ❌ ไม่ลบ avatar
-  window.location.href = "login.html";
-}
-/* =========================
-   INIT
-========================= */
-async function init() {
-  try {
-    const [jobs, users] = await Promise.all([
-      loadJobs(),
-      loadUsers()
-    ]);
-
-    updateCards(jobs, users);
-    renderJobsTable(jobs);
-    renderUsersTable(users);
-  } catch (err) {
-    console.error(err);
-    alert("โหลดข้อมูลไม่สำเร็จ");
+  if (res) {
+    alert("ลบผู้ใช้เรียบร้อย");
+    init();
   }
 }
-document.addEventListener("DOMContentLoaded", () => {
 
-  // ---- text ----
-  const avatar = localStorage.getItem("avatar");
-  const name   = localStorage.getItem("userName");
-  const role   = localStorage.getItem("role");
-
-  if (document.getElementById("profileNameLarge"))
-    document.getElementById("profileNameLarge").textContent = name || "ผู้ใช้งาน";
-
-  if (document.getElementById("profileRole"))
-    document.getElementById("profileRole").textContent = role || "-";
-
-  // ---- avatar ----
-  if (avatar) {
-    if (document.getElementById("profileAvatar"))
-      document.getElementById("profileAvatar").src = avatar;
-    if (document.getElementById("profileAvatarLarge"))
-      document.getElementById("profileAvatarLarge").src = avatar;
-  }
-
-  init(); // โหลดข้อมูล admin
-});
-
-/* =========================
-   ADMIN DATA
-========================= */
-async function apiFetch(path, options = {}) {
-  const res = await fetch(API_BASE + path, {
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    ...options
-  });
-  return res.ok ? res.json() : [];
-}
-
-async function init() {
-  const [jobs, users] = await Promise.all([
-    apiFetch("/jobs"),
-    apiFetch("/employees")
-  ]);
-  updateCards(jobs, users);
-  renderJobsTable(jobs);
-  renderUsersTable(users);
-}
-
-/* =========================
+/* ==================================================
    AVATAR UPLOAD
-========================= */
-async function uploadAvatar(e) {
-  const file = e.target.files[0];
+================================================== */
+async function uploadAvatar(event) {
+  const file = event.target.files[0];
   if (!file) return;
 
   const fd = new FormData();
   fd.append("avatar", file);
 
-  const res = await fetch(
-    "http://localhost:5000/api/employees/profile/avatar",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      },
-      body: fd
-    }
-  );
-
-  if (!res.ok) {
-    alert("อัปโหลดไม่สำเร็จ");
-    return;
-  }
-
-  await loadProfile(); // โหลดจาก DB ใหม่
-}
-
-
-/* =========================
-   PROFILE MENU
-========================= */
-function toggleProfile() {
-  document.getElementById("profileDropdown")?.classList.toggle("show");
-}
-
-document.addEventListener("click", e => {
-  const menu = document.getElementById("profileMenu");
-  if (menu && !menu.contains(e.target)) {
-    document.getElementById("profileDropdown")?.classList.remove("show");
-  }
-});
-/* =========================
-   LOGOUT
-========================= */
-function logout() {
-  localStorage.clear();
-  location.href = "login.html";
-}
-document.addEventListener("DOMContentLoaded", () => {
-
-  // เรียก init
-  init();
-
-  // ผูกปุ่มเพิ่มผู้ใช้ (สำคัญ)
-  const addBtn = document.getElementById("btn-add-user");
-  if (!addBtn) return;
-
-  addBtn.addEventListener("click", async () => {
-    const firstName = document.getElementById("new-user-firstname").value.trim();
-    const lastName  = document.getElementById("new-user-lastname").value.trim();
-    const email     = document.getElementById("new-user-email").value.trim();
-    const password  = document.getElementById("new-user-password").value.trim();
-    const role      = document.getElementById("new-user-role").value;
-
-    if (!firstName || !lastName || !email || !password) {
-      alert("กรุณากรอกข้อมูลให้ครบ");
-      return;
-    }
-
-    const res = await fetch("http://localhost:5000/api/employees", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      },
-      body: JSON.stringify({
-        firstName,
-        lastName,
-        email,
-        password,
-        role
-      })
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message || "เพิ่มผู้ใช้ไม่สำเร็จ");
-      return;
-    }
-
-    alert("✅ เพิ่มผู้ใช้สำเร็จ");
-
-    // ล้างฟอร์ม
-    document.getElementById("new-user-firstname").value = "";
-    document.getElementById("new-user-lastname").value = "";
-    document.getElementById("new-user-email").value = "";
-    document.getElementById("new-user-password").value = "";
-
-    init(); // โหลดตารางใหม่
-  });
-
-});
-/* =========================
-   UPDATE USER ROLE
-========================= */
-async function updateUserRole(userId, role) {
-  if (!confirm("ต้องการเปลี่ยนสิทธิ์ผู้ใช้นี้หรือไม่?")) return;
-
-  const res = await fetch(`${API_BASE}/employees/${userId}`, {
-    method: "PUT",
+  const res = await fetch("/api/employees/profile/avatar", {
+    method: "POST",
     headers: {
-      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`
     },
-    body: JSON.stringify({ role }) // 🔴 ต้องชื่อ role เท่านั้น
+    body: fd
   });
-
-  const data = await res.json();
-
-  if (!res.ok) {
-    alert(data.message || "เปลี่ยนสิทธิ์ไม่สำเร็จ");
-    return;
-  }
-
-  alert("✅ เปลี่ยนสิทธิ์เรียบร้อย");
-  init(); // โหลดตารางใหม่
-}
-async function uploadAvatar(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-
-  const formData = new FormData();
-  formData.append("avatar", file);
-
-  const token = localStorage.getItem("token");
-
-  const res = await fetch(
-    "http://localhost:5000/api/employees/profile/avatar",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`
-      },
-      body: formData
-    }
-  );
 
   const data = await res.json();
 
@@ -1588,15 +1393,44 @@ async function uploadAvatar(event) {
     return;
   }
 
-  const avatarUrl = `http://localhost:5000${data.avatar}`;
+  document.getElementById("profileAvatar").src = data.avatar;
+  document.getElementById("profileAvatarLarge").src = data.avatar;
 
-  document.getElementById("profileAvatar").src = avatarUrl;
-  document.getElementById("profileAvatarLarge").src = avatarUrl;
-
+  localStorage.setItem("avatar", data.avatar);
   alert("✅ เปลี่ยนรูปโปรไฟล์เรียบร้อย");
 }
 
+/* ==================================================
+   INIT
+================================================== */
+async function init() {
+  const [jobs, users] = await Promise.all([
+    loadJobs(),
+    loadUsers()
+  ]);
+
+  updateCards(jobs, users);
+  renderJobsTable(jobs);
+  renderUsersTable(users);
+}
+
+/* ==================================================
+   LOGOUT
+================================================== */
+function logout() {
+  localStorage.clear();
+  location.href = "login.html";
+}
+
+/* ==================================================
+   ON LOAD
+================================================== */
+document.addEventListener("DOMContentLoaded", () => {
+  loadProfile();
+  init();
+});
 </script>
+
 
 </body>
 </html>

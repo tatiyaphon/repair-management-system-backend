@@ -8,53 +8,28 @@ const path = require("path");
 const verifyToken = require("../middleware/auth");
 
 console.log("✅ jobRoutes loaded");
-// ============================
-// 🔥 ต้องอยู่บนสุด
-// ============================
-router.post("/:id/withdraw", auth, async (req, res) => {
 
+/* ==================================================
+   ⚠️ SPECIFIC ROUTES FIRST - อื่นเบื่องหน้า
+   GET /api/jobs/receipt/:receiptNumber
+   ลูกค้าเช็คสถานะ (ต้องอยู่ก่อน /:id)
+================================================== */
+  router.get("/receipt/:receiptNumber", async (req, res) => {
   try {
-    const { stockId, quantity } = req.body;
-
-    if (!stockId || !quantity) {
-      return res.status(400).json({ message: "ข้อมูลไม่ครบ" });
-    }
-
-    const job = await Job.findById(req.params.id);
-    if (!job) return res.status(404).json({ message: "ไม่พบงานซ่อม" });
-
-    const Stock = require("../models/Stock");
-    const stock = await Stock.findById(stockId);
-    if (!stock) return res.status(404).json({ message: "ไม่พบอะไหล่" });
-
-    if (stock.quantity < quantity) {
-      return res.status(400).json({ message: "อะไหล่ไม่พอ" });
-    }
-
-    stock.quantity -= quantity;
-    await stock.save();
-
-    job.usedParts = job.usedParts || [];
-    job.usedParts.push({
-      stock: stock._id,
-      name: stock.name,
-      model: stock.model,
-      quantity,
-      usedAt: new Date()
+    const job = await Job.findOne({
+      receiptNumber: req.params.receiptNumber
     });
 
-    await job.save();
+    if (!job) {
+      return res.status(404).json({ message: "ไม่พบงานซ่อม" });
+    }
 
-    res.json({ message: "เบิกอะไหล่สำเร็จ" });
+    res.json(job);
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "error" });
+    res.status(500).json({ message: "Server error" });
   }
 });
 
-// ============================
-// ❗ route ที่เป็น :id ไว้ล่างสุด
-// ============================
 /* ==================================================
    GET /api/jobs
 ================================================== */

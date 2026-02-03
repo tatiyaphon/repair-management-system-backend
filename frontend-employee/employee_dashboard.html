@@ -708,44 +708,28 @@
     </main>
  <script>
 /* ==========================================================
-   Dashboard Script (FIXED + MONTH/YEAR FILTER)
+   DASHBOARD SCRIPT (PRODUCTION READY)
 ========================================================== */
 
-const API_BASE = 'http://localhost:5000';
+/* =============================
+   CONFIG
+============================= */
+const API_BASE = ""; // ✅ ใช้ relative path
 let jobs = [];
 let filteredJobs = [];
 
-/* =============================
-   STATUS (ภาษาไทย)
-============================= */
-const statusLabel = {
-  "รับเครื่อง": "รับเครื่อง",
-  "กำลังซ่อม": "กำลังซ่อม",
-  "รออะไหล่": "รออะไหล่",
-  "ซ่อมเสร็จ": "ซ่อมเสร็จ",
-  "ยกเลิก": "ยกเลิก"
-};
-
-function statusClass(status) {
-  return {
-    "รับเครื่อง": "status-new",
-    "กำลังซ่อม": "status-in_progress",
-    "รออะไหล่": "status-waiting_parts",
-    "ซ่อมเสร็จ": "status-completed",
-    "ยกเลิก": "status-cancelled"
-  }[status] || "";
-}
 
 /* =============================
    AUTH
 ============================= */
 function getToken() {
-  return localStorage.getItem('token');
+  return localStorage.getItem("token");
 }
 
 function requireAuth() {
   if (!getToken()) {
-    window.location.href = 'login.html';
+    alert("กรุณาเข้าสู่ระบบ");
+    location.href = "login.html";
   }
 }
 
@@ -754,36 +738,50 @@ function requireAuth() {
 ============================= */
 async function apiFetch(path, options = {}) {
   const headers = {
-    'Content-Type': 'application/json',
-    ...(options.headers || {})
+    ...(options.headers || {}),
+    Authorization: `Bearer ${getToken()}`,
   };
 
-  const token = getToken();
-  if (token) headers.Authorization = `Bearer ${token}`;
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
 
   const res = await fetch(`${API_BASE}${path}`, {
     ...options,
-    headers
+    headers,
   });
 
-  if (res.status === 401) {
-    alert("Session หมดอายุ กรุณาเข้าสู่ระบบใหม่");
+  if (res.status === 401 || res.status === 403) {
+    alert("Session หมดอายุ");
     localStorage.clear();
-    window.location.href = 'login.html';
+    location.href = "login.html";
     return;
   }
 
   const data = await res.json();
-  if (!res.ok) throw new Error(data.message || 'Server Error');
+  if (!res.ok) throw new Error(data.message || "Server error");
   return data;
+}
+
+/* =============================
+   STATUS
+============================= */
+function statusClass(status) {
+  return {
+    "รับเครื่อง": "status-new",
+    "กำลังซ่อม": "status-in_progress",
+    "รออะไหล่": "status-waiting_parts",
+    "ซ่อมเสร็จ": "status-completed",
+    "ยกเลิก": "status-cancelled",
+  }[status] || "";
 }
 
 /* =============================
    LOAD JOBS
 ============================= */
 async function loadJobs() {
-  const res = await apiFetch('/api/jobs');
-  jobs = Array.isArray(res) ? res : [];
+  const data = await apiFetch("/api/jobs");
+  jobs = Array.isArray(data) ? data : [];
   initMonthYearFilter();
   applyFilter();
 }
@@ -798,17 +796,16 @@ function initMonthYearFilter() {
   monthSel.innerHTML = `<option value="all">ทุกเดือน</option>`;
   yearSel.innerHTML  = `<option value="all">ทุกปี</option>`;
 
-  // เดือน
+
   for (let m = 1; m <= 12; m++) {
     monthSel.innerHTML += `<option value="${m}">${m}</option>`;
   }
 
-  // ปีจากข้อมูลงานจริง
+
   const years = [...new Set(
-    jobs
-      .map(j => new Date(j.receivedDate))
-      .filter(d => !isNaN(d))
-      .map(d => d.getFullYear())
+    jobs.map(j => new Date(j.receivedDate))
+        .filter(d => !isNaN(d))
+        .map(d => d.getFullYear())
   )].sort((a,b) => b - a);
 
   years.forEach(y => {
@@ -821,18 +818,16 @@ function applyFilter() {
   const year  = document.getElementById("yearFilter").value;
 
   filteredJobs = jobs.filter(j => {
-  // ❗ ตัดงานที่ซ่อมเสร็จออกจาก Dashboard
-  if (j.status === "ซ่อมเสร็จ") return false;
+    if (j.status === "ซ่อมเสร็จ") return false;
 
-  const d = new Date(j.receivedDate);
-  if (isNaN(d)) return false;
+    const d = new Date(j.receivedDate);
+    if (isNaN(d)) return false;
 
-  if (month !== "all" && d.getMonth() + 1 !== Number(month)) return false;
-  if (year !== "all" && d.getFullYear() !== Number(year)) return false;
+    if (month !== "all" && d.getMonth() + 1 !== Number(month)) return false;
+    if (year !== "all" && d.getFullYear() !== Number(year)) return false;
 
-  return true;
-});
-
+    return true;
+  });
 
   updateCards();
   renderTable();
@@ -846,125 +841,67 @@ document.getElementById("yearFilter").addEventListener("change", applyFilter);
 ============================= */
 function updateCards() {
   const count = s => filteredJobs.filter(j => j.status === s).length;
-    document.getElementById('monthly-total').textContent = filteredJobs.length;
-  document.getElementById('new-jobs-count').textContent = count('รับเครื่อง');
-  document.getElementById('in-progress-count').textContent = count('กำลังซ่อม');
-  document.getElementById('waiting-parts-count').textContent = count('รออะไหล่');
-  document.getElementById('completed-count').textContent = count('ซ่อมเสร็จ');
+  document.getElementById("monthly-total").textContent = filteredJobs.length;
+  document.getElementById("new-jobs-count").textContent = count("รับเครื่อง");
+  document.getElementById("in-progress-count").textContent = count("กำลังซ่อม");
+  document.getElementById("waiting-parts-count").textContent = count("รออะไหล่");
 }
 
 /* =============================
    TABLE
 ============================= */
 function renderTable() {
-  const tbody = document.querySelector('#job-list-table tbody');
-  tbody.innerHTML = '';
+  const tbody = document.querySelector("#job-list-table tbody");
+  tbody.innerHTML = "";
 
   filteredJobs.forEach(job => {
-    const tr = document.createElement('tr');
-
-   tr.innerHTML = `
-  <td>${job.receiptNumber || '-'}</td>
-  <td>${job.deviceType || '-'}</td>
-  <td>${job.customerName || '-'}</td>
-  <td>${job.deviceType || '-'} ${job.deviceModel || ''}</td>
-  <td>${job.symptom || '-'}</td>
-  <td>
-    <span class="status-badge ${statusClass(job.status)}">
-      ${statusLabel[job.status] || job.status}
-    </span>
-  </td>
-  <td>${formatDate(job.receivedDate)}</td>
-  <td>${formatDate(job.startDate)}</td>
-  <td>${formatDate(job.finishDate)}</td>
-  <td>
-    <div class="action-group">
-      <a href="manage_job.html?id=${job._id}" class="action-btn">
-        จัดการข้อมูล
-      </a>
-      ${
-        job.status !== 'ซ่อมเสร็จ'
-          ? `<button class="finish-btn" data-id="${job._id}">เสร็จสิ้น</button>`
-          : `<span style="color:green;font-weight:600;">เสร็จแล้ว</span>`
-      }
-    </div>
-  </td>
-`;
-
-
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${job.receiptNumber || "-"}</td>
+      <td>${job.customerName || "-"}</td>
+      <td>${job.deviceType} ${job.deviceModel || ""}</td>
+      <td>${job.symptom || "-"}</td>
+      <td>
+        <span class="status-badge ${statusClass(job.status)}">
+          ${job.status}
+        </span>
+      </td>
+      <td>${formatDate(job.receivedDate)}</td>
+      <td>
+        <a href="manage_job.html?id=${job._id}" class="action-btn">จัดการ</a>
+      </td>
+    `;
     tbody.appendChild(tr);
   });
-
-  document.querySelectorAll('.finish-btn')
-    .forEach(btn => btn.onclick = finishJob);
-}
-
-/* =============================
-   FINISH JOB
-============================= */
-async function finishJob(e) {
-  const id = e.target.dataset.id;
-  if (!confirm('ยืนยันปิดงานซ่อมนี้?')) return;
-
-  await apiFetch(`/api/jobs/${id}`, {
-    method: 'PUT',
-    body: JSON.stringify({
-      status: 'ซ่อมเสร็จ',
-      finishDate: new Date()
-    })
-  });
-
-  // โหลดใหม่ → งานจะหาย เพราะ filter แล้ว
-  await loadJobs();
+  
 }
 
 /* =============================
    UTILS
 ============================= */
 function formatDate(date) {
-  if (!date) return '-';
+  if (!date) return "-";
   const d = new Date(date);
-  if (isNaN(d)) return '-';
-  return d.toISOString().split('T')[0];
+  return isNaN(d) ? "-" : d.toISOString().split("T")[0];
 }
 
 /* =============================
-   INIT
+   PROFILE
 ============================= */
-document.addEventListener('DOMContentLoaded', async () => {
-  requireAuth();
-  try {
-    await loadJobs();
-  } catch (err) {
-    alert(err.message);
-  }
-});
-const profileDropdown = document.getElementById("profileDropdown");
-const avatarSmall = document.getElementById("profileAvatar");
-const avatarLarge = document.getElementById("profileAvatarLarge");
+async function loadProfile() {
+  const userId = localStorage.getItem("userId");
+  if (!userId) return;
 
-/* ===== toggle dropdown ===== */
-function toggleProfile() {
-  profileDropdown.classList.toggle("show");
+  const user = await apiFetch(`/api/employees/${userId}/profile`);
+  const avatar = user.avatar || "/uploads/profile/default.jpg";
+
+  document.getElementById("profileAvatar").src = avatar;
+  document.getElementById("profileAvatarLarge").src = avatar;
 }
 
-/* ===== close when click outside ===== */
-document.addEventListener("click", (e) => {
-  const menu = document.getElementById("profileMenu");
-  if (!menu.contains(e.target)) {
-    profileDropdown.classList.remove("show");
-  }
-});
-
-/* ===== load profile info ===== */
-const name = localStorage.getItem("userName");
-const role = localStorage.getItem("role");
-
-if (name) document.getElementById("profileNameLarge").textContent = name;
-if (role) document.getElementById("profileRole").textContent = role;
-
-
-/* ===== upload avatar ===== */
+/* =============================
+   AVATAR UPLOAD
+============================= */
 async function uploadAvatar(e) {
   const file = e.target.files[0];
   if (!file) return;
@@ -972,58 +909,37 @@ async function uploadAvatar(e) {
   const fd = new FormData();
   fd.append("avatar", file);
 
-  const res = await fetch(
-    "http://localhost:5000/api/employees/profile/avatar",
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("token")}`
-      },
-      body: fd
-    }
-  );
+  await apiFetch("/api/employees/profile/avatar", {
+    method: "POST",
+    body: fd,
+  });
 
-  if (!res.ok) {
-    alert("อัปโหลดไม่สำเร็จ");
-    return;
-  }
-
-  await loadProfile(); // โหลดจาก DB ใหม่
+  await loadProfile();
+  alert("✅ เปลี่ยนรูปโปรไฟล์เรียบร้อย");
 }
 
-/* ===== logout ===== */
+/* =============================
+   LOGOUT
+============================= */
 function logout() {
-  localStorage.removeItem("token");
-  localStorage.removeItem("role");
-  localStorage.removeItem("userName");
-  localStorage.removeItem("userId");
-  // ❌ ไม่ลบ avatar
-  window.location.href = "login.html";
+  localStorage.clear();
+  location.href = "login.html";
 }
-async function loadProfile() {
-  const token  = localStorage.getItem("token");
-  const userId = localStorage.getItem("userId");
-  if (!token || !userId) return;
 
-  const res = await fetch(
-    `http://localhost:5000/api/employees/${userId}/profile`,
-    { headers: { Authorization: `Bearer ${token}` } }
-  );
-  if (!res.ok) return;
+/* =============================
+   INIT
+============================= */
+document.addEventListener("DOMContentLoaded", async () => {
+  requireAuth();
 
-  const user = await res.json();
+  document.getElementById("profileNameLarge").textContent =
+    localStorage.getItem("userName") || "-";
+  document.getElementById("profileRole").textContent =
+    localStorage.getItem("role") || "-";
 
-  const avatarPath = user.avatar
-    ? user.avatar
-    : "/uploads/profile/default.jpg";
-
-  const avatarUrl = `http://localhost:5000${avatarPath}`;
-
-  document.getElementById("profileAvatar").src = avatarUrl;
-  document.getElementById("profileAvatarLarge").src = avatarUrl;
-}
-document.addEventListener("DOMContentLoaded", loadProfile);
-
+  await loadProfile();
+  await loadJobs();
+});
 </script>
 
 </body>

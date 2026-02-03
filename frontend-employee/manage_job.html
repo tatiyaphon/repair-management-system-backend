@@ -307,45 +307,44 @@
 
 <script>
 /* ==========================================================
-   manage_job.html — REAL API MODE
+   manage_job.html — PRODUCTION READY
 ========================================================== */
 
-const API_BASE = "http://localhost:5000/api";
+/* =========================
+   CONFIG
+========================= */
+const API_BASE = "/api";
 const token = localStorage.getItem("token");
 
 if (!token) {
   alert("กรุณาเข้าสู่ระบบใหม่");
-  window.location.href = "login.html";
+  location.replace("login.html");
 }
 
 const headers = {
   "Content-Type": "application/json",
   Authorization: `Bearer ${token}`
 };
+
+/* =========================
+   PROFILE
+========================= */
 async function loadProfile() {
   const userId = localStorage.getItem("userId");
-  const token  = localStorage.getItem("token");
+  if (!userId) return;
 
-  if (!userId || !token) return;
-
-  const res = await fetch(
-    `http://localhost:5000/api/employees/${userId}/profile`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    }
-  );
-
+  const res = await fetch(`${API_BASE}/employees/${userId}/profile`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
   if (!res.ok) return;
 
   const user = await res.json();
 
-  if (user.avatar) {
+  if (document.getElementById("profileAvatar")) {
     document.getElementById("profileAvatar").src =
-      `http://localhost:5000${user.avatar}`;
+      user.avatar || "/uploads/profile/default.jpg";
   }
-
+  
   if (document.getElementById("profileNameLarge")) {
     document.getElementById("profileNameLarge").textContent =
       `${user.firstName} ${user.lastName}`;
@@ -356,20 +355,17 @@ async function loadProfile() {
   }
 }
 
-document.addEventListener("DOMContentLoaded", loadProfile);
-/* -----------------------------
-   Utils
------------------------------ */
+/* =========================
+   UTILS
+========================= */
 function getJobId() {
-  return new URLSearchParams(window.location.search).get("id");
+  return new URLSearchParams(location.search).get("id");
 }
 function formatInputDate(d) {
-  if (!d) return "";
-  return new Date(d).toISOString().slice(0, 10);
+  return d ? new Date(d).toISOString().slice(0, 10) : "";
 }
 function formatTH(d) {
-  if (!d) return "-";
-  return new Date(d).toLocaleDateString("th-TH");
+  return d ? new Date(d).toLocaleDateString("th-TH") : "-";
 }
 function statusBadgeClass(status) {
   return {
@@ -381,265 +377,147 @@ function statusBadgeClass(status) {
   }[status] || "new";
 }
 
-
-/* -----------------------------
-   State
------------------------------ */
+/* =========================
+   STATE
+========================= */
 let currentJob = null;
 let stockList = [];
 
-/* -----------------------------
-   Fetch Job
------------------------------ */
+/* =========================
+   FETCH JOB
+========================= */
 async function fetchJob() {
   const id = getJobId();
-  if (!id) {
-    alert("ไม่พบ Job ID");
-    return;
-  }
+  if (!id) return alert("ไม่พบ Job ID");
 
   const res = await fetch(`${API_BASE}/jobs/${id}`, { headers });
-  if (!res.ok) {
-    alert("ไม่พบข้อมูลงานซ่อม");
-    return;
-  }
+  if (!res.ok) return alert("ไม่พบข้อมูลงานซ่อม");
 
   currentJob = await res.json();
   renderJob();
 }
 
-/* -----------------------------
-   Fetch Stock
------------------------------ */
+/* =========================
+   FETCH STOCK
+========================= */
 async function fetchStock() {
   const res = await fetch(`${API_BASE}/stocks`, { headers });
   stockList = await res.json();
 
-  const partNameSelect = document.getElementById("part-name");
-  const partModelSelect = document.getElementById("part-model");
+  const nameSel = document.getElementById("part-name");
+  const modelSel = document.getElementById("part-model");
+  if (!nameSel || !modelSel) return;
 
-  // ดึงชื่ออะไหล่ไม่ซ้ำ
-  const partNames = [...new Set(stockList.map(s => s.name))];
+  const names = [...new Set(stockList.map(s => s.name))];
+  nameSel.innerHTML = `<option value="">-- เลือกอะไหล่ --</option>`;
+  names.forEach(n => nameSel.innerHTML += `<option>${n}</option>`);
 
-  partNameSelect.innerHTML = `<option value="">-- เลือกอะไหล่ --</option>`;
-  partNames.forEach(name => {
-    partNameSelect.innerHTML += `<option value="${name}">${name}</option>`;
-  });
+  nameSel.onchange = e => {
+    modelSel.innerHTML = `<option value="">-- เลือกรุ่น --</option>`;
+    const models = stockList.filter(
+      s => s.name === e.target.value && s.quantity > 0
+    );
+    if (!models.length) return (modelSel.disabled = true);
 
-  // reset รุ่น
- /* -----------------------------
-   เลือกชื่ออะไหล่ → โหลดรุ่น
------------------------------ */
-document.getElementById("part-name").addEventListener("change", e => {
-  const selectedName = e.target.value;
-  const partModelSelect = document.getElementById("part-model");
-
-  partModelSelect.innerHTML = `<option value="">-- เลือกรุ่น --</option>`;
-
-  if (!selectedName) {
-    partModelSelect.disabled = true;
-    return;
-  }
-
-  // กรองเฉพาะอะไหล่ชื่อนี้ + ของเหลือ
-  const models = stockList.filter(
-    s => s.name === selectedName && s.quantity > 0
-  );
-
-  if (!models.length) {
-    partModelSelect.innerHTML += `
-      <option value="">ไม่มีอะไหล่พร้อมใช้งาน</option>
-    `;
-    partModelSelect.disabled = true;
-    return;
-  }
-
-  models.forEach(m => {
-    partModelSelect.innerHTML += `
-      <option value="${m._id}">
-        ${m.model} (คงเหลือ ${m.quantity})
-      </option>
-    `;
-  });
-
-  partModelSelect.disabled = false;
-});
+    models.forEach(m => {
+      modelSel.innerHTML += `
+        <option value="${m._id}">
+          ${m.model} (คงเหลือ ${m.quantity})
+        </option>`;
+    });
+    modelSel.disabled = false;
+  };
 }
-/* -----------------------------
-   Render
------------------------------ */
+
+/* =========================
+   RENDER JOB
+========================= */
 function renderJob() {
   const div = document.getElementById("job-details");
+  if (!div) return;
 
   div.innerHTML = `
-  <div class="detail-item"><strong>ชื่อลูกค้า:</strong> ${currentJob.customerName}</div>
-  <div class="detail-item"><strong>เบอร์โทร:</strong> ${currentJob.customerPhone || "-"}</div>
-  <div class="detail-item"><strong>ที่อยู่:</strong> ${currentJob.customerAddress || "-"}</div>
-
-  <div class="detail-item"><strong>ประเภทอุปกรณ์:</strong> ${currentJob.deviceType}</div>
-  <div class="detail-item"><strong>รุ่น:</strong> ${currentJob.deviceModel}</div>
-  <div class="detail-item"><strong>อาการเสีย:</strong> ${currentJob.symptom}</div>
-  <div class="detail-item"><strong>อุปกรณ์ที่นำมา:</strong> ${currentJob.accessory || "-"}</div>
-
-  <div class="detail-item">
-    <strong>ประเภทงาน:</strong>
-    <span class="badge ${currentJob.jobType === "เคลม" ? "claim" : "new_repair"}">
-      ${currentJob.jobType}
-    </span>
-  </div>
-
-  <div class="detail-item">
-    <strong>สถานะ:</strong>
-    <span class="badge ${statusBadgeClass(currentJob.status)}">
-      ${currentJob.status}
-    </span>
-  </div>
+    <div><strong>ลูกค้า:</strong> ${currentJob.customerName}</div>
+    <div><strong>อุปกรณ์:</strong> ${currentJob.deviceType} ${currentJob.deviceModel}</div>
+    <div><strong>อาการ:</strong> ${currentJob.symptom}</div>
+    <div><strong>สถานะ:</strong>
+      <span class="badge ${statusBadgeClass(currentJob.status)}">
+        ${currentJob.status}
+      </span>
     </div>
-    <div class="detail-item"><strong>วันที่รับ:</strong> ${formatTH(currentJob.receivedDate)}</div>
-    <div class="detail-item"><strong>ราคา:</strong> ${currentJob.priceQuoted || "-"} บาท</div>
+    <div><strong>วันที่รับ:</strong> ${formatTH(currentJob.receivedDate)}</div>
+    <div><strong>ราคา:</strong> ${currentJob.priceQuoted || "-"} บาท</div>
   `;
-// === ลิงก์ใบรับเครื่อง (PDF) ===
-const receiptBtn = document.getElementById("receipt-link");
-if (receiptBtn && currentJob?._id) {
-  receiptBtn.href =
-    `http://localhost:5000/api/jobs/${currentJob._id}/receipt`;
-}
 
-  document.getElementById("received-date").value = formatInputDate(currentJob.receivedDate);
-  document.getElementById("start-date").value = formatInputDate(currentJob.startDate);
-  document.getElementById("finish-date").value = formatInputDate(currentJob.finishDate);
+  document.getElementById("received-date").value =
+    formatInputDate(currentJob.receivedDate);
+  document.getElementById("start-date").value =
+    formatInputDate(currentJob.startDate);
+  document.getElementById("finish-date").value =
+    formatInputDate(currentJob.finishDate);
   document.getElementById("new-status").value = currentJob.status;
   document.getElementById("new-price").value = currentJob.priceQuoted || "";
   document.getElementById("new-job-type").value = currentJob.jobType || "";
-
 }
 
-document.getElementById("status-form").addEventListener("submit", async e => {
-  e.preventDefault();
-  const status = document.getElementById("new-status").value;
-
-  await fetch(`${API_BASE}/jobs/${currentJob._id}`, {
-    method: "PUT",
-    headers,
-    body: JSON.stringify({ status })
-  });
-
-  alert("อัปเดตสถานะแล้ว");
-  fetchJob();
-
-  
-});
-
-/* -----------------------------
-   Update Dates
------------------------------ */
-document.getElementById("date-form").addEventListener("submit", async e => {
-  e.preventDefault();
-
-  const body = {
-    receivedDate: document.getElementById("received-date").value,
-    startDate: document.getElementById("start-date").value,
-    finishDate: document.getElementById("finish-date").value
-  };
-
+/* =========================
+   UPDATE HELPERS
+========================= */
+async function updateJob(body) {
   await fetch(`${API_BASE}/jobs/${currentJob._id}`, {
     method: "PUT",
     headers,
     body: JSON.stringify(body)
   });
-
-  alert("บันทึกวันที่แล้ว");
+  await
   fetchJob();
-});
+}
 
-/* -----------------------------
-   Update Price
------------------------------ */
-document.getElementById("job-type-form").addEventListener("submit", async e => {
+/* =========================
+   EVENTS
+========================= */
+document.getElementById("status-form")?.addEventListener("submit", e => {
   e.preventDefault();
-
-  const jobType = document.getElementById("new-job-type").value;
-  if (!jobType) {
-    alert("กรุณาเลือกประเภทงาน");
-    return;
-  }
-
-  await fetch(`${API_BASE}/jobs/${currentJob._id}`, {
-    method: "PUT",
-    headers,
-    body: JSON.stringify({ jobType })
-  });
-
-  alert("บันทึกประเภทงานเรียบร้อย");
-  fetchJob();
+  updateJob({ status: document.getElementById("new-status").value });
 });
-/* -----------------------------
-   Update Price ✅ (เพิ่มส่วนนี้)
------------------------------ */
-document.getElementById("price-form").addEventListener("submit", async e => {
+
+document.getElementById("date-form")?.addEventListener("submit", e => {
   e.preventDefault();
+  updateJob({
+    receivedDate: document.getElementById("received-date").value,
+    startDate: document.getElementById("start-date").value,
+    finishDate: document.getElementById("finish-date").value
+  });
+});
 
-  const price = document.getElementById("new-price").value;
+document.getElementById("price-form")?.addEventListener("submit", e => {
+  e.preventDefault();
+  updateJob({ priceQuoted: Number(document.getElementById("new-price").value) });
+});
 
-  if (price === "") {
-    alert("กรุณากรอกราคา");
-    return;
+document.getElementById("approve-price-btn")?.addEventListener("click", () => {
+  if (confirm("ยืนยันปิดงาน?")) {
+    updateJob({ status: "ซ่อมเสร็จ" });
+    location.replace("employee_dashboard.html");
   }
-
-  await fetch(`${API_BASE}/jobs/${currentJob._id}`, {
-    method: "PUT",
-    headers,
-    body: JSON.stringify({
-      priceQuoted: Number(price)
-    })
-  });
-
-  alert("บันทึกราคาเรียบร้อย");
-  fetchJob(); // โหลดข้อมูลใหม่มาแสดง
 });
 
-/* -----------------------------
-   Close Job
------------------------------ */
-document.getElementById("approve-price-btn").addEventListener("click", async () => {
-  if (!confirm("ยืนยันปิดงานซ่อม?")) return;
-
-  await fetch(`${API_BASE}/jobs/${currentJob._id}`, {
-    method: "PUT",
-    headers,
-    body: JSON.stringify({ status: "ซ่อมเสร็จ" })
-
-  });
-
-  alert("ปิดงานเรียบร้อย");
-  window.location.href = "employee_dashboard.html";
+document.getElementById("cancel-job-btn")?.addEventListener("click", () => {
+  if (confirm("ยกเลิกงานนี้?")) {
+    updateJob({ status: "ยกเลิก" });
+    location.replace("employee_dashboard.html");
+  }
 });
 
-/* -----------------------------
-   Cancel Job
------------------------------ */
-document.getElementById("cancel-job-btn").addEventListener("click", async () => {
-  if (!confirm("ยกเลิกงานนี้?")) return;
-
-  await fetch(`${API_BASE}/jobs/${currentJob._id}`, {
-    method: "PUT",
-    headers,
-    body: JSON.stringify({ status: "ยกเลิก" })
-
-  });
-
-  alert("ยกเลิกงานแล้ว");
-  window.location.href = "employee_dashboard.html";
-});
-
-/* -----------------------------
-   Init
------------------------------ */
-(async function init() {
+/* =========================
+   INIT
+========================= */
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadProfile();
   await fetchStock();
   await fetchJob();
-})();
+});
 </script>
-
+</div>
 </body>
 </html>

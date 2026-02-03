@@ -249,92 +249,157 @@ select{
 </div>
 
 <script>
-const API = "http://localhost:5000/api";
+/* ==========================================================
+   reports.html — PRODUCTION READY
+========================================================== */
+
+const API_BASE = "/api";
 const token = localStorage.getItem("token");
 
-async function apiFetch(path){
-  const res = await fetch(API + path,{
-    headers:{ Authorization:`Bearer ${token}` }
-  });
-  return res.json();
+/* =========================
+   AUTH CHECK
+========================= */
+if (!token) {
+  location.replace("login.html");
 }
 
-async function loadReport(){
-  const jobs = await apiFetch("/jobs");
-  const stocks = await apiFetch("/stocks");
+/* =========================
+   API FETCH (SAFE)
+========================= */
+async function apiFetch(path) {
+  const res = await fetch(`${API_BASE}${path}`, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
 
+  if (res.status === 401 || res.status === 403) {
+    alert("Session หมดอายุ กรุณาเข้าสู่ระบบใหม่");
+    localStorage.clear();
+    location.replace("login.html");
+    return [];
+  }
 
-  totalJobs.textContent = jobs.length;
-  inProgress.textContent = jobs.filter(j=>j.status==="กำลังซ่อม").length;
-  waiting.textContent = jobs.filter(j=>j.status==="รออะไหล่").length;
-  completed.textContent = jobs.filter(j=>j.status==="ซ่อมเสร็จ").length;
+  return res.ok ? res.json() : [];
+}
 
-  jobTable.innerHTML="";
-  jobs.forEach(j=>{
-    jobTable.innerHTML+=`
-      <tr>
-        <td>${j.receiptNumber}</td>
-        <td>${j.customerName}</td>
-        <td>${j.deviceType} ${j.deviceModel}</td>
+/* =========================
+   LOAD REPORT
+========================= */
+async function loadReport() {
+  const totalJobsEl   = document.getElementById("totalJobs");
+  const inProgressEl = document.getElementById("inProgress");
+  const waitingEl    = document.getElementById("waiting");
+  const completedEl  = document.getElementById("completed");
+  const jobTable     = document.getElementById("jobTable");
+  const stockTable   = document.getElementById("stockTable");
+
+  if (!jobTable || !stockTable) return;
+
+  try {
+    const [jobs, stocks] = await Promise.all([
+      apiFetch("/jobs"),
+      apiFetch("/stocks")
+    ]);
+
+    // ===== SUMMARY =====
+    if (totalJobsEl)   totalJobsEl.textContent   = jobs.length;
+    if (inProgressEl) inProgressEl.textContent = jobs.filter(j => j.status === "กำลังซ่อม").length;
+    if (waitingEl)    waitingEl.textContent    = jobs.filter(j => j.status === "รออะไหล่").length;
+    if (completedEl)  completedEl.textContent  = jobs.filter(j => j.status === "ซ่อมเสร็จ").length;
+
+    // ===== JOB TABLE =====
+    jobTable.innerHTML = "";
+    jobs.forEach(j => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${j.receiptNumber || "-"}</td>
+        <td>${j.customerName || "-"}</td>
+        <td>${j.deviceType || "-"} ${j.deviceModel || ""}</td>
         <td>
           <span class="badge ${
-            j.status==="รับเครื่อง"?"new":
-            j.status==="กำลังซ่อม"?"progress":
-            j.status==="รออะไหล่"?"wait":"done"
-          }">${j.status}</span>
+            j.status === "รับเครื่อง" ? "new" :
+            j.status === "กำลังซ่อม" ? "progress" :
+            j.status === "รออะไหล่" ? "wait" : "done"
+          }">
+            ${j.status}
+          </span>
         </td>
-        <td>${new Date(j.receivedDate).toLocaleDateString("th-TH")}</td>
-      </tr>`;
-  });
+        <td>${formatDate(j.receivedDate)}</td>
+      `;
+      jobTable.appendChild(tr);
+    });
 
-  stockTable.innerHTML="";
-  stocks.filter(s=>s.quantity<=5).forEach(s=>{
-    stockTable.innerHTML+=`
-      <tr>
-        <td>${s.name}</td>
-        <td>${s.model}</td>
-        <td style="color:red;font-weight:600">${s.quantity}</td>
-      </tr>`;
-  });
+    // ===== LOW STOCK =====
+    stockTable.innerHTML = "";
+    stocks
+      .filter(s => s.quantity <= 5)
+      .forEach(s => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${s.name}</td>
+          <td>${s.model}</td>
+          <td style="color:red;font-weight:600">${s.quantity}</td>
+        `;
+        stockTable.appendChild(tr);
+      });
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ โหลดรายงานไม่สำเร็จ");
+  }
 }
 
-loadReport();
+/* =========================
+   PROFILE (TOP BAR)
+========================= */
 async function loadProfile() {
   const userId = localStorage.getItem("userId");
-  const token  = localStorage.getItem("token");
+  if (!userId) return;
 
-  if (!userId || !token) return;
-
-  const res = await fetch(
-    `http://localhost:5000/api/employees/${userId}/profile`,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
+  const res = await fetch(`${API_BASE}/employees/${userId}/profile`, {
+    headers: {
+      Authorization: `Bearer ${token}`
     }
-  );
+  });
 
   if (!res.ok) return;
 
   const user = await res.json();
 
-  if (user.avatar) {
-    document.getElementById("profileAvatar").src =
-      `http://localhost:5000${user.avatar}`;
-  }
+  const avatar = user.avatar || "/uploads/profile/default.jpg";
+  const avatarUrl = avatar.startsWith("http") ? avatar : avatar;
 
-  if (document.getElementById("profileNameLarge")) {
+  if (document.getElementById("profileAvatar"))
+    document.getElementById("profileAvatar").src = avatarUrl;
+
+  if (document.getElementById("profileNameLarge"))
     document.getElementById("profileNameLarge").textContent =
       `${user.firstName} ${user.lastName}`;
-  }
 
-  if (document.getElementById("profileRole")) {
+      
+  if (document.getElementById("profileRole"))
     document.getElementById("profileRole").textContent = user.role;
-  }
 }
 
-document.addEventListener("DOMContentLoaded", loadProfile);
-</script>
+/* =========================
+   UTIL
+========================= */
+function formatDate(date) {
+  if (!date) return "-";
+  const d = new Date(date);
+  if (isNaN(d)) return "-";
+  return d.toLocaleDateString("th-TH");
+}
 
+/* =========================
+   INIT
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  loadReport();
+  loadProfile();
+});
+</script>
+</div>
 </body>
 </html>

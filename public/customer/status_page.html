@@ -335,8 +335,9 @@
 <script>
 document.addEventListener("DOMContentLoaded", async () => {
 
+    
   const API = "/api/jobs/receipt";
-  const box = document.getElementById("content");
+  const box = document.getElementById("status-content");
   const params = new URLSearchParams(location.search);
   const receipt = params.get("receipt_number");
 
@@ -344,8 +345,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     box.innerHTML = `<div class="not-found">ไม่พบเลขที่ใบเสร็จ</div>`;
     return;
   }
-
-  try{
     const res = await fetch(`${API}/${receipt}`);
     if(!res.ok){
       box.innerHTML = `<div class="not-found">ไม่พบข้อมูลงานซ่อม</div>`;
@@ -391,10 +390,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       <a href="/customer/check_status.html" class="back">← กลับ</a>
     `;
-  }
-  catch{
-    box.innerHTML = `<div class="not-found">เชื่อมต่อเซิร์ฟเวอร์ไม่ได้</div>`;
-  }
+  
 });
 </script>
 </body>
