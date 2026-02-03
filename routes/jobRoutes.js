@@ -161,9 +161,7 @@ router.put("/:id/complete", auth, async (req, res) => {
 router.get("/:id/receipt", async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
-    if (!job) {
-      return res.status(404).send("ไม่พบงานซ่อม");
-    }
+    if (!job) return res.status(404).send("ไม่พบงานซ่อม");
 
     res.send(`
 <!DOCTYPE html>
@@ -171,27 +169,222 @@ router.get("/:id/receipt", async (req, res) => {
 <head>
 <meta charset="UTF-8">
 <title>ใบรับเครื่องซ่อม</title>
+
 <style>
-  body { font-family: Sarabun, sans-serif; padding:40px }
-  h1 { color:#0f3c8a }
-  .box { margin-bottom:12px }
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap');
+
+@page { size: A4; margin: 18mm; }
+
+body{
+  font-family:'Sarabun',sans-serif;
+  background:#eef2f7;
+  margin:0;
+  padding:30px 0;
+}
+
+.container{
+  width:210mm;
+  min-height:297mm;
+  margin:auto;
+  background:#fff;
+  padding:42px 48px;
+  border-radius:10px;
+  box-shadow:0 15px 35px rgba(0,0,0,.12);
+  position:relative;
+}
+
+.container::before{
+  content:"";
+  position:absolute;
+  top:0;left:0;
+  width:12px;height:100%;
+  background:linear-gradient(180deg,#0f3c8a,#f6c200);
+  border-radius:10px 0 0 10px;
+}
+
+header{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:3px solid #f6c200;
+  padding-bottom:18px;
+  margin-bottom:28px;
+}
+
+.logo{
+  display:flex;
+  gap:16px;
+}
+
+.logo img{
+  width:90px;height:90px;
+  border-radius:50%;
+  border:3px solid #0f3c8a;
+}
+
+.logo h1{margin:0;color:#0f3c8a}
+.logo p{margin:4px 0;font-size:14px}
+
+.doc{text-align:right}
+.doc h2{margin:0;color:#0f3c8a}
+.doc .no{color:#b91c1c;font-weight:700}
+
+.info{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:24px;
+}
+
+.box{
+  background:#f8fafc;
+  border:1px solid #d1d5db;
+  border-radius:8px;
+  padding:16px;
+}
+
+.box h3{
+  margin:0 0 10px;
+  color:#0f3c8a;
+  border-bottom:1px solid #d1d5db;
+}
+
+.row{display:flex;margin-bottom:6px}
+.label{width:90px;font-weight:600}
+
+.badge{
+  background:#ecfdf5;
+  color:#047857;
+  padding:5px 14px;
+  border-radius:999px;
+  border:1px solid #10b981;
+  font-size:13px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+thead th{
+  background:#0f3c8a;
+  color:#fff;
+  padding:12px;
+  text-align:left;
+}
+
+tbody td{
+  padding:12px;
+  border-bottom:1px solid #d1d5db;
+}
+
+.terms{
+  margin-top:24px;
+  background:#fff7ed;
+  border-left:6px solid #f6c200;
+  padding:16px;
+  font-size:13px;
+}
+
+.sign{
+  margin-top:60px;
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:80px;
+  text-align:center;
+}
+
+.line{
+  border-top:1px solid #000;
+  margin-top:50px;
+  padding-top:6px;
+}
+
+.print{
+  margin:30px auto 0;
+  display:block;
+  width:200px;
+  padding:12px;
+  background:#0f3c8a;
+  color:#fff;
+  text-align:center;
+  border-radius:999px;
+  cursor:pointer;
+}
+
+@media print{
+  .print{display:none}
+  body{background:#fff}
+  .container{box-shadow:none}
+}
 </style>
 </head>
-<body onload="window.print()">
 
-<h1>ใบรับเครื่องซ่อม</h1>
+<body>
+<div class="container">
 
-<div class="box"><b>เลขใบรับ:</b> ${job.receiptNumber}</div>
-<div class="box"><b>ลูกค้า:</b> ${job.customerName}</div>
-<div class="box"><b>เบอร์:</b> ${job.customerPhone}</div>
-<div class="box"><b>ที่อยู่:</b> ${job.customerAddress || "-"}</div>
+<header>
+  <div class="logo">
+    <img src="/logo1.png">
+    <div>
+      <h1>ร้านตุ้ยไอที โคราช</h1>
+      <p>ศูนย์ซ่อมและจำหน่ายอุปกรณ์ไอทีครบวงจร</p>
+      <p>โทร 080-4641677</p>
+    </div>
+  </div>
 
-<hr>
+  <div class="doc">
+    <h2>ใบรับเครื่องซ่อม</h2>
+    <div class="no">No. ${job.receiptNumber}</div>
+    <p>วันที่ ${new Date(job.receivedDate).toLocaleDateString("th-TH")}</p>
+  </div>
+</header>
 
-<div class="box"><b>อุปกรณ์:</b> ${job.deviceType} ${job.deviceModel}</div>
-<div class="box"><b>อาการ:</b> ${job.symptom}</div>
-<div class="box"><b>สถานะ:</b> ${job.status}</div>
+<div class="info">
+  <div class="box">
+    <h3>ข้อมูลลูกค้า</h3>
+    <div class="row"><div class="label">ชื่อ</div>${job.customerName}</div>
+    <div class="row"><div class="label">โทร</div>${job.customerPhone}</div>
+    <div class="row"><div class="label">ที่อยู่</div>${job.customerAddress || "-"}</div>
+  </div>
 
+  <div class="box">
+    <h3>สถานะงาน</h3>
+    <span class="badge">${job.status}</span>
+  </div>
+</div>
+
+<table>
+<thead>
+<tr>
+  <th width="10%">ลำดับ</th>
+  <th width="60%">อุปกรณ์</th>
+  <th width="30%">อาการเสีย</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+  <td>1</td>
+  <td>${job.deviceType} ${job.deviceModel}</td>
+  <td>${job.symptom}</td>
+</tr>
+</tbody>
+</table>
+
+<div class="terms">
+<b>เงื่อนไข</b><br>
+1. กรุณานำใบรับเครื่องมาแสดงเมื่อรับเครื่องคืน<br>
+2. รับประกันงานซ่อม 30 วัน<br>
+3. ไม่รับเครื่องภายใน 90 วัน ร้านขอสงวนสิทธิ์
+</div>
+
+<div class="sign">
+  <div class="line">ผู้ส่งเครื่อง<br>(${job.customerName})</div>
+  <div class="line">ผู้รับเครื่อง<br>(ร้านตุ้ยไอที)</div>
+</div>
+
+</div>
+
+<div class="print" onclick="window.print()">พิมพ์เอกสาร</div>
 </body>
 </html>
     `);
