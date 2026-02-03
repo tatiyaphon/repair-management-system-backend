@@ -340,7 +340,7 @@
 
  <script>
 /* ==========================================================
-   new_job.html — PRODUCTION READY
+   new_job.html — FIXED & PRODUCTION READY
 ========================================================== */
 
 /* =========================
@@ -363,7 +363,7 @@ const headers = {
 };
 
 /* =========================
-   LOAD TECHNICIANS (role = tech)
+   LOAD TECHNICIANS
 ========================= */
 async function loadTechnicians() {
   try {
@@ -371,17 +371,14 @@ async function loadTechnicians() {
       headers: { Authorization: `Bearer ${token}` }
     });
 
-    if (!res.ok) {
-      console.warn("ไม่พบ endpoint /employees/tech");
-      return;
-    }
+    if (!res.ok) return;
 
     const techs = await res.json();
     const select = document.getElementById("assigned-tech");
     if (!select) return;
 
     select.innerHTML =
-      `<option value="" disabled selected>--- เลือกช่าง ---</option>`;
+      `<option value="">--- เลือกช่าง ---</option>`;
 
     techs.forEach(t => {
       const opt = document.createElement("option");
@@ -392,12 +389,11 @@ async function loadTechnicians() {
 
   } catch (err) {
     console.error("LOAD TECH ERROR:", err);
-    alert("โหลดรายชื่อช่างไม่สำเร็จ");
   }
 }
 
 /* =========================
-   REPAIR TYPE (radio)
+   REPAIR TYPE
 ========================= */
 function getRepairType() {
   return (
@@ -417,87 +413,74 @@ document.addEventListener("DOMContentLoaded", () => {
 /* =========================
    SUBMIT FORM
 ========================= */
-document.getElementById("new-job-form")?.addEventListener("submit", async e => {
-  e.preventDefault();
+document
+  .getElementById("new-job-form")
+  ?.addEventListener("submit", async e => {
+    e.preventDefault();
 
-  const jobData = {
-    receiptNumber: document.getElementById("employee-id")?.value.trim(),
-    customerName: document.getElementById("customer-name")?.value.trim(),
-    customerPhone: document.getElementById("customer-phone")?.value.trim(),
-    customerAddress: document.getElementById("customer-address")?.value.trim(),
+    const jobData = {
+      receiptNumber: document.getElementById("employee-id")?.value.trim(),
+      customerName: document.getElementById("customer-name")?.value.trim(),
+      customerPhone: document.getElementById("customer-phone")?.value.trim(),
+      customerAddress: document.getElementById("customer-address")?.value.trim(),
 
-    deviceType: document.getElementById("device-type")?.value,
-    deviceModel: document.getElementById("device-model")?.value.trim(),
-    symptom: document.getElementById("symptom")?.value.trim(),
-    accessory: document.getElementById("accessory")?.value.trim(),
+      deviceType: document.getElementById("device-type")?.value,
+      deviceModel: document.getElementById("device-model")?.value.trim(),
+      symptom: document.getElementById("symptom")?.value.trim(),
+      accessory: document.getElementById("accessory")?.value.trim(),
 
-    priceQuoted: Number(
-      document.getElementById("price-quoted")?.value || 0
-    ),
+      priceQuoted: Number(
+        document.getElementById("price-quoted")?.value || 0
+      ),
 
-    receivedDate: document.getElementById("received-date")?.value,
-    startDate: document.getElementById("start-date")?.value || null,
-    finishDate: document.getElementById("finished-date")?.value || null,
+      assignedTo: document.getElementById("assigned-tech")?.value || null,
+      jobType: getRepairType()
+    };
 
-    assignedTo: document.getElementById("assigned-tech")?.value,
-    jobType: getRepairType()
-    // ❌ ไม่ส่ง status → backend default = "รับเครื่อง"
-  };
-
-  /* =========================
-     VALIDATE
-  ========================= */
-  if (
-    !jobData.receiptNumber ||
-    !jobData.customerName ||
-    !jobData.customerPhone ||
-    !jobData.deviceType ||
-    !jobData.deviceModel ||
-    !jobData.symptom ||
-    !jobData.assignedTo
-  ) {
-    alert("กรุณากรอกข้อมูลให้ครบถ้วน");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_BASE}/jobs`, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(jobData)
-    });
-
-    const data = await res.json();
-
-    if (!res.ok) {
-      alert(data.message || "บันทึกงานไม่สำเร็จ");
+    /* =========================
+       VALIDATE
+    ========================= */
+    if (
+      !jobData.receiptNumber ||
+      !jobData.customerName ||
+      !jobData.customerPhone ||
+      !jobData.deviceType ||
+      !jobData.deviceModel ||
+      !jobData.symptom
+    ) {
+      alert("กรุณากรอกข้อมูลให้ครบถ้วน");
       return;
     }
 
-    alert("✅ บันทึกงานซ่อมสำเร็จ");
+    try {
+      const res = await fetch(`${API_BASE}/jobs`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(jobData)
+      });
 
-    /* =========================
-       OPEN RECEIPT (PDF)
-    ========================= */
-    if (data.job?._id) {
-      window.open(
-        `/api/jobs/${data.job._id}/receipt`,
-        "_blank"
-      );
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "บันทึกงานไม่สำเร็จ");
+        return;
+      }
+
+      alert("✅ บันทึกงานซ่อมสำเร็จ");
+
+      /* =========================
+         👉 OPEN RECEIPT (HTML)
+      ========================= */
+      if (data.job?.receiptNumber) {
+        window.location.href =
+          `/customer/receipt.html?receipt_number=${data.job.receiptNumber}`;
+      }
+
+    } catch (err) {
+      console.error("POST JOB ERROR:", err);
+      alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
     }
-
-    /* =========================
-       REDIRECT
-    ========================= */
-    setTimeout(() => {
-      location.replace("employee_dashboard.html");
-    }, 800);
-
-  } catch (err) {
-    console.error(err);
-    alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
-  }
-});
+  });
 
 /* =========================
    INIT
