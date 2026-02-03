@@ -349,9 +349,18 @@ tbody td{
 <div class="container">
 
   <div class="header">
-    <div class="shop">
-      <img src="/customer/logo1.png" class="logo">
-      <div>
+    <div class="shop" style="display:flex; gap:16px; align-items:center;">
+  <img 
+    src="https://www.tui-it.org/customer/logo1.png"
+    style="
+      width:90px;
+      height:90px;
+      object-fit:contain;
+      border-radius:50%;
+      border:3px solid #0f3c8a;
+      background:#fff;
+    "
+  />
         <h1>ร้านตุ้ยไอที โคราช</h1>
         <p>ศูนย์ซ่อมและจำหน่ายอุปกรณ์ไอทีครบวงจร</p>
         <p>โทร 080-4641677</p>
