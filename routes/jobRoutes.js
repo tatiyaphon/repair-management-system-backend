@@ -170,24 +170,31 @@ router.get("/:id/receipt", async (req, res) => {
 <title>ใบรับเครื่องซ่อม</title>
 
 <style>
+@page {
+  size: A4;
+  margin: 15mm;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap');
 
 body{
-  font-family:'Sarabun',sans-serif;
-  background:#eef2f7;
-  margin:0;
-  padding:30px;
+ font-family:'Sarabun',sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #fff;
 }
 
 .container{
-  max-width:900px;
-  margin:auto;
+  width: 100%;
+  min-height: calc(297mm - 30mm); /* A4 - margin บนล่าง */
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 20mm;
   background:#fff;
-  padding:36px 40px;
-  border-radius:12px;
-  box-shadow:0 15px 35px rgba(0,0,0,.12);
-  border-left:10px solid #f6c200;
+  /* แถบสีซ้าย */
+  border-left: 8px solid #facc15;
 }
+
 
 /* ===== HEADER ===== */
 .header{
@@ -342,9 +349,19 @@ tbody td{
   border-radius:999px;
   cursor:pointer;
 }
-@media print{
-  .print-btn{display:none}
-  body{background:#fff}
+@media print {
+  body{
+    background:#fff;
+  }
+
+  .container{
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .btn-print{
+    display:none;
+  }
 }
 </style>
 </head>
