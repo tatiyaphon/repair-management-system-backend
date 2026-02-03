@@ -502,19 +502,23 @@
         </section>
 
         <div class="toolbar">
-    <input id="searchInput" type="text" placeholder="ค้นหา: ชื่อลูกค้า / เครื่อง / อาการ / รหัสงาน">
+    <input
+  type="text"
+  id="searchInput"
+  placeholder="ค้นหา: ชื่อลูกค้า / เครื่อง / อาการ / รหัสงาน"
+/>
 
-    <select id="statusFilter">
-        <option value="all">ทุกสถานะ</option>
-        <option value="new">คิวงานใหม่</option>
-        <option value="in_progress">กำลังดำเนินการ</option>
-        <option value="waiting_parts">รออะไหล่</option>
-        <option value="completed">เสร็จสิ้น</option>
-        <option value="cancelled">ยกเลิก</option>
-    </select>
+<select id="statusFilter">
+  <option value="all">ทุกสถานะ</option>
+  <option value="รับเครื่อง">รับเครื่อง</option>
+  <option value="กำลังซ่อม">กำลังซ่อม</option>
+  <option value="รออะไหล่">รออะไหล่</option>
+  <option value="ซ่อมเสร็จ">ซ่อมเสร็จ</option>
+</select>
 
-     <select class="filter-month"></select>
-  <select class="filter-year"></select>
+<select id="monthFilter"></select>
+<select id="yearFilter"></select>
+
   </div>
 
         <section class="content-section">
@@ -553,6 +557,8 @@ const role     = localStorage.getItem("role");
 const userId   = localStorage.getItem("userId");
 const userName = localStorage.getItem("userName");
 
+let allJobs = [];
+
 if (!token || !userId) {
   localStorage.clear();
   location.replace("/employee/login.html");
@@ -569,53 +575,7 @@ const STATUS_CLASS_MAP = {
   "ยกเลิก": "cancelled"
 };
 
-/* =============================
-   MONTH / YEAR FILTER
-============================= */
-function initMonthYearFilter() {
-  const monthSel = document.getElementById("monthFilter");
-  const yearSel  = document.getElementById("yearFilter");
 
-  monthSel.innerHTML = `<option value="all">ทุกเดือน</option>`;
-  yearSel.innerHTML  = `<option value="all">ทุกปี</option>`;
-
-  for (let m = 1; m <= 12; m++) {
-    monthSel.innerHTML += `<option value="${m}">${m}</option>`;
-  }
-
-  const years = [...new Set(
-    jobs.map(j => new Date(j.receivedDate))
-        .filter(d => !isNaN(d))
-        .map(d => d.getFullYear())
-  )].sort((a,b) => b - a);
-
-  years.forEach(y => {
-    yearSel.innerHTML += `<option value="${y}">${y}</option>`;
-  });
-}
-
-function applyFilter() {
-  const month = document.getElementById("monthFilter").value;
-  const year  = document.getElementById("yearFilter").value;
-
-  filteredJobs = jobs.filter(j => {
-    if (j.status === "ซ่อมเสร็จ") return false;
-
-    const d = new Date(j.receivedDate);
-    if (isNaN(d)) return false;
-
-    if (month !== "all" && d.getMonth() + 1 !== Number(month)) return false;
-    if (year !== "all" && d.getFullYear() !== Number(year)) return false;
-
-    return true;
-  });
-
-  updateCards();
-  renderTable();
-}
-
-document.getElementById("monthFilter")?.addEventListener("change", applyFilter);
-document.getElementById("yearFilter")?.addEventListener("change", applyFilter);
 
 /* =====================
    API FETCH (กลาง)
@@ -726,13 +686,16 @@ async function fetchMyJobs() {
   const jobs = await apiFetch("/jobs/my");
   if (!jobs) return;
 
-  const activeJobs = jobs.filter(j =>
-    j.status !== "ซ่อมเสร็จ" && j.status !== "ยกเลิก"
+  // เก็บงานทั้งหมด
+  allJobs = jobs.filter(j =>
+    j.status !== "ยกเลิก"
   );
 
-  renderJobs(activeJobs);
-  updateSummaryCards(activeJobs);
+  initMonthYearFilter();   // 🔹 สร้างเดือน/ปี
+  applyFilters();          // 🔹 render ครั้งแรก
+  updateSummaryCards(allJobs);
 }
+
 
 /* =====================
    RENDER TABLE
@@ -810,6 +773,60 @@ async function finishJob(jobId) {
 
   fetchMyJobs();
 }
+function initMonthYearFilter() {
+  const monthSel = document.getElementById("monthFilter");
+  const yearSel  = document.getElementById("yearFilter");
+
+  if (!monthSel || !yearSel) return;
+
+  monthSel.innerHTML = `<option value="all">ทุกเดือน</option>`;
+  yearSel.innerHTML  = `<option value="all">ทุกปี</option>`;
+
+  // เดือน
+  for (let m = 1; m <= 12; m++) {
+    monthSel.innerHTML += `<option value="${m}">${m}</option>`;
+  }
+
+  // ปี (ดึงจากวันที่รับเครื่อง)
+  const years = [...new Set(
+    allJobs
+      .map(j => new Date(j.receivedDate))
+      .filter(d => !isNaN(d))
+      .map(d => d.getFullYear())
+  )].sort((a, b) => b - a);
+
+  years.forEach(y => {
+    yearSel.innerHTML += `<option value="${y}">${y}</option>`;
+  });
+}
+function applyFilters() {
+  const q      = document.getElementById("searchInput")?.value.toLowerCase() || "";
+  const status = document.getElementById("statusFilter")?.value || "all";
+  const month  = document.getElementById("monthFilter")?.value || "all";
+  const year   = document.getElementById("yearFilter")?.value || "all";
+
+  const result = allJobs.filter(j => {
+    const text = `
+      ${j.receiptNumber}
+      ${j.customerName}
+      ${j.deviceType}
+      ${j.deviceModel}
+      ${j.symptom}
+    `.toLowerCase();
+
+    if (q && !text.includes(q)) return false;
+    if (status !== "all" && j.status !== status) return false;
+
+    const d = new Date(j.receivedDate);
+    if (month !== "all" && d.getMonth() + 1 !== Number(month)) return false;
+    if (year  !== "all" && d.getFullYear() !== Number(year)) return false;
+
+    return true;
+  });
+
+  renderJobs(result);
+}
+
 </script>
 
 
