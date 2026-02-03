@@ -432,6 +432,10 @@ router.get("/:id", auth, async (req, res) => {
 ================================================== */
 router.post("/", auth, async (req, res) => {
   try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
     const {
       customerName,
       customerPhone,
@@ -445,7 +449,7 @@ router.post("/", auth, async (req, res) => {
       assignedTo
     } = req.body;
 
-    if (!customerName || !customerPhone || !receiptNumber || !deviceType || !deviceModel || !symptom) {
+    if (!customerName || !receiptNumber || !deviceType || !deviceModel || !symptom) {
       return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
     }
 
@@ -453,26 +457,30 @@ router.post("/", auth, async (req, res) => {
     if (exists) {
       return res.status(409).json({ message: "เลขใบรับนี้ถูกใช้แล้ว" });
     }
-   const job = await Job.create({
-  customerName,
-  customerPhone,
-  customerAddress,
-  receiptNumber,
-  deviceType,
-  deviceModel,
-  symptom,
-  accessory,
-  priceQuoted: Number(priceQuoted) || 0,
-  status: "รับเครื่อง",
-  receivedDate: new Date(),
-  createdBy: req.user.id,
-  assignedTo: assignedTo ? assignedTo : null
-});
 
+    const job = await Job.create({
+      customerName,
+      customerPhone,
+      customerAddress,
+      receiptNumber,
+      deviceType,
+      deviceModel,
+      symptom,
+      accessory,
+      priceQuoted: isNaN(Number(priceQuoted)) ? 0 : Number(priceQuoted),
+      status: "รับเครื่อง",
+      receivedDate: new Date(),
+      createdBy: req.user.id, // 🔥 จุดแก้หลัก
+      assignedTo: assignedTo || null
+    });
 
     res.status(201).json({ message: "รับเครื่องสำเร็จ", job });
+
   } catch (err) {
-    res.status(500).json({ message: "บันทึกงานซ่อมไม่สำเร็จ" });
+    console.error("POST /api/jobs ERROR =", err);
+    res.status(500).json({
+      message: err.message || "บันทึกงานซ่อมไม่สำเร็จ"
+    });
   }
 });
 
