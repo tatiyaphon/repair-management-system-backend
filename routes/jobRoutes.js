@@ -421,6 +421,7 @@ tbody td{
       <div class="row"><div class="label">ชื่อลูกค้า</div>${job.customerName}</div>
       <div class="row"><div class="label">เบอร์โทร</div>${job.customerPhone || "-"}</div>
       <div class="row"><div class="label">ที่อยู่</div>${job.customerAddress || "-"}</div>
+      <div class="row"><div class="label">อุปกรณ์ที่มาด้วย</div>${job.accessories || "-"}</div>
     </div>
 
     <div class="box">
