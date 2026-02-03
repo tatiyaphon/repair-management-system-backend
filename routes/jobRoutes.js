@@ -162,10 +162,10 @@ router.get("/:id/receipt", async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
     if (!job) {
-      return res.status(404).json({ message: "ไม่พบงานซ่อม" });
+      return res.status(404).send("ไม่พบงานซ่อม");
     }
 
-    const html = `
+    res.send(`
 <!DOCTYPE html>
 <html lang="th">
 <head>
@@ -173,92 +173,114 @@ router.get("/:id/receipt", async (req, res) => {
 <title>ใบรับเครื่องซ่อม</title>
 
 <style>
-@page { size: A4; margin: 18mm; }
-
 body{
-  font-family: "Sarabun","Tahoma",sans-serif;
+  font-family:'Sarabun',sans-serif;
   background:#eef2f7;
   margin:0;
-  padding:30px 0;
+  padding:30px;
 }
 
 .container{
-  width:210mm;
-  min-height:297mm;
+  max-width:900px;
   margin:auto;
   background:#fff;
-  padding:42px 48px;
-  border-radius:10px;
-  box-shadow:0 15px 35px rgba(0,0,0,.12);
-  position:relative;
+  padding:40px;
+  border-radius:12px;
+  box-shadow:0 10px 30px rgba(0,0,0,.15);
+  border-left:10px solid #facc15;
 }
 
-.container::before{
-  content:"";
-  position:absolute;
-  top:0; left:0;
-  width:10px; height:100%;
-  background:#f6c200;
-}
-
-header{
+/* ===== HEADER ===== */
+.header{
   display:flex;
   justify-content:space-between;
-  border-bottom:3px solid #f6c200;
-  padding-bottom:18px;
+  align-items:center;
+  border-bottom:3px solid #facc15;
+  padding-bottom:20px;
+  margin-bottom:25px;
 }
 
-.shop h1{margin:0;color:#0f3c8a;}
-.shop p{margin:4px 0;font-size:14px;}
+.shop{
+  display:flex;
+  gap:16px;
+  align-items:center;
+}
 
-.doc{text-align:right;}
-.doc .no{color:#b91c1c;font-weight:700;font-size:18px;}
+.logo{
+  width:90px;
+  height:90px;
+  object-fit:contain;
+  border-radius:50%;
+  border:3px solid #0f3c8a;
+  background:#fff;
+}
 
+.shop h1{
+  margin:0;
+  font-size:24px;
+  color:#0f3c8a;
+}
+
+.shop p{
+  margin:4px 0;
+  font-size:14px;
+}
+
+.doc{
+  text-align:right;
+}
+
+.doc .no{
+  font-size:18px;
+  font-weight:bold;
+  color:#b91c1c;
+}
+
+/* ===== INFO ===== */
 .info{
   display:grid;
   grid-template-columns:2fr 1fr;
-  gap:30px;
-  margin-top:28px;
+  gap:20px;
+  margin-bottom:20px;
 }
 
 .box{
-  background:#f8fafc;
-  padding:18px;
-  border-radius:8px;
   border:1px solid #d1d5db;
+  border-radius:8px;
+  padding:16px;
+  background:#f9fafb;
 }
 
 .box h3{
   margin:0 0 10px;
+  font-size:16px;
   color:#0f3c8a;
-  border-bottom:1px solid #d1d5db;
-  padding-bottom:6px;
 }
 
 .row{
   display:flex;
-  margin-bottom:8px;
-  font-size:15px;
+  margin-bottom:6px;
 }
 
 .label{
-  width:110px;
-  font-weight:600;
+  width:100px;
+  font-weight:bold;
 }
 
 .badge{
-  background:#ecfdf5;
+  background:#dcfce7;
   color:#047857;
   padding:4px 14px;
   border-radius:999px;
+  font-size:13px;
   border:1px solid #10b981;
-  font-weight:600;
 }
 
+/* ===== TABLE ===== */
 table{
   width:100%;
   border-collapse:collapse;
-  margin-top:28px;
+  margin-top:20px;
 }
 
 thead th{
@@ -269,37 +291,56 @@ thead th{
 
 tbody td{
   padding:12px;
-  border-bottom:1px solid #d1d5db;
+  border-bottom:1px solid #e5e7eb;
 }
 
+/* ===== PRICE ===== */
 .total{
   margin-top:20px;
   text-align:right;
   font-size:18px;
-  font-weight:700;
+}
+.total span{
+  color:#b91c1c;
+  font-weight:bold;
 }
 
-.total span{color:#b91c1c;}
-
+/* ===== FOOTER ===== */
 .terms{
-  margin-top:28px;
+  margin-top:25px;
   background:#fff7ed;
-  border-left:6px solid #f6c200;
   padding:16px;
+  border-left:5px solid #facc15;
   font-size:13px;
 }
 
 .sign{
-  margin-top:60px;
   display:flex;
   justify-content:space-between;
+  margin-top:60px;
   text-align:center;
 }
 
 .line{
   width:40%;
   border-top:1px solid #000;
-  padding-top:8px;
+  padding-top:6px;
+}
+
+.btn-print{
+  display:block;
+  margin:30px auto 0;
+  padding:12px 26px;
+  background:#0f3c8a;
+  color:#fff;
+  border-radius:999px;
+  text-align:center;
+  cursor:pointer;
+}
+
+@media print{
+  .btn-print{display:none;}
+  body{background:#fff;}
 }
 </style>
 </head>
@@ -307,90 +348,79 @@ tbody td{
 <body>
 <div class="container">
 
-<header>
-  <div class="shop">
-    <h1>ร้านตุ้ยไอที โคราช</h1>
-    <p>ศูนย์ซ่อมและจำหน่ายอุปกรณ์ไอทีครบวงจร</p>
-    <p>โทร 080-4641677</p>
-  </div>
-  <div class="doc">
-    <div class="no">No. ${job.receiptNumber}</div>
-    <div>วันที่ ${new Date(job.receivedDate).toLocaleDateString("th-TH")}</div>
-  </div>
-</header>
-
-<div class="info">
-  <div class="box">
-    <h3>ข้อมูลลูกค้า</h3>
-    <div class="row"><div class="label">ชื่อ</div>${job.customerName}</div>
-    <div class="row"><div class="label">โทร</div>${job.customerPhone}</div>
-    <div class="row"><div class="label">ที่อยู่</div>${job.customerAddress || "-"}</div>
-  </div>
-
-  <div class="box">
-    <h3>สถานะงาน</h3>
-    <div class="row">
-      <div class="label">สถานะ</div>
-      <span class="badge">${job.status}</span>
-    </div>
-    <div class="row">
-      <div class="label">ราคา</div>
-      <div style="font-weight:700;color:#b91c1c">
-        ${job.priceQuoted?.toLocaleString() || "0"} บาท
+  <div class="header">
+    <div class="shop">
+      <img src="/customer/logo1.png" class="logo">
+      <div>
+        <h1>ร้านตุ้ยไอที โคราช</h1>
+        <p>ศูนย์ซ่อมและจำหน่ายอุปกรณ์ไอทีครบวงจร</p>
+        <p>โทร 080-4641677</p>
       </div>
     </div>
+
+    <div class="doc">
+      <div class="no">No. ${job.receiptNumber}</div>
+      <div>วันที่ ${new Date(job.receivedDate).toLocaleDateString("th-TH")}</div>
+    </div>
   </div>
+
+  <div class="info">
+    <div class="box">
+      <h3>ข้อมูลลูกค้า</h3>
+      <div class="row"><div class="label">ชื่อ</div>${job.customerName}</div>
+      <div class="row"><div class="label">โทร</div>${job.customerPhone}</div>
+      <div class="row"><div class="label">ที่อยู่</div>${job.customerAddress || "-"}</div>
+    </div>
+
+    <div class="box">
+      <h3>สถานะงาน</h3>
+      <span class="badge">${job.status}</span>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th width="10%">ลำดับ</th>
+        <th width="50%">อุปกรณ์</th>
+        <th width="40%">อาการเสีย</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td>${job.deviceType} ${job.deviceModel}</td>
+        <td>${job.symptom}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="total">
+    ราคารวม: <span>${job.priceQuoted?.toLocaleString() || "-"} บาท</span>
+  </div>
+
+  <div class="terms">
+    <strong>เงื่อนไข</strong><br>
+    1. กรุณานำใบรับเครื่องมาแสดงเมื่อรับเครื่อง<br>
+    2. ร้านไม่รับผิดชอบข้อมูลภายในเครื่อง<br>
+    3. ไม่มารับเครื่องภายใน 90 วัน ร้านขอสงวนสิทธิ์
+  </div>
+
+  <div class="sign">
+    <div class="line">ผู้ส่งเครื่อง<br>(${job.customerName})</div>
+    <div class="line">ผู้รับเครื่อง<br>(ร้านตุ้ยไอที)</div>
+  </div>
+
 </div>
 
-<table>
-<thead>
-<tr>
-  <th width="10%">ลำดับ</th>
-  <th width="45%">อุปกรณ์</th>
-  <th width="25%">อาการเสีย</th>
-  <th width="20%">ราคา (บาท)</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-  <td>1</td>
-  <td>${job.deviceType} ${job.deviceModel}</td>
-  <td>${job.symptom}</td>
-  <td style="text-align:right;font-weight:700">
-    ${job.priceQuoted?.toLocaleString() || "0"}
-  </td>
-</tr>
-</tbody>
-</table>
+<div class="btn-print" onclick="window.print()">พิมพ์เอกสาร</div>
 
-<div class="total">
-  รวมเป็นเงินทั้งสิ้น :
-  <span>${job.priceQuoted?.toLocaleString() || "0"} บาท</span>
-</div>
-
-<div class="terms">
-<strong>เงื่อนไขการรับบริการ</strong><br>
-1. กรุณานำใบรับเครื่องมาแสดงเมื่อรับเครื่องคืน<br>
-2. ร้านไม่รับผิดชอบข้อมูลภายในเครื่อง<br>
-3. ไม่มารับเครื่องภายใน 90 วัน ร้านขอสงวนสิทธิ์
-</div>
-
-<div class="sign">
-  <div class="line">ผู้ส่งเครื่อง<br>(${job.customerName})</div>
-  <div class="line">ผู้รับเครื่อง<br>(ร้านตุ้ยไอที)</div>
-</div>
-
-</div>
 </body>
 </html>
-`;
-
-    res.setHeader("Content-Type", "text/html; charset=utf-8");
-    res.send(html);
-
+`);
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "สร้างใบรับเครื่องไม่สำเร็จ" });
+    res.status(500).send("สร้างใบรับเครื่องไม่สำเร็จ");
   }
 });
 
