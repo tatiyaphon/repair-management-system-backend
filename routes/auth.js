@@ -30,44 +30,45 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
     }
 
-    // ✅ อัปเดตสถานะออนไลน์ตรงนี้
+    // ✅ อัปเดตสถานะออนไลน์
     user.online = true;
-    await user.save();
+
 
     // upgrade password ถ้ายังไม่ bcrypt
     if (!user.password.startsWith("$2")) {
       user.password = await bcrypt.hash(password, 10);
       user.mustChangePassword = true;
-      await user.save();
+
     }
 
-    // login success
-await Employee.findByIdAndUpdate(user._id, { online: true });
+    await user.save();
 
- jwt.sign(
-  { userId: user._id, role: user.role },
-  process.env.JWT_SECRET,
-  { expiresIn: "7d" }
-);
+    // ✅ สร้าง token และเก็บใส่ตัวแปร
+    const token = jwt.sign(
+      { userId: user._id, role: user.role },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
 
-res.json({
-  token,
-  user: {
-    id: user._id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    role: user.role
-  }
-});
+    res.json({
+      message: "เข้าสู่ระบบสำเร็จ",
+      token,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role
+      }
+    });
 
   } catch (err) {
     console.error("LOGIN ERROR:", err);
     res.status(500).json({ error: "Login failed" });
   }
-  // หลังจากตรวจรหัสผ่านถูกต้อง
-
+  
 
 });
+
 
 
 router.post("/logout", verifyToken, async (req, res) => {
