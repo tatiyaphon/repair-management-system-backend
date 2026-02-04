@@ -1267,7 +1267,7 @@
     </div>
   </div>
 
-  
+
   <!-- ตารางผู้ใช้ -->
   <div class="panel">
   <div class="panel-header">
@@ -1492,64 +1492,53 @@ function renderJobsTable(jobs) {
 function renderUsersTable(users) {
   const tbody = document.querySelector("#admin-users-table tbody");
 
-  if (!tbody) return;
+
 
   tbody.innerHTML = "";
 
+
   if (!users.length) {
-    tbody.innerHTML = `<tr><td colspan="5">ไม่มีผู้ใช้</td></tr>`;
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center;color:#6b7280;">
+          ไม่มีข้อมูลผู้ใช้
+        </td>
+      </tr>
+    `;
     return;
   }
-
+  
 
   users.forEach(u => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-  <td class="user-name">${u.firstName} ${u.lastName}</td>
-
-  <td class="user-email">${u.email}</td>
-
-  <td class="user-phone">${u.phone || "-"}</td>
-
-  <!-- บทบาท -->
-  <td class="center">
-    <select class="role-select"
-      onchange="updateUserRole('${u._id}', this.value)">
-      <option value="admin" ${u.role==="admin"?"selected":""}>ผู้ดูแลระบบ</option>
-      <option value="staff" ${u.role==="staff"?"selected":""}>พนักงาน</option>
-      <option value="tech"  ${u.role==="tech" ?"selected":""}>ช่าง</option>
-    </select>
-  </td>
-
- <td>
-  ${
-    u.online
+    const statusHtml = u.online
       ? `<span class="status-online">● ออนไลน์</span>`
-      : `<span class="status-offline">● ออฟไลน์</span>`
-  }
-</td>
+      : `<span class="status-offline">● ออฟไลน์</span>`;
 
-  <!-- จัดการ -->
-  <td class="center">
-    <div class="action-group">
-      <button class="btn-edit"
-        onclick="editUser('${u._id}')">
-        แก้ไข
-      </button>
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${u.firstName} ${u.lastName}</td>
+      <td>${u.email}</td>
+      <td>${u.phone || "-"}</td>
 
-      <button class="btn-delete"
-        onclick="deleteUser('${u._id}')">
-        ลบ
-      </button>
-    </div>
-  </td>
-`;
+      <td>
+        <select onchange="updateUserRole('${u._id}', this.value)">
+          <option value="admin" ${u.role==="admin"?"selected":""}>ผู้ดูแลระบบ</option>
+          <option value="staff" ${u.role==="staff"?"selected":""}>พนักงาน</option>
+          <option value="tech"  ${u.role==="tech" ?"selected":""}>ช่าง</option>
+        </select>
+      </td>
 
+      <td>${statusHtml}</td>
 
+      <td>
+        <button class="btn-edit" onclick="editUser('${u._id}')">แก้ไข</button>
+        <button class="btn-delete" onclick="deleteUser('${u._id}')">ลบ</button>
+      </td>
+    `;
     tbody.appendChild(tr);
   });
 }
+
 function editUser(id) {
   window.location.href = `edit_user.html?id=${id}`;
 }

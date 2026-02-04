@@ -154,10 +154,13 @@ router.post(
 /* =====================================
    GET PROFILE
 ===================================== */
-router.get("/:id/profile", verifyToken, async (req, res) => {
+// =========================
+// GET /api/employees/:id/profile
+// =========================
+router.get("/:id/profile", verifyToken, requireRole("admin"), async (req, res) => {
   try {
     const user = await Employee.findById(req.params.id).select(
-      "firstName lastName role avatar phone active"
+      "firstName lastName email phone role active"
     );
 
     if (!user) {
@@ -166,9 +169,11 @@ router.get("/:id/profile", verifyToken, async (req, res) => {
 
     res.json(user);
   } catch (err) {
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 /* =====================================
    DELETE EMPLOYEE

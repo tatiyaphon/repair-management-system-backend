@@ -41,26 +41,24 @@ router.post("/login", async (req, res) => {
       await user.save();
     }
 
-    const token = jwt.sign(
-      { userId: user._id, role: user.role },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-    await Employee.findByIdAndUpdate(user._id, {
-  online: true
-});
+    // login success
+await Employee.findByIdAndUpdate(user._id, { online: true });
 
-    res.json({
-      token,
-      user: {
-        id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-        avatar: user.avatar,
-        mustChangePassword: user.mustChangePassword
-      }
-    });
+const token = jwt.sign(
+  { userId: user._id, role: user.role },
+  process.env.JWT_SECRET,
+  { expiresIn: "1d" }
+);
+
+res.json({
+  token,
+  user: {
+    id: user._id,
+    firstName: user.firstName,
+    lastName: user.lastName,
+    role: user.role
+  }
+});
 
   } catch (err) {
     console.error("LOGIN ERROR:", err);
@@ -73,15 +71,10 @@ router.post("/login", async (req, res) => {
 
 
 router.post("/logout", verifyToken, async (req, res) => {
-  try {
-    await Employee.findByIdAndUpdate(req.user.userId, {
-      online: false
-    });
-
-    res.json({ message: "logout success" });
-  } catch (err) {
-    res.status(500).json({ message: "logout error" });
-  }
+  await Employee.findByIdAndUpdate(req.user.userId, {
+    online: false
+  });
+  res.json({ message: "logout success" });
 });
 
 

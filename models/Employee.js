@@ -5,13 +5,14 @@ const employeeSchema = new mongoose.Schema({
   lastName:  { type: String, required: true },
   email:     { type: String, required: true, unique: true },
   password:  { type: String, required: true },
+  
 
   role: {
     type: String,
     enum: ["admin", "tech", "staff"],
     default: "staff"
   },
-  
+  phone: { type: String, default: "-" },
 
   avatar: {
     type: String,
@@ -22,7 +23,10 @@ const employeeSchema = new mongoose.Schema({
   active: { type: Boolean, default: true },
 
   // ✅ เพิ่มตรงนี้
-  online: { type: Boolean, default: false }
+  online: { 
+    type: Boolean, 
+    default: false 
+  }
 
 }, { timestamps: true });
 
