@@ -32,6 +32,7 @@ router.get("/my", auth, async (req, res) => {
     let query = {};
 
     if (req.user.role === "tech") {
+      // ✅ จุดชี้ชะตา
       query = { assignedTo: req.user.userId };
     } else if (req.user.role === "staff") {
       query = { createdBy: req.user.userId };
@@ -45,7 +46,7 @@ router.get("/my", auth, async (req, res) => {
 
     res.json(jobs);
   } catch (err) {
-
+    console.error(err);
     res.status(500).json({ message: "โหลดงานของฉันไม่สำเร็จ" });
   }
 });
