@@ -7,24 +7,21 @@ const puppeteer = require("puppeteer");
 
 console.log("✅ jobRoutes loaded");
 
+// ✅ DASHBOARD: ทุก role เห็นทุกงาน
 router.get("/", auth, async (req, res) => {
   try {
-    const query =
-  req.user.role === "admin"
-    ? {}
-    : { createdBy: req.user.userId };
-
-    const jobs = await Job.find(query)
+    const jobs = await Job.find({})
       .populate("createdBy", "firstName lastName role")
       .populate("assignedTo", "firstName lastName")
       .sort({ createdAt: -1 });
 
     res.json(jobs);
   } catch (err) {
-    console.error(err);
+    console.error("GET /api/jobs ERROR:", err);
     res.status(500).json({ message: "โหลดข้อมูลงานซ่อมไม่สำเร็จ" });
   }
 });
+
 
 
 router.get("/my", auth, async (req, res) => {

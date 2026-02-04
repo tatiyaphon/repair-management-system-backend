@@ -65,7 +65,7 @@ router.post("/login", async (req, res) => {
     console.error("LOGIN ERROR:", err);
     res.status(500).json({ error: "Login failed" });
   }
-  
+
 
 });
 
@@ -84,6 +84,7 @@ router.post("/logout", verifyToken, async (req, res) => {
    POST /api/auth/change-password
    ผู้ใช้เปลี่ยนรหัสผ่านเอง
 ========================= */
+// change-password
 router.post("/change-password", verifyToken, async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
@@ -94,7 +95,8 @@ router.post("/change-password", verifyToken, async (req, res) => {
       });
     }
 
-    const user = await Employee.findById(req.user.id);
+    // ✅ ใช้ userId เท่านั้น
+    const user = await Employee.findById(req.user.userId);
     if (!user || user.active === false) {
       return res.status(404).json({ message: "ไม่พบผู้ใช้" });
     }
@@ -118,7 +120,6 @@ router.post("/change-password", verifyToken, async (req, res) => {
     await user.save();
 
     res.json({ message: "เปลี่ยนรหัสผ่านสำเร็จ" });
-
   } catch (err) {
     console.error("CHANGE PASSWORD ERROR:", err);
     res.status(500).json({
@@ -126,6 +127,7 @@ router.post("/change-password", verifyToken, async (req, res) => {
     });
   }
 });
+
 
 /* =========================
    POST /api/auth/reset-admin
