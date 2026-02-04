@@ -159,12 +159,12 @@ router.post(
 // =========================
 router.get("/:id/profile", verifyToken, async (req, res) => {
   try {
-    // 🔐 ป้องกันแอบดูข้อมูลคนอื่น
+    // ✅ อนุญาต: ดูของตัวเอง หรือ admin เท่านั้น
     if (
       req.user.role !== "admin" &&
       req.user.userId !== req.params.id
     ) {
-      return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงข้อมูลนี้" });
+      return res.status(403).json({ message: "Forbidden" });
     }
 
     const user = await Employee.findById(req.params.id)
@@ -176,7 +176,7 @@ router.get("/:id/profile", verifyToken, async (req, res) => {
 
     res.json(user);
   } catch (err) {
-    console.error("GET PROFILE ERROR:", err);
+    console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
