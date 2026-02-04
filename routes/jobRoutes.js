@@ -9,10 +9,6 @@ console.log("✅ jobRoutes loaded");
 
 router.get("/", auth, async (req, res) => {
   try {
-    const query =
-  req.user.role === "admin"
-    ? {}
-    : { createdBy: req.user.userId };
 
     const jobs = await Job.find(query)
       .populate("createdBy", "firstName lastName role")
