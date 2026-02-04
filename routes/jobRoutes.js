@@ -10,9 +10,9 @@ console.log("✅ jobRoutes loaded");
 router.get("/", auth, async (req, res) => {
   try {
     const query =
-      req.user.role === "admin"
-        ? {}
-        : { createdBy: req.user.id };
+  req.user.role === "admin"
+    ? {}
+    : { createdBy: req.user.userId };
 
     const jobs = await Job.find(query)
       .populate("createdBy", "firstName lastName role")
@@ -32,14 +32,11 @@ router.get("/my", auth, async (req, res) => {
     let query = {};
 
     if (req.user.role === "tech") {
-      query = {
-        $or: [
-          { assignedTo: req.user.id },
-          { assignedTo: null }
-        ]
-      };
-    } else {
-      query = { createdBy: req.user.id };
+      query = { assignedTo: req.user.userId };
+    } else if (req.user.role === "staff") {
+      query = { createdBy: req.user.userId };
+    } else if (req.user.role === "admin") {
+      query = {};
     }
 
     const jobs = await Job.find(query)
@@ -48,10 +45,11 @@ router.get("/my", auth, async (req, res) => {
 
     res.json(jobs);
   } catch (err) {
-    console.error(err);
+
     res.status(500).json({ message: "โหลดงานของฉันไม่สำเร็จ" });
   }
 });
+
 /* ==================================================
    GET /api/jobs/receipt/:receiptNumber
    ลูกค้าเช็คสถานะงานซ่อม (ไม่ต้อง login)
