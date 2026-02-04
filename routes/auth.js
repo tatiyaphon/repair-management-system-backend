@@ -44,7 +44,7 @@ router.post("/login", async (req, res) => {
     // login success
 await Employee.findByIdAndUpdate(user._id, { online: true });
 
-const token = jwt.sign(
+ jwt.sign(
   { userId: user._id, role: user.role },
   process.env.JWT_SECRET,
   { expiresIn: "7d" }
