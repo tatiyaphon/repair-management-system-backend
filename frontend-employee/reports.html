@@ -493,15 +493,6 @@ document.addEventListener("DOMContentLoaded", () => {
   loadReport();
   loadProfile();
 });
-document.addEventListener("DOMContentLoaded", () => {
-  const role = localStorage.getItem("role");
-  const adminTab = document.getElementById("adminTab");
-
-  if (adminTab && role !== "admin") {
-    adminTab.remove(); // 🔥 ซ่อนจริง ไม่ใช่แค่ display:none
-  }
-});
-
 </script>
 </div>
 </body>

@@ -1092,10 +1092,9 @@
       <a href="reports.html" class="nav-link">
         <i class="fas fa-chart-line"></i> รายงาน
       </a>
-      <a href="admin_dashboard.html" id="adminTab">
+      <a href="admin_dashboard.html" class="nav-link active">
         <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
       </a>
-
 <div class="profile-menu" id="profileMenu">
   <div class="profile-trigger" onclick="toggleProfile()">
     <!-- รูปเล็ก (มุมขวาบน) -->
@@ -1508,7 +1507,7 @@ function renderUsersTable(users) {
     `;
     return;
   }
-
+  
 
   users.forEach(u => {
     const statusHtml = u.online
@@ -1701,15 +1700,6 @@ document.addEventListener("click", (e) => {
     dropdown.classList.remove("show");
   }
 });
-document.addEventListener("DOMContentLoaded", () => {
-  const role = localStorage.getItem("role");
-  const adminTab = document.getElementById("adminTab");
-
-  if (adminTab && role !== "admin") {
-    adminTab.remove(); // 🔥 ซ่อนจริง ไม่ใช่แค่ display:none
-  }
-});
-
 </script>
 
 
