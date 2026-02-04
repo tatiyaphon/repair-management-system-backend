@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const Employee = require("../models/Employee");
 const verifyToken = require("../middleware/auth");
 
+
 /* =========================
    POST /api/auth/login
 ========================= */
@@ -13,38 +14,27 @@ router.post("/login", async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({
-        error: "Email และ password จำเป็นต้องกรอก"
-      });
+      return res.status(400).json({ error: "Email และ password จำเป็นต้องกรอก" });
     }
 
     const user = await Employee.findOne({ email });
     if (!user || user.active === false) {
-      return res.status(401).json({
-        error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
-      });
+      return res.status(401).json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
     }
 
-    let isMatch = false;
-
-    // รองรับ bcrypt และ plain text (legacy)
-    if (typeof user.password === "string" && user.password.startsWith("$2")) {
-      isMatch = await bcrypt.compare(password, user.password);
-    } else {
-      isMatch = password === user.password;
-    }
+    const isMatch = user.password.startsWith("$2")
+      ? await bcrypt.compare(password, user.password)
+      : password === user.password;
 
     if (!isMatch) {
-      return res.status(401).json({
-        error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
-      });
+      return res.status(401).json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
     }
 
-    // หลังตรวจรหัสผ่านผ่านแล้ว
-      user.online = true;
-      await user.save();
+    // ✅ อัปเดตสถานะออนไลน์ตรงนี้
+    user.online = true;
+    await user.save();
 
-    // upgrade password เป็น bcrypt ถ้ายังไม่ใช่
+    // upgrade password ถ้ายังไม่ bcrypt
     if (!user.password.startsWith("$2")) {
       user.password = await bcrypt.hash(password, 10);
       user.mustChangePassword = true;
@@ -52,31 +42,29 @@ router.post("/login", async (req, res) => {
     }
 
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { userId: user._id, role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 
     res.json({
-  token,
-  user: {
-    id: user._id,
-    firstName: user.firstName,
-    lastName: user.lastName,
-    role: user.role,
-    avatar: user.avatar,        // ✅ เพิ่มบรรทัดนี้
-    mustChangePassword: user.mustChangePassword || false
-  }
-});
+      token,
+      user: {
+        id: user._id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        avatar: user.avatar,
+        mustChangePassword: user.mustChangePassword
+      }
+    });
 
   } catch (err) {
     console.error("LOGIN ERROR:", err);
     res.status(500).json({ error: "Login failed" });
   }
 });
-await Employee.findByIdAndUpdate(user._id, {
-  online: true
-});
+
 
 router.post("/logout", verifyToken, async (req, res) => {
   await Employee.findByIdAndUpdate(req.user.userId, {
