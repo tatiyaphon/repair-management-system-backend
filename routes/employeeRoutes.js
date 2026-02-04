@@ -157,11 +157,18 @@ router.post(
 // =========================
 // GET /api/employees/:id/profile
 // =========================
-router.get("/:id/profile", verifyToken, requireRole("admin"), async (req, res) => {
+router.get("/:id/profile", verifyToken, async (req, res) => {
   try {
-    const user = await Employee.findById(req.params.id).select(
-      "firstName lastName email phone role active"
-    );
+    // 🔐 ป้องกันแอบดูข้อมูลคนอื่น
+    if (
+      req.user.role !== "admin" &&
+      req.user.userId !== req.params.id
+    ) {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์เข้าถึงข้อมูลนี้" });
+    }
+
+    const user = await Employee.findById(req.params.id)
+      .select("firstName lastName email role phone avatar active");
 
     if (!user) {
       return res.status(404).json({ message: "ไม่พบผู้ใช้" });
@@ -169,10 +176,11 @@ router.get("/:id/profile", verifyToken, requireRole("admin"), async (req, res) =
 
     res.json(user);
   } catch (err) {
-    console.error(err);
+    console.error("GET PROFILE ERROR:", err);
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 
 /* =====================================
