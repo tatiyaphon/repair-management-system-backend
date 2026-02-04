@@ -101,9 +101,9 @@ router.put("/:id/complete", auth, async (req, res) => {
 ================================================== */
 router.post("/", auth, async (req, res) => {
   try {
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
+    if (!req.user || !req.user.userId) {
+  return res.status(401).json({ message: "Unauthorized" });
+}
 
     const {
       customerName,
@@ -139,7 +139,7 @@ router.post("/", auth, async (req, res) => {
       priceQuoted: Number(priceQuoted) || 0,
       status: "รับเครื่อง",
       receivedDate: new Date(),
-      createdBy: req.user.id,
+      createdBy: req.user.userId,
       assignedTo: assignedTo || null
     });
 

@@ -368,7 +368,11 @@ const headers = {
 async function loadTechnicians() {
   try {
     const res = await fetch(`${API_BASE}/employees/tech`, {
-      headers: { Authorization: `Bearer ${token}` }
+      headers: {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("token")}`
+}
+
     });
 
     if (!res.ok) {
