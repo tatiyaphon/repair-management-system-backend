@@ -7,14 +7,16 @@
     <link rel="icon" type="image/png" href="logo1.png">
     <!-- CSP ปรับให้โหลดฟอนต์/สไตล์จาก CDN ได้เหมือนหน้าก่อน -->
     <meta http-equiv="Content-Security-Policy"
+  <meta http-equiv="Content-Security-Policy"
   content="
     default-src 'self';
     script-src 'self' 'unsafe-inline';
     style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com;
     font-src https://fonts.gstatic.com https://cdnjs.cloudflare.com data:;
-    img-src 'self' data: http://localhost:5000;
-    connect-src 'self' http://localhost:5000;
+    img-src 'self' data: https://www.tui-it.org http://localhost:5000;
+    connect-src 'self' https://www.tui-it.org http://localhost:5000;
   ">
+
 
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
