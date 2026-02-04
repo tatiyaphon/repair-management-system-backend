@@ -46,6 +46,9 @@ router.post("/login", async (req, res) => {
       process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
+    await Employee.findByIdAndUpdate(user._id, {
+  online: true
+});
 
     res.json({
       token,
@@ -63,16 +66,25 @@ router.post("/login", async (req, res) => {
     console.error("LOGIN ERROR:", err);
     res.status(500).json({ error: "Login failed" });
   }
+  // หลังจากตรวจรหัสผ่านถูกต้อง
+
+
 });
 
 
 router.post("/logout", verifyToken, async (req, res) => {
-  await Employee.findByIdAndUpdate(req.user.userId, {
-    online: false
-  });
+  try {
+    await Employee.findByIdAndUpdate(req.user.userId, {
+      online: false
+    });
 
-  res.json({ message: "ออกจากระบบแล้ว" });
+    res.json({ message: "logout success" });
+  } catch (err) {
+    res.status(500).json({ message: "logout error" });
+  }
 });
+
+
 
 /* =========================
    POST /api/auth/change-password

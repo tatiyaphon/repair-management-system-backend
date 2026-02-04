@@ -11,11 +11,7 @@ const employeeSchema = new mongoose.Schema({
     enum: ["admin", "tech", "staff"],
     default: "staff"
   },
-
-  phone: {
-    type: String,
-    default: "-"
-  },
+  
 
   avatar: {
     type: String,
@@ -26,10 +22,7 @@ const employeeSchema = new mongoose.Schema({
   active: { type: Boolean, default: true },
 
   // ✅ เพิ่มตรงนี้
-  online: {
-    type: Boolean,
-    default: false
-  }
+  online: { type: Boolean, default: false }
 
 }, { timestamps: true });
 
