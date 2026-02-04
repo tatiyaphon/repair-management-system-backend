@@ -203,5 +203,18 @@ router.delete(
     }
   }
 );
+router.get("/me", verifyToken, async (req, res) => {
+  try {
+    const user = await Employee.findById(req.user.userId)
+      .select("firstName lastName email role phone avatar active");
 
+    if (!user) {
+      return res.status(404).json({ message: "ไม่พบผู้ใช้" });
+    }
+
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
 module.exports = router;

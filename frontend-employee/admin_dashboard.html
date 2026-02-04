@@ -1254,18 +1254,7 @@
         </div>
       </div>
 
-      <!-- Users panel -->
-     <div class="panel">
-  <div class="panel-header">
-    <div>
-      <h2 class="panel-title">
-        <i class="fas fa-users-cog"></i> จัดการบัญชีผู้ใช้
-      </h2>
-      <p class="panel-subtitle">
-        เพิ่มพนักงาน / ช่าง และกำหนดสิทธิ์การใช้งานระบบ
-      </p>
-    </div>
-  </div>
+
 
 
   <!-- ตารางผู้ใช้ -->
@@ -1385,9 +1374,7 @@ async function apiFetch(path, options = {}) {
    LOAD PROFILE
 ================================================== */
 async function loadProfile() {
-  if (!userId) return;
-
-  const user = await apiFetch(`/employees/${userId}/profile`);
+  const user = await apiFetch(`/employees/me`);
   if (!user) return;
 
   const avatar = user.avatar || "/uploads/profile/default.jpg";
