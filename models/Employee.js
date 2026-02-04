@@ -12,13 +12,24 @@ const employeeSchema = new mongoose.Schema({
     default: "staff"
   },
 
+  phone: {
+    type: String,
+    default: "-"
+  },
+
   avatar: {
     type: String,
     default: "/uploads/profile/default.jpg"
   },
 
   mustChangePassword: { type: Boolean, default: true },
-  active: { type: Boolean, default: true }
+  active: { type: Boolean, default: true },
+
+  // ✅ เพิ่มตรงนี้
+  online: {
+    type: Boolean,
+    default: false
+  }
 
 }, { timestamps: true });
 

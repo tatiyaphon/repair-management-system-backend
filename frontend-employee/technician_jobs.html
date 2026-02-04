@@ -671,13 +671,18 @@ async function uploadAvatar(e) {
   loadProfile();
 }
 
-/* =====================
-   LOGOUT
-===================== */
-function logout() {
+async function logout() {
+  await fetch("/api/auth/logout", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    }
+  });
+
   localStorage.clear();
-  location.replace("login.html");
+  location.href = "login.html";
 }
+
 
 /* =====================
    FETCH MY JOBS

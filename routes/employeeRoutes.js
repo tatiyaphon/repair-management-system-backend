@@ -13,7 +13,8 @@ const router = express.Router();
 ===================================== */
 router.get("/", verifyToken, requireRole("admin"), async (req, res) => {
   const employees = await Employee.find()
-    .select("_id firstName lastName email role phone active avatar");
+    .select("_id firstName lastName email role phone active avatar online");
+
   res.json(employees);
 });
 

@@ -1058,6 +1058,15 @@
 .status-dot.offline {
   background: #dc2626;
 }
+.status-online {
+  color: #16a34a;
+  font-weight: 600;
+}
+
+.status-offline {
+  color: #dc2626;
+  font-weight: 600;
+}
 
   </style>
 </head>
@@ -1539,16 +1548,13 @@ function renderUsersTable(users) {
     </select>
   </td>
 
-  <!-- สถานะ -->
+ <td>
   ${
     u.online
-      ? `<span class="status-active">
-           <span class="status-dot"></span> ออนไลน์
-         </span>`
-      : `<span class="status-inactive">
-           <span class="status-dot offline"></span> ออฟไลน์
-         </span>`
+      ? `<span class="status-online">● ออนไลน์</span>`
+      : `<span class="status-offline">● ออฟไลน์</span>`
   }
+</td>
 
   <!-- จัดการ -->
   <td class="center">
@@ -1653,19 +1659,16 @@ async function init() {
    LOGOUT
 ================================================== */
 async function logout() {
-  try {
-    await fetch("/api/auth/logout", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-  } catch (e) {}
+  await fetch("/api/auth/logout", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    }
+  });
 
   localStorage.clear();
   location.href = "login.html";
 }
-
 
 /* ==================================================
    ON LOAD

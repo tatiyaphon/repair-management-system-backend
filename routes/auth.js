@@ -74,6 +74,10 @@ router.post("/login", async (req, res) => {
     res.status(500).json({ error: "Login failed" });
   }
 });
+await Employee.findByIdAndUpdate(user._id, {
+  online: true
+});
+
 router.post("/logout", verifyToken, async (req, res) => {
   await Employee.findByIdAndUpdate(req.user.userId, {
     online: false

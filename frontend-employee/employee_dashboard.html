@@ -947,13 +947,18 @@ document.addEventListener("click", (e) => {
   }
 });
 
-/* =============================
-   LOGOUT
-============================= */
-function logout() {
+async function logout() {
+  await fetch("/api/auth/logout", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    }
+  });
+
   localStorage.clear();
   location.href = "login.html";
 }
+
 
 /* =============================
    INIT
