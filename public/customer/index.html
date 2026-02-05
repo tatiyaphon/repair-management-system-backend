@@ -74,72 +74,73 @@ header{
 
 /* ================= BANNER ================= */
 /* ================= SMOOTH BANNER ================= */
-.banner{
-  position:relative;
-  overflow:hidden;
+/* ================= FULL BLEED BANNER ================= */
+.banner-full{
+  position: relative;
+  width: 100vw;           /* เต็มจอจริง */
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  overflow: hidden;
+  background:#020617;
 }
 
-.banner img{
-  width:100%;
-  height:420px;
-  object-fit:cover;
-  object-position:center;
-  filter:brightness(0.85);
+.banner-full img{
+  width: 100%;
+  height: 420px;
+  object-fit: cover;
+  object-position: center;
+  display: block;
 }
 
-/* layer สมูท */
-.banner::after{
+/* overlay ทำให้ดูสมูท */
+.banner-full::after{
   content:"";
   position:absolute;
   inset:0;
 }
 
-/* เนื้อหาบน banner */
+/* ข้อความบน banner */
 .banner-content{
   position:absolute;
   inset:0;
+  z-index:2;
   display:flex;
   align-items:center;
   padding:40px;
-  z-index:2;
 }
 
-.banner-box{
+.banner-text{
   color:#fff;
-  max-width:620px;
+  max-width:600px;
 }
 
-.banner-box img{
-  height:56px;
-  margin-bottom:14px;
-}
-
-.banner-box h1{
-  font-size:2.2rem;
+.banner-text h1{
   margin:0 0 10px;
+  font-size:2.2rem;
 }
 
-.banner-box p{
+.banner-text p{
+  margin:0;
   font-size:1.05rem;
-  opacity:.92;
+  opacity:.95;
 }
 
 /* ================= MOBILE ================= */
 @media(max-width:768px){
-  .banner img{
+  .banner-full img{
     height:260px;
     object-position:center top;
   }
 
   .banner-content{
-    padding:24px;
+    padding:20px;
   }
 
-  .banner-box h1{
+  .banner-text h1{
     font-size:1.4rem;
   }
 
-  .banner-box p{
+  .banner-text p{
     font-size:.9rem;
   }
 }
@@ -273,12 +274,16 @@ footer img{
   </a>
 </header>
 
-<div class="banner">
+<div class="banner-full">
   <img src="/customer/banner.jpg" alt="ร้านตุ้ยไอที">
+  
   <div class="banner-content">
-    <div class="banner-box">
+    <div class="banner-text">
       <h1>ศูนย์บริการซ่อมคอมพิวเตอร์</h1>
-      <p>รับซ่อม | รับซื้อ–ขาย iPhone iPad Macbook พร้อมระบบตรวจสอบงานออนไลน์</p>
+      <p>
+        รับซ่อม | รับซื้อ–ขาย iPhone iPad Macbook  
+        พร้อมระบบตรวจสอบงานออนไลน์
+      </p>
     </div>
   </div>
 </div>
