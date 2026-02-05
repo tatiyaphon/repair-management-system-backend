@@ -58,6 +58,7 @@
             max-width: 1300px;
             margin: 0 auto;
             padding: 30px 20px;
+            page-break-inside: avoid;
         }
 
         /* ==========================================================
@@ -175,9 +176,10 @@
 
         .dashboard-grid {
             display: grid;
-            gap: 30px;
-            margin-bottom: 30px;
+            gap: 24px;
             grid-template-columns: repeat(5, 1fr);
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
 
         .card {
@@ -618,6 +620,9 @@
   width:110px; /* การจัดการ */
   text-align:center;
 }
+.dashboard-container {
+  padding-bottom: 0;   /* ❌ ไม่ให้เหลือพื้นที่ล่าง */
+}
 
     </style>
 </head>
@@ -760,6 +765,7 @@
             <p id="cancelled-count">0</p>
         </div>
         <i class="fas fa-times-circle card-icon"></i>
+    </a>
 
 </div>
       <div class="table-box">
