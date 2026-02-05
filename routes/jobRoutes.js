@@ -106,42 +106,59 @@ router.post("/", auth, async (req, res) => {
 }
 
     const {
-      customerName,
-      customerPhone,
-      customerAddress,
-      receiptNumber,
-      deviceType,
-      deviceModel,
-      symptom,
-      accessory,
-      priceQuoted,
-      assignedTo
-    } = req.body;
+  customerName,
+  customerPhone,
+  customerAddress,
+  deviceType,
+  deviceModel,
+  symptom,
+  accessory,
+  priceQuoted,
+  assignedTo
+} = req.body;
 
-    if (!customerName || !receiptNumber || !deviceType || !deviceModel || !symptom) {
-      return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
-    }
+   if (!customerName || !deviceType || !deviceModel || !symptom) {
+  return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
+}
+/* =========================
+   GENERATE RECEIPT NUMBER
+========================= */
+const now = new Date();
 
-    const exists = await Job.findOne({ receiptNumber });
-    if (exists) {
-      return res.status(409).json({ message: "เลขใบรับนี้ถูกใช้แล้ว" });
-    }
+const dateStr = now
+  .toISOString()
+  .slice(0, 10)
+  .replace(/-/g, "");
+
+const start = new Date();
+start.setHours(0, 0, 0, 0);
+
+const end = new Date();
+end.setHours(23, 59, 59, 999);
+
+const countToday = await Job.countDocuments({
+  createdAt: { $gte: start, $lte: end }
+});
+
+const receiptNumber = `IN${dateStr}-${String(countToday + 1).padStart(3, "0")}`;
+
 
     const job = await Job.create({
-      customerName,
-      customerPhone,
-      customerAddress,
-      receiptNumber,
-      deviceType,
-      deviceModel,
-      symptom,
-      accessory,
-      priceQuoted: Number(priceQuoted) || 0,
-      status: "รับเครื่อง",
-      receivedDate: new Date(),
-      createdBy: req.user.userId,
-      assignedTo: assignedTo || null
-    });
+  customerName,
+  customerPhone,
+  customerAddress,
+  receiptNumber, // 👈 จากระบบ
+  deviceType,
+  deviceModel,
+  symptom,
+  accessory,
+  priceQuoted: Number(priceQuoted) || 0,
+  status: "รับเครื่อง",
+  receivedDate: new Date(),
+  createdBy: req.user.userId,
+  assignedTo: assignedTo || null
+});
+
 
     res.status(201).json({ message: "รับเครื่องสำเร็จ", job });
 

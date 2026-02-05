@@ -255,7 +255,7 @@
 
                         <div class="form-group">
                             <label for="employee-id">เลขที่ใบเสร็จ/อ้างอิง:</label>
-                            <input type="text" id="employee-id" required placeholder="เช่น INV001, POS002" />
+                            <input type="text"id="employee-id"readonlyplaceholder="ระบบจะสร้างให้อัตโนมัติ"/>
                         </div>
                         <div class="form-group">
                             <label for="customer-name">ชื่อ-นามสกุล:</label>
@@ -416,7 +416,13 @@ function getRepairType() {
 document.addEventListener("DOMContentLoaded", () => {
   const received = document.getElementById("received-date");
   if (received) received.valueAsDate = new Date();
+
+  const receiptInput = document.getElementById("employee-id");
+  if (receiptInput) {
+    receiptInput.value = generateReceiptNumber();
+  }
 });
+
 
 /* =========================
    SUBMIT FORM
@@ -507,6 +513,18 @@ document.getElementById("new-job-form")?.addEventListener("submit", async e => {
    INIT
 ========================= */
 document.addEventListener("DOMContentLoaded", loadTechnicians);
+
+function generateReceiptNumber() {
+  const now = new Date();
+
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+
+  const random = Math.floor(100 + Math.random() * 900); // 3 หลัก
+  return `IN${y}${m}${d}-${random}`;
+}
+
 </script>
 
 </body>
