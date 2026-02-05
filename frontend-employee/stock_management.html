@@ -853,6 +853,7 @@ async function loadStock() {
     alert("❌ โหลดข้อมูลสต็อกไม่สำเร็จ");
   }
     renderWithdrawHistory(); 
+    renderWithdrawFilter(stockData);
 }
 
 /* ================= RENDER ================= */
@@ -1064,6 +1065,26 @@ function renderWithdrawHistory() {
       </tr>
     `;
   }
+}
+function renderWithdrawFilter(stockData = []) {
+  const filter = document.getElementById("withdrawFilter");
+  if (!filter) return;
+
+  const typeSet = new Set();
+
+  stockData.forEach(stock => {
+    if (stock.withdrawHistory?.length) {
+      typeSet.add(stock.name);
+    }
+  });
+
+  filter.innerHTML = `<option value="">ทั้งหมด</option>`;
+
+  [...typeSet].sort().forEach(type => {
+    filter.innerHTML += `
+      <option value="${type}">${type}</option>
+    `;
+  });
 }
 
 
