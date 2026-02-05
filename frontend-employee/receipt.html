@@ -7,7 +7,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
-@page { size: A4; margin: 15mm; }
+@page { size: A4; margin: 10mm; }
 
 body{
   font-family:'Sarabun',sans-serif;
@@ -17,8 +17,7 @@ body{
 
 .container{
   width:100%;
-  min-height:calc(297mm - 30mm);
-  padding:20mm;
+  padding:10mm;
   border-left:8px solid #facc15;
 }
 
@@ -31,7 +30,7 @@ body{
 }
 .shop{display:flex;gap:16px;align-items:center;}
 .logo{
-  width:80px;height:80px;border-radius:50%;
+  width:60px;height:60px;border-radius:50%;
   border:3px solid #0f3c8a;
 }
 .shop h1{margin:0;font-size:22px;color:#0f3c8a;}
@@ -119,8 +118,13 @@ tbody td{
   cursor:pointer;
 }
 
-@media print{
-  .print-btn{display:none;}
+@media print {
+  .info,
+  .terms,
+  .sign,
+  table {
+    page-break-inside: avoid;
+  }
 }
 </style>
 </head>
