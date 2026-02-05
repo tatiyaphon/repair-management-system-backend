@@ -214,7 +214,7 @@ tbody td{
 
     <div class="doc">
       <h2>ใบรับเครื่องซ่อม</h2>
-      <div class="no">No. <span id="receiptNo"></span></div>
+      <div class="no" id="receiptNumber">-</div>
       <div id="receivedDate">-</div>
     </div>
   </div>
@@ -306,5 +306,6 @@ fetch(`${API_BASE}/jobs/${jobId}`, {
   location.href = "/employee/employee_dashboard.html";
 });
 </script>
+
 </body>
 </html>
