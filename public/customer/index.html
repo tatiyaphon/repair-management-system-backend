@@ -72,78 +72,83 @@ header{
   gap:6px;
 }
 
-/* ================= BANNER ================= */
-/* ================= SMOOTH BANNER ================= */
-/* ================= FULL BLEED BANNER ================= */
-.banner-full{
-  position: relative;
-  width: 100vw;           /* เต็มจอจริง */
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
-  overflow: hidden;
-  background:#020617;
+/* ================= HERO BACKGROUND ================= */
+.hero-bg{
+  position:relative;
+  min-height:70vh;
+  background-image: url("/customer/banner.jpg");
+  background-size:cover;
+  background-position:center;
+  background-repeat:no-repeat;
+
+  display:flex;
+  align-items:center;
 }
 
-.banner-full img{
-  width: 100%;
-  height: 420px;
-  object-fit: cover;
-  object-position: center;
-  display: block;
-}
-
-/* overlay ทำให้ดูสมูท */
-.banner-full::after{
+/* overlay ทำให้จาง + อ่านง่าย */
+.hero-bg::before{
   content:"";
   position:absolute;
   inset:0;
+  background:
+    linear-gradient(
+      to right,
+      rgba(2,6,23,.85),
+      rgba(2,6,23,.55),
+      rgba(2,6,23,.35)
+    );
+  backdrop-filter: blur(2px); /* สมูท */
 }
 
-/* ข้อความบน banner */
-.banner-content{
-  position:absolute;
-  inset:0;
+/* เนื้อหาด้านหน้า */
+.hero-content{
+  position:relative;
   z-index:2;
-  display:flex;
-  align-items:center;
-  padding:40px;
-}
-
-.banner-text{
+  max-width:650px;
+  padding:40px 60px;
   color:#fff;
-  max-width:600px;
 }
 
-.banner-text h1{
-  margin:0 0 10px;
-  font-size:2.2rem;
+.hero-content h1{
+  font-size:2.4rem;
+  margin:0 0 12px;
 }
 
-.banner-text p{
-  margin:0;
+.hero-content p{
   font-size:1.05rem;
   opacity:.95;
+  margin-bottom:24px;
+}
+
+.hero-btn{
+  display:inline-block;
+  background:#2563eb;
+  color:#fff;
+  padding:14px 34px;
+  border-radius:999px;
+  text-decoration:none;
+  font-weight:500;
 }
 
 /* ================= MOBILE ================= */
 @media(max-width:768px){
-  .banner-full img{
-    height:260px;
-    object-position:center top;
+  .hero-bg{
+    min-height:50vh;
   }
 
-  .banner-content{
-    padding:20px;
+  .hero-content{
+    padding:24px;
   }
 
-  .banner-text h1{
-    font-size:1.4rem;
+  .hero-content h1{
+    font-size:1.5rem;
   }
 
-  .banner-text p{
+  .hero-content p{
     font-size:.9rem;
   }
 }
+
 
 /* ================= CONTAINER ================= */
 .container{
@@ -274,19 +279,21 @@ footer img{
   </a>
 </header>
 
-<div class="banner-full">
-  <img src="/customer/banner.jpg" alt="ร้านตุ้ยไอที">
-  
-  <div class="banner-content">
-    <div class="banner-text">
-    </div>
+<section class="hero-bg">
+  <div class="hero-content">
+    <h1>ศูนย์บริการซ่อมคอมพิวเตอร์</h1>
+    <p>
+      รับซ่อม | รับซื้อ–ขาย iPhone iPad Macbook  
+      พร้อมระบบตรวจสอบงานออนไลน์
+    </p>
+
+    <a href="/customer/check_status.html" class="hero-btn">
+      🔍 ตรวจสอบสถานะงานซ่อม
+    </a>
   </div>
-</div>
-<h1>ศูนย์บริการซ่อมคอมพิวเตอร์</h1>
-      <p>
-        รับซ่อม | รับซื้อ–ขาย iPhone iPad Macbook  
-        พร้อมระบบตรวจสอบงานออนไลน์
-      </p>
+</section>
+
+
 
 <div class="container">
 
