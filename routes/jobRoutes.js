@@ -3,6 +3,7 @@ const router = express.Router();
 const Job = require("../models/Job");
 const auth = require("../middleware/auth");
 const puppeteer = require("puppeteer");
+const Stock = require("../models/Stock");
 
 
 console.log("✅ jobRoutes loaded");
@@ -186,6 +187,51 @@ router.put("/:id", auth, async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "อัปเดตงานซ่อมไม่สำเร็จ" });
+  }
+});
+// POST /api/jobs/:id/withdraw
+router.post("/:id/use-part", verifyToken, async (req, res) => {
+  try {
+    const { stockId, quantity } = req.body;
+
+    if (!stockId || !quantity || quantity <= 0) {
+      return res.status(400).json({ message: "ข้อมูลไม่ครบถ้วน" });
+    }
+
+    const job = await Job.findById(req.params.id);
+    if (!job) {
+      return res.status(404).json({ message: "ไม่พบงานซ่อม" });
+    }
+
+    const stock = await Stock.findById(stockId);
+    if (!stock) {
+      return res.status(404).json({ message: "ไม่พบอะไหล่" });
+    }
+
+    if (stock.quantity < quantity) {
+      return res.status(400).json({ message: "อะไหล่ไม่เพียงพอ" });
+    }
+
+    // ตัดสต็อก
+    stock.quantity -= quantity;
+    await stock.save();
+
+    // บันทึกอะไหล่ที่ใช้กับงาน
+    job.usedParts = job.usedParts || [];
+    job.usedParts.push({
+      stock: stock._id,
+      name: stock.name,
+      model: stock.model,
+      quantity,
+      usedAt: new Date()
+    });
+
+    await job.save();
+
+    res.json({ message: "เบิกอะไหล่เรียบร้อย", job });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "เกิดข้อผิดพลาดในการเบิกอะไหล่" });
   }
 });
 
