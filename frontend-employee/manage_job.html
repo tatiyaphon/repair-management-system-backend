@@ -358,9 +358,6 @@ async function loadProfile() {
 /* =========================
    UTILS
 ========================= */
-function getJobId() {
-  return new URLSearchParams(location.search).get("id");
-}
 function formatInputDate(d) {
   return d ? new Date(d).toISOString().slice(0, 10) : "";
 }
@@ -403,13 +400,29 @@ async function fetchJob() {
     }
   });
 
+  const jobId = getJobId();
+
+// ✅ ตรวจ Job ID ตั้งแต่ต้น
+  if (!id) {
+    alert("ไม่พบ Job ID\nกรุณาเข้าหน้านี้จากปุ่ม 'จัดการ'");
+    location.replace("employee_dashboard.html");
+    return;
+  }
+
   if (!res.ok) {
     alert("ไม่พบงานซ่อม");
+    location.replace("employee_dashboard.html");
     return;
   }
 
   currentJob = await res.json();
   renderJob();
+
+  // ✅ ตั้งลิงก์ใบรับเครื่องหลังโหลดงาน
+  const receiptLink = document.getElementById("receipt-link");
+  if (receiptLink) {
+    receiptLink.href = `/employee/receipt.html?id=${currentJob._id}`;
+  }
 }
 
 
@@ -481,6 +494,11 @@ function renderJob() {
    UPDATE HELPERS
 ========================= */
 async function updateJob(body) {
+  if (!currentJob || !currentJob._id) {
+    alert("ไม่พบ Job ID");
+    return;
+  }
+
   const res = await fetch(`${API_BASE}/jobs/${currentJob._id}`, {
     method: "PUT",
     headers,
@@ -495,6 +513,7 @@ async function updateJob(body) {
 
   await fetchJob();
 }
+
 
 /* =========================
    EVENTS
