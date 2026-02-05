@@ -27,13 +27,13 @@ router.delete("/:id", verifyToken, async (req, res) => {
 });
 
 /* เบิก */
-router.patch("/:id/withdraw", verifyToken, async (req, res) => {
+router.post("/:id/withdraw", verifyToken, async (req, res) => {
   const { quantity, employeeName, jobRef } = req.body;
 
   const stock = await Stock.findById(req.params.id);
   if (!stock) return res.status(404).json({ message: "ไม่พบอะไหล่" });
 
-  if (stock.quantity < quantity) {
+  if (quantity > stock.quantity) {
     return res.status(400).json({ message: "จำนวนไม่พอ" });
   }
 
@@ -46,7 +46,7 @@ router.patch("/:id/withdraw", verifyToken, async (req, res) => {
   });
 
   await stock.save();
-  res.json({ message: "เบิกสำเร็จ", stock });
+  res.json({ message: "เบิกอะไหล่สำเร็จ" });
 });
 
 

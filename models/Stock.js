@@ -55,11 +55,17 @@ const stockSchema = new mongoose.Schema({
   },
 
   // ✅ ประวัติการเบิกอะไหล่
-  withdrawHistory: {
-    type: [withdrawHistorySchema],
-    default: []
-  }
-
+   withdrawHistory: [
+    {
+      quantity: Number,
+      employeeName: String,
+      jobRef: String,
+      withdrawnAt: {
+        type: Date,
+        default: Date.now
+      }
+    }
+  ]
 }, { timestamps: true });
 
 module.exports = mongoose.model("Stock", stockSchema);

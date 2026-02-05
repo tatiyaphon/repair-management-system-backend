@@ -169,7 +169,7 @@
       .btn-group{flex-direction:column;}
       .btn{width:100%;justify-content:center;}
       .btn-receipt {
-    width: 100%;
+    width: 80%;
     justify-content: center;
   }
     }
@@ -178,7 +178,7 @@
   align-items: center;
   gap: 10px;
 
-  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  background: linear-gradient(120deg, #3b82f6, #2563eb);
   color: #ffffff;
 
   padding: 14px 30px;
@@ -207,6 +207,24 @@
   transform: translateY(0);
   box-shadow: 0 8px 16px rgba(59, 130, 246, 0.35);
 }
+.btn-receipt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 26px;
+  background: #3498db;
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+.btn-receipt:hover {
+  background: #2c80b4;
+  transform: translateY(-2px);
+}
 
   </style>
 
@@ -229,13 +247,12 @@
 <div id="job-details"></div>
 
 <a
-  href="/api/jobs/${job._id}/receipt"
+  id="receipt-link"
   target="_blank"
   class="btn-receipt"
 >
   ดูใบรับเครื่อง
 </a>
-
       <hr>
               <h3 class="section-header"><i class="fas fa-tag"></i> แก้ไขประเภทงานซ่อม</h3>
       <form id="job-type-form">
@@ -506,17 +523,30 @@ function renderJob() {
   if (!div) return;
 
   div.innerHTML = `
-    <div><strong>ลูกค้า:</strong> ${currentJob.customerName}</div>
-    <div><strong>อุปกรณ์:</strong> ${currentJob.deviceType} ${currentJob.deviceModel}</div>
-    <div><strong>อาการ:</strong> ${currentJob.symptom}</div>
-    <div><strong>สถานะ:</strong>
-      <span class="badge ${statusBadgeClass(currentJob.status)}">
-        ${currentJob.status}
-      </span>
-    </div>
-    <div><strong>วันที่รับ:</strong> ${formatTH(currentJob.receivedDate)}</div>
-    <div><strong>ราคา:</strong> ${currentJob.priceQuoted || "-"} บาท</div>
-  `;
+  <div><strong>ลูกค้า:</strong> ${currentJob.customerName}</div>
+  <div><strong>อุปกรณ์:</strong> ${currentJob.deviceType} ${currentJob.deviceModel}</div>
+  <div><strong>อาการ:</strong> ${currentJob.symptom}</div>
+  <div>
+    <strong>สถานะ:</strong>
+    <span class="badge ${statusBadgeClass(currentJob.status)}">
+      ${currentJob.status}
+    </span>
+  </div>
+  <div><strong>วันที่รับ:</strong> ${formatTH(currentJob.receivedDate)}</div>
+  <div><strong>ราคา:</strong> ${currentJob.priceQuoted || "-"} บาท</div>
+
+  <!-- ปุ่มดูใบรับเครื่อง -->
+  <div style="margin-top:20px; text-align:center;">
+    <a
+      href="/api/jobs/${currentJob._id}/receipt"
+      target="_blank"
+      class="btn-receipt"
+    >
+      <i class="fas fa-file-pdf"></i> ดูใบรับเครื่อง
+    </a>
+  </div>
+`;
+
 
   // ===== ✅ ส่วนที่ต้องเพิ่ม =====
   const receiptLink = document.getElementById("receipt-link");
