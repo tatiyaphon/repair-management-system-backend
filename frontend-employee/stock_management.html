@@ -618,46 +618,97 @@
             <h2 class="text-2xl font-bold text-orange-600 mb-6 border-b pb-2 flex items-center">
                 <i class="fas fa-dolly-flatbed mr-2"></i> เบิกอะไหล่
             </h2>
-            <form id="withdrawForm" class="space-y-4">
-                <input type="hidden" id="withdrawStockId">
-                <input type="hidden" id="maxQuantity">
+           <form id="withdrawForm" class="space-y-4">
 
-                <div class="bg-gray-100 p-4 rounded-lg border border-gray-200">
-                    <p class="text-lg font-semibold text-gray-800 mb-1">
-                        อะไหล่: <strong id="withdrawItemName" class="text-emerald-700"></strong>
-                    </p>
-                    <p class="text-sm text-gray-600">
-                        คงเหลือปัจจุบัน: <strong id="currentQuantity" class="text-lg font-bold">0</strong> ชิ้น
-                    </p>
-                </div>
+  <!-- hidden -->
+  <input type="hidden" id="withdrawStockId">
+  <input type="hidden" id="maxQuantity">
 
-                <div>
-                    <label for="withdrawEmployeeName" class="block font-medium text-gray-700">ชื่อผู้เบิก:</label>
-                    <input type="text" id="withdrawEmployeeName" name="withdrawEmployeeName" required placeholder="ชื่อ-นามสกุล ช่าง" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
-                </div>
-
-                <div>
-                    <label for="withdrawQuantity" class="block font-medium text-gray-700">จำนวนที่เบิก:</label>
-                    <input type="number" id="withdrawQuantity" name="withdrawQuantity" required min="1" value="1" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
-                    <p id="withdrawError" class="text-red-500 text-sm mt-1 hidden">จำนวนที่เบิกต้องไม่เกินจำนวนคงเหลือ</p>
-                </div>
-                
-                <div>
-                    <label for="withdrawJobId" class="block font-medium text-gray-700">อ้างอิงงานซ่อม (ไม่บังคับ):</label>
-                    <input type="text" id="withdrawJobId" name="withdrawJobId" placeholder="เช่น JOB001" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
-                </div>
-                
-                <div>
-                    <label for="itemPricePerUnit" class="block font-medium text-gray-700">ราคา:</label>
-                    <input type="number" id="itemPricePerUnit" name="itemPricePerUnit" required min="0" value="0" class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500">
-                </div>
-
-                <button type="submit" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition duration-300 shadow-lg mt-6">
-                    <i class="fas fa-save mr-1"></i> บันทึกการเบิก
-                </button>
-            </form>
-        </div>
+  <!-- กล่องข้อมูลอะไหล่ -->
+  <div class="bg-gray-100 p-4 rounded-lg border border-gray-200">
+    <div class="text-sm text-gray-600 mb-1">
+      อะไหล่
     </div>
+    <div class="text-lg font-semibold text-emerald-700" id="withdrawItemName">
+      -
+    </div>
+
+    <div class="text-sm text-gray-600 mt-2">
+      คงเหลือปัจจุบัน:
+      <strong id="currentQuantity" class="text-gray-800">0</strong> ชิ้น
+    </div>
+  </div>
+
+  <!-- ผู้เบิก -->
+  <div>
+    <label for="withdrawEmployeeName" class="block font-medium text-gray-700">
+      ผู้เบิก
+    </label>
+    <input
+      type="text"
+      id="withdrawEmployeeName"
+      required
+      placeholder="ชื่อ-นามสกุล"
+      class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+    >
+  </div>
+
+  <!-- จำนวน -->
+  <div>
+    <label for="withdrawQuantity" class="block font-medium text-gray-700">
+      จำนวนที่เบิก
+    </label>
+    <input
+      type="number"
+      id="withdrawQuantity"
+      required
+      min="1"
+      value="1"
+      class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+    >
+    <p id="withdrawError" class="text-red-500 text-sm mt-1 hidden">
+      จำนวนที่เบิกต้องไม่เกินจำนวนคงเหลือ
+    </p>
+  </div>
+
+  <!-- อ้างอิงงาน -->
+  <div>
+    <label for="withdrawJobId" class="block font-medium text-gray-700">
+      อ้างอิงงาน
+    </label>
+    <input
+      type="text"
+      id="withdrawJobId"
+      placeholder="เช่น JOB001"
+      class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+    >
+  </div>
+
+  <!-- วันที่เบิก -->
+  <div>
+    <label for="withdrawDate" class="block font-medium text-gray-700">
+      วันที่เบิก
+    </label>
+    <input
+      type="datetime-local"
+      id="withdrawDate"
+      class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+    >
+    <p class="text-xs text-gray-500 mt-1">
+      * หากไม่เลือก ระบบจะใช้เวลาปัจจุบัน
+    </p>
+  </div>
+
+  <!-- ปุ่ม -->
+  <button
+    type="submit"
+    class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 rounded-xl transition duration-300 shadow-lg mt-6"
+  >
+    <i class="fas fa-save mr-1"></i> บันทึกการเบิก
+  </button>
+
+</form>
+
 
 <script>
 /* ==========================================================
@@ -944,6 +995,14 @@ function renderWithdrawHistory() {
     `;
   }
 }
+const withdrawnAt = document.getElementById("withdrawDate").value;
+
+const payload = {
+  quantity: Number(withdrawQuantity.value),
+  employeeName: withdrawEmployeeName.value,
+  jobRef: withdrawJobId.value || null,
+  withdrawnAt: withdrawnAt ? new Date(withdrawnAt) : new Date()
+};
 
 
 </script>
