@@ -214,7 +214,7 @@ tbody td{
 
     <div class="doc">
       <h2>ใบรับเครื่องซ่อม</h2>
-      <div class="no" id="receiptNumber">-</div>
+      <div class="no">No. <span id="receiptNo"></span></div>
       <div id="receivedDate">-</div>
     </div>
   </div>
@@ -278,34 +278,33 @@ tbody td{
 
 <script>
 const API_BASE = "/api";
+const token = localStorage.getItem("token");
+
+if (!token) {
+  alert("กรุณาเข้าสู่ระบบ");
+  location.href = "/employee/login.html";
+}
 
 const jobId = new URLSearchParams(location.search).get("id");
 
-async function loadReceipt(){
-  if(!jobId){ alert("ไม่พบข้อมูลงาน"); return; }
-
-  const res = await fetch(`${API_BASE}/jobs/${jobId}`);
-  const job = await res.json();
-
-  document.getElementById("receiptNumber").textContent = `No. ${job.receiptNumber}`;
-  document.getElementById("receivedDate").textContent =
-    "วันที่ " + new Date(job.receivedDate).toLocaleDateString("th-TH");
-
+fetch(`${API_BASE}/jobs/${jobId}`, {
+  headers: {
+    Authorization: `Bearer ${token}`
+  }
+})
+.then(res => {
+  if (!res.ok) throw new Error("Unauthorized");
+  return res.json();
+})
+.then(job => {
+  document.getElementById("receiptNo").textContent = job.receiptNumber;
   document.getElementById("customerName").textContent = job.customerName;
-  document.getElementById("customerPhone").textContent = job.customerPhone || "-";
-  document.getElementById("customerAddress").textContent = job.customerAddress || "-";
-  document.getElementById("accessories").textContent = job.accessories || "-";
-  document.getElementById("jobStatus").textContent = job.status;
-  document.getElementById("deviceDetail").textContent =
-    `${job.deviceType} ${job.deviceModel}`;
-  document.getElementById("symptom").textContent = job.symptom;
-  document.getElementById("priceQuoted").textContent =
-    `${(job.priceQuoted ?? 0).toLocaleString()} บาท`;
-  document.getElementById("signCustomer").textContent = job.customerName;
-}
-
-document.addEventListener("DOMContentLoaded", loadReceipt);
+  // เติม field อื่น ๆ
+})
+.catch(() => {
+  alert("ไม่สามารถโหลดใบรับเครื่องได้");
+  location.href = "/employee/employee_dashboard.html";
+});
 </script>
-
 </body>
 </html>
