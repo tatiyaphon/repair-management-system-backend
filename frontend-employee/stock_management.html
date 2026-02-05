@@ -547,20 +547,20 @@
     <span class="section-line"></span>
     ประวัติการเบิกอะไหล่
   </h2>
+   <label>กรองตามอะไหล่:</label>
+    <select id="withdrawFilterName">
+      <option value="all">ทั้งหมด</option>
+    </select>
+  </div>
 
-  <div class="stock-controls">
-                <div class="filter-group">
-                    <label for="typeFilter"><i class="fas fa-filter"></i> กรองตามประเภท:</label>
-                    <select id="typeFilter" onchange="filterStock()">
-                        <option value="all">ทั้งหมด</option>
-                    </select>
-                </div>
-                
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" onkeyup="filterStock()" placeholder="ค้นหา ID, ชื่อ, รุ่นอะไหล่...">
-                </div>
-                
+  <div class="filter-right">
+    <i class="fas fa-search"></i>
+    <input
+      type="text"
+      id="withdrawSearch"
+      placeholder="ค้นหา อะไหล่, รุ่น, ผู้เบิก, งาน..."
+    >
+  </div>
   <div style="overflow-x:auto;">
     <table class="styled-table" id="withdrawHistoryTable">
       <thead>
@@ -979,12 +979,28 @@ function renderWithdrawHistory() {
   const tbody = document.querySelector("#withdrawHistoryTable tbody");
   if (!tbody) return;
 
+  const filterName = document.getElementById("withdrawFilterName").value;
+  const searchText = document
+    .getElementById("withdrawSearch")
+    .value
+    .toLowerCase();
+
   tbody.innerHTML = "";
+  let found = false;
 
   stockData.forEach(stock => {
-    if (!stock.withdrawHistory || !stock.withdrawHistory.length) return;
+    if (!stock.withdrawHistory) return;
+
+    if (filterName !== "all" && stock.name !== filterName) return;
 
     stock.withdrawHistory.forEach(h => {
+      const text =
+        `${stock.name} ${stock.model} ${h.employeeName} ${h.jobRef}`.toLowerCase();
+
+      if (searchText && !text.includes(searchText)) return;
+
+      found = true;
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${stock.name}</td>
@@ -998,16 +1014,17 @@ function renderWithdrawHistory() {
     });
   });
 
-  if (!tbody.innerHTML) {
+  if (!found) {
     tbody.innerHTML = `
       <tr>
         <td colspan="6" style="text-align:center;color:#9ca3af;">
-          ยังไม่มีประวัติการเบิกอะไหล่
+          ไม่พบข้อมูลการเบิก
         </td>
       </tr>
     `;
   }
 }
+
 const withdrawnAt = document.getElementById("withdrawDate").value;
 
 const payload = {
@@ -1016,6 +1033,19 @@ const payload = {
   jobRef: withdrawJobId.value || null,
   withdrawnAt: withdrawnAt ? new Date(withdrawnAt) : new Date()
 };
+function initWithdrawFilter() {
+  const select = document.getElementById("withdrawFilterName");
+  if (!select) return;
+
+  const names = [...new Set(stockData.map(s => s.name))];
+
+  names.forEach(name => {
+    const opt = document.createElement("option");
+    opt.value = name;
+    opt.textContent = name;
+    select.appendChild(opt);
+  });
+}
 
 
 </script>
