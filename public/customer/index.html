@@ -4,11 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Google -->
-<meta name="google-site-verification" content="jZQiJZhJWh2XwbxKZSqnWIvqMbUgGGMjyWo082zkwc0" />
 <title>ตรวจสอบสถานะงานซ่อม | ร้านตุ้ยไอที</title>
 <meta name="description" content="ตรวจสอบสถานะงานซ่อมคอมพิวเตอร์ ร้านตุ้ยไอที เช็คสถานะงานซ่อมออนไลน์ด้วยเลขใบรับเครื่อง">
-<meta name="keywords" content="ร้านซ่อมคอม, เช็คงานซ่อม, ร้านตุ้ยไอที, ซ่อมคอม, ซ่อมโน้ตบุ๊ก">
+<meta name="keywords" content="ร้านซ่อมคอม, ร้านตุ้ยไอที, เช็คงานซ่อม, ซ่อมโน้ตบุ๊ก">
 <meta name="robots" content="index,follow">
 <link rel="canonical" href="https://tui-it.org/">
 
@@ -18,9 +16,9 @@
 
 <style>
 :root{
+  --dark:#020617;
   --primary:#0f172a;
   --accent:#2563eb;
-  --accent-soft:#60a5fa;
   --bg:#f1f5f9;
   --card:#ffffff;
   --border:#e5e7eb;
@@ -39,7 +37,7 @@ body{
 
 /* ================= HEADER ================= */
 header{
-  background:#020617;
+  background:var(--dark);
   color:#fff;
   padding:14px 28px;
   display:flex;
@@ -47,7 +45,20 @@ header{
   justify-content:space-between;
 }
 
-header img{height:42px}
+.header-left{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
+.header-left img{
+  height:42px;
+}
+
+.header-left span{
+  font-weight:600;
+  font-size:1.05rem;
+}
 
 .login-btn{
   background:var(--accent);
@@ -61,9 +72,11 @@ header img{height:42px}
   gap:6px;
 }
 
-.login-btn:hover{background:#1d4ed8}
-
 /* ================= BANNER ================= */
+.banner{
+  position:relative;
+}
+
 .banner img{
   width:100%;
   max-height:420px;
@@ -71,19 +84,45 @@ header img{height:42px}
   display:block;
 }
 
-.banner-bar{
-  background:#020617;
+.banner-overlay{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(
+    to right,
+    rgba(2,6,23,.75),
+    rgba(2,6,23,.25)
+  );
+  display:flex;
+  align-items:center;
+  padding:40px;
+}
+
+.banner-box{
   color:#fff;
-  padding:12px 20px;
-  text-align:center;
-  font-size:.95rem;
+  max-width:600px;
+}
+
+.banner-box img{
+  height:60px;
+  margin-bottom:12px;
+}
+
+.banner-box h1{
+  margin:0 0 8px;
+  font-size:2.1rem;
+}
+
+.banner-box p{
+  margin:0;
+  font-size:1.05rem;
+  opacity:.9;
 }
 
 /* ================= CONTAINER ================= */
 .container{
   max-width:1200px;
   margin:auto;
-  padding:50px 30px;
+  padding:60px 30px;
 }
 
 /* ================= CHECK ================= */
@@ -99,7 +138,10 @@ header img{height:42px}
   box-shadow:0 20px 40px rgba(0,0,0,.25);
 }
 
-.check-box h2{margin:0;font-weight:500}
+.check-box h2{
+  margin:0;
+  font-weight:500;
+}
 
 .check-box a{
   background:#fff;
@@ -110,9 +152,7 @@ header img{height:42px}
   font-weight:600;
 }
 
-.check-box a:hover{background:#e0e7ff}
-
-/* ================= SERVICES ================= */
+/* ================= SECTIONS ================= */
 .section-title{
   margin:60px 0 20px;
   font-size:1.6rem;
@@ -129,12 +169,6 @@ header img{height:42px}
   border:1px solid var(--border);
   border-radius:16px;
   padding:28px;
-  transition:.25s;
-}
-
-.stat:hover{
-  transform:translateY(-6px);
-  box-shadow:0 20px 30px rgba(0,0,0,.08);
 }
 
 .stat i{
@@ -143,11 +177,9 @@ header img{height:42px}
   margin-bottom:12px;
 }
 
-.stat h3{margin:0 0 6px}
-
 /* ================= TIMELINE ================= */
 .timeline{
-  margin-top:60px;
+  margin-top:40px;
 }
 
 .step{
@@ -163,7 +195,7 @@ header img{height:42px}
 
 .step i{color:var(--accent)}
 
-/* ================= CONTACT FLOAT ================= */
+/* ================= FLOAT ================= */
 .contact-float{
   position:fixed;
   bottom:26px;
@@ -181,15 +213,21 @@ header img{height:42px}
 
 /* ================= FOOTER ================= */
 footer{
-  background:#020617;
+  background:var(--dark);
   color:#9ca3af;
   text-align:center;
-  padding:22px;
+  padding:26px;
   font-size:.85rem;
+}
+
+footer img{
+  height:36px;
+  margin-bottom:6px;
 }
 
 /* ================= MOBILE ================= */
 @media(max-width:768px){
+  .banner-box h1{font-size:1.5rem}
   .check-box{
     flex-direction:column;
     text-align:center;
@@ -202,17 +240,25 @@ footer{
 <body>
 
 <header>
-  <img src="/customer/logo1.png" alt="ร้านตุ้ยไอที">
+  <div class="header-left">
+    <img src="/customer/logo1.png" alt="ร้านตุ้ยไอที">
+    <span>ร้านตุ้ยไอที</span>
+  </div>
   <a href="/employee/login.html" class="login-btn">
     <i class="fas fa-user-lock"></i> เข้าสู่ระบบ
   </a>
 </header>
 
+<!-- BANNER -->
 <div class="banner">
   <img src="/customer/banner.jpg" alt="ร้านตุ้ยไอที">
-</div>
-<div class="banner-bar">
-  💻 รับซ่อมคอม | รับซื้อ–ขาย iPhone iPad Macbook | อัปเดตสถานะงานออนไลน์
+  <div class="banner-overlay">
+    <div class="banner-box">
+      <img src="/customer/logo1.png" alt="ร้านตุ้ยไอที">
+      <h1>ศูนย์บริการซ่อมคอมพิวเตอร์</h1>
+      <p>รับซ่อม | รับซื้อ–ขาย iPhone iPad Macbook พร้อมระบบตรวจสอบงานออนไลน์</p>
+    </div>
+  </div>
 </div>
 
 <div class="container">
@@ -222,7 +268,7 @@ footer{
     <a href="/customer/check_status.html">ตรวจสอบงานซ่อม</a>
   </div>
 
-  <h3 class="section-title">บริการของเรา</h3>
+  <h3 class="section-title">บริการของร้าน</h3>
   <div class="stats">
     <div class="stat">
       <i class="fas fa-tools"></i>
@@ -232,12 +278,12 @@ footer{
     <div class="stat">
       <i class="fas fa-clock"></i>
       <h3>อัปเดตสถานะ</h3>
-      <p>ลูกค้าตรวจสอบงานซ่อมได้ตลอดเวลา</p>
+      <p>ลูกค้าตรวจสอบงานได้ตลอดเวลา</p>
     </div>
     <div class="stat">
       <i class="fas fa-shield-alt"></i>
       <h3>ข้อมูลปลอดภัย</h3>
-      <p>ระบบจัดการข้อมูลอย่างปลอดภัย</p>
+      <p>จัดการข้อมูลลูกค้าอย่างปลอดภัย</p>
     </div>
     <div class="stat">
       <i class="fas fa-headset"></i>
@@ -261,7 +307,8 @@ footer{
 </button>
 
 <footer>
-  © 2025 ร้านตุ้ยไอที | Computer Repair Tracking System
+  <img src="/customer/logo1.png" alt="ร้านตุ้ยไอที">
+  <div>© 2025 ร้านตุ้ยไอที | Computer Repair Tracking System</div>
 </footer>
 
 </body>
