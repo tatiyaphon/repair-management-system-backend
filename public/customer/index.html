@@ -35,20 +35,14 @@ body{
 }
 
 /* ================= HEADER ================= */
-/* ================= HEADER (WHITE) ================= */
 header{
-  background:#ffffff;                 /* เปลี่ยนเป็นสีขาว */
-  color:#111827;
+  background:var(--dark);
+  color:#fff;
   padding:14px 28px;
   display:flex;
   align-items:center;
   justify-content:space-between;
-  border-bottom:1px solid #e5e7eb;    /* เส้นบาง ๆ ดูแพง */
-  position:sticky;
-  top:0;
-  z-index:1000;
 }
-
 
 .header-left{
   display:flex;
@@ -311,19 +305,6 @@ footer{
 .contact-float{
   background:#00b900;
 }
-.hero {
-  width: 100%;
-  min-height: 100vh;              /* เต็มจอ */
-  background-image: url("/customer/banner.jpg"); /* รูปของคุณ */
-  background-size: cover;         /* ⭐ สำคัญ */
-  background-position: center;    /* จัดกึ่งกลาง */
-  background-repeat: no-repeat;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  position: relative;
-}
 
 </style>
 </head>
@@ -341,7 +322,7 @@ footer{
 </header>
 
 <section class="hero-bg">
-  <div class="hero-overlay">
+  <div class="hero-content">
     <h1>ศูนย์บริการซ่อมคอมพิวเตอร์</h1>
     <p>
       รับซ่อม | รับซื้อ–ขาย iPhone iPad Macbook  
