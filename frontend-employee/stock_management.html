@@ -430,6 +430,57 @@
                 padding: 12px 10px;
             }
         }
+    .content-section{
+  background:#fff;
+  border-radius:14px;
+  padding:30px;
+  box-shadow:0 10px 30px rgba(0,0,0,.06);
+  margin-bottom:30px;
+}
+
+.section-title{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  font-size:1.6rem;
+  font-weight:600;
+  color:#1f3a4d;
+  margin-bottom:20px;
+}
+
+.section-line{
+  width:4px;
+  height:28px;
+  background:#22c55e;
+  border-radius:4px;
+}
+
+.styled-table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+}
+
+.styled-table thead{
+  background:#2c3e50;
+  color:#fff;
+}
+
+.styled-table th,
+.styled-table td{
+  padding:14px 16px;
+  text-align:left;
+}
+
+.styled-table tbody tr{
+  background:#fff;
+  border-bottom:1px solid #edf2f7;
+}
+
+.styled-table tbody tr:hover{
+  background:#f9fafb;
+}
+
     </style>
 </head>
 <body>
@@ -488,21 +539,30 @@
             </div>
         </div>
     </main>
-<div class="content-section" style="margin-top:30px">
-  <h2 class="section-title">ประวัติการเบิกอะไหล่</h2>
+<!-- ===============================
+     ประวัติการเบิกอะไหล่
+=============================== -->
+<div class="content-section" style="margin-top:30px;">
+  <h2 class="section-title">
+    <span class="section-line"></span>
+    ประวัติการเบิกอะไหล่
+  </h2>
 
-  <div class="table-responsive">
+  <div style="overflow-x:auto;">
     <table class="styled-table" id="withdrawHistoryTable">
       <thead>
         <tr>
           <th>อะไหล่</th>
+          <th>รุ่น</th>
           <th>จำนวน</th>
           <th>ผู้เบิก</th>
           <th>อ้างอิงงาน</th>
-          <th>วันที่</th>
+          <th>วันที่เบิก</th>
         </tr>
       </thead>
-      <tbody></tbody>
+      <tbody>
+        <!-- JS เติม -->
+      </tbody>
     </table>
   </div>
 </div>
@@ -880,15 +940,18 @@ router.post("/", auth, requireRole("admin"), async (req, res) => {
 });
 function renderWithdrawHistory() {
   const tbody = document.querySelector("#withdrawHistoryTable tbody");
+  if (!tbody) return;
+
   tbody.innerHTML = "";
 
   stockData.forEach(stock => {
-    if (!stock.withdrawHistory) return;
+    if (!stock.withdrawHistory || !stock.withdrawHistory.length) return;
 
     stock.withdrawHistory.forEach(h => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
-        <td>${stock.name} (${stock.model})</td>
+        <td>${stock.name}</td>
+        <td>${stock.model}</td>
         <td>${h.quantity}</td>
         <td>${h.employeeName || "-"}</td>
         <td>${h.jobRef || "-"}</td>
@@ -897,7 +960,18 @@ function renderWithdrawHistory() {
       tbody.appendChild(tr);
     });
   });
+
+  if (!tbody.innerHTML) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" style="text-align:center;color:#9ca3af;">
+          ยังไม่มีประวัติการเบิกอะไหล่
+        </td>
+      </tr>
+    `;
+  }
 }
+
 
 </script>
 
