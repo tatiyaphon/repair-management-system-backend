@@ -17,7 +17,6 @@
 <style>
 :root{
   --dark:#020617;
-  --primary:#0f172a;
   --accent:#2563eb;
   --bg:#f1f5f9;
   --card:#ffffff;
@@ -27,9 +26,9 @@
 }
 
 *{box-sizing:border-box}
+html,body{margin:0;padding:0}
 
 body{
-  margin:0;
   font-family:'Kanit',sans-serif;
   background:var(--bg);
   color:var(--text);
@@ -51,14 +50,7 @@ header{
   gap:12px;
 }
 
-.header-left img{
-  height:42px;
-}
-
-.header-left span{
-  font-weight:600;
-  font-size:1.05rem;
-}
+.header-left img{height:42px}
 
 .login-btn{
   background:var(--accent);
@@ -76,36 +68,29 @@ header{
 .hero-bg{
   position:relative;
   min-height:70vh;
-  background-image: url("/customer/banner.jpg");
-  background-size:cover;
-  background-position:center;
-  background-repeat:no-repeat;
-
+  background:url("/customer/banner.jpg") center/cover no-repeat;
   display:flex;
   align-items:center;
 }
 
-/* overlay ทำให้จาง + อ่านง่าย */
 .hero-bg::before{
   content:"";
   position:absolute;
   inset:0;
-  background:
-    linear-gradient(
-      to right,
-      rgba(2,6,23,.85),
-      rgba(2,6,23,.55),
-      rgba(2,6,23,.35)
-    );
-  backdrop-filter: blur(2px); /* สมูท */
+  background:linear-gradient(
+    to right,
+    rgba(2,6,23,.88),
+    rgba(2,6,23,.55),
+    rgba(2,6,23,.35)
+  );
+  backdrop-filter: blur(2px);
 }
 
-/* เนื้อหาด้านหน้า */
 .hero-content{
   position:relative;
   z-index:2;
-  max-width:650px;
-  padding:40px 60px;
+  max-width:680px;
+  padding:60px;
   color:#fff;
 }
 
@@ -116,54 +101,38 @@ header{
 
 .hero-content p{
   font-size:1.05rem;
+  margin-bottom:26px;
   opacity:.95;
-  margin-bottom:24px;
 }
 
 .hero-btn{
   display:inline-block;
-  background:#2563eb;
+  background:var(--accent);
   color:#fff;
-  padding:14px 34px;
+  padding:14px 36px;
   border-radius:999px;
   text-decoration:none;
   font-weight:500;
 }
 
-/* ================= MOBILE ================= */
-@media(max-width:768px){
-  .hero-bg{
-    min-height:50vh;
-  }
-
-  .hero-content{
-    padding:24px;
-  }
-
-  .hero-content h1{
-    font-size:1.5rem;
-  }
-
-  .hero-content p{
-    font-size:.9rem;
-  }
+/* ================= MAIN ================= */
+.container{
+  max-width:1200px;
+  margin:auto;
+  padding:70px 30px;
 }
 
-/* ================= CHECK ================= */
+/* ================= CHECK BOX ================= */
 .check-box{
   background:linear-gradient(135deg,#1e3a8a,#2563eb);
   color:#fff;
   border-radius:18px;
   padding:40px;
   display:flex;
-  align-items:center;
   justify-content:space-between;
+  align-items:center;
   gap:20px;
-}
-
-.check-box h2{
-  margin:0;
-  font-weight:500;
+  box-shadow:0 20px 40px rgba(0,0,0,.2);
 }
 
 .check-box a{
@@ -177,10 +146,11 @@ header{
 
 /* ================= SECTIONS ================= */
 .section-title{
-  margin:60px 0 20px;
+  margin:70px 0 20px;
   font-size:1.6rem;
 }
 
+/* ================= SERVICES ================= */
 .stats{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
@@ -197,28 +167,23 @@ header{
 .stat i{
   font-size:1.7rem;
   color:var(--accent);
-  margin-bottom:12px;
+  margin-bottom:10px;
 }
 
 /* ================= TIMELINE ================= */
-.timeline{
-  margin-top:40px;
-}
-
-.step{
+.timeline .step{
   background:var(--card);
   border:1px solid var(--border);
   border-radius:12px;
   padding:16px 20px;
   display:flex;
-  align-items:center;
   gap:14px;
   margin-bottom:12px;
 }
 
 .step i{color:var(--accent)}
 
-/* ================= FLOAT ================= */
+/* ================= FLOAT BUTTON ================= */
 .contact-float{
   position:fixed;
   bottom:26px;
@@ -242,19 +207,100 @@ footer{
   font-size:.85rem;
 }
 
-footer img{
-  height:36px;
-  margin-bottom:6px;
-}
-
-/* ================= MOBILE ================= */
+/* ================= MOBILE (TABLET) ================= */
 @media(max-width:768px){
-  .banner-box h1{font-size:1.5rem}
+  .hero-bg{min-height:55vh}
+  .hero-content{padding:28px}
+  .hero-content h1{font-size:1.6rem}
+  .hero-content p{font-size:.95rem}
+
   .check-box{
     flex-direction:column;
     text-align:center;
   }
   .check-box a{width:100%}
+}
+
+/* ================= MOBILE (PHONE) ================= */
+@media(max-width:480px){
+
+  header{
+    padding:10px 14px;
+  }
+
+  .header-left img{
+    height:34px;
+  }
+
+  .login-btn{
+    padding:6px 14px;
+    font-size:.8rem;
+  }
+
+  .hero-bg{
+    min-height:48vh;
+  }
+
+  .hero-bg::before{
+    background:linear-gradient(
+      to bottom,
+      rgba(2,6,23,.9),
+      rgba(2,6,23,.65),
+      rgba(2,6,23,.45)
+    );
+  }
+
+  .hero-content{
+    padding:20px;
+  }
+
+  .hero-content h1{
+    font-size:1.35rem;
+    line-height:1.3;
+  }
+
+  .hero-content p{
+    font-size:.9rem;
+    line-height:1.5;
+  }
+
+  .hero-btn{
+    width:100%;
+    text-align:center;
+    padding:14px;
+    font-size:.95rem;
+  }
+
+  .container{
+    padding:50px 16px;
+  }
+
+  .section-title{
+    font-size:1.35rem;
+    margin:50px 0 16px;
+  }
+
+  .stat{
+    padding:20px;
+  }
+
+  .timeline .step{
+    font-size:.95rem;
+    padding:14px 16px;
+  }
+
+  .contact-float{
+    width:52px;
+    height:52px;
+    font-size:20px;
+    bottom:18px;
+    right:18px;
+  }
+
+  footer{
+    font-size:.75rem;
+    padding:20px 14px;
+  }
 }
 </style>
 </head>
@@ -264,7 +310,7 @@ footer img{
 <header>
   <div class="header-left">
     <img src="/customer/logo1.png" alt="ร้านตุ้ยไอที">
-    <span>ร้านตุ้ยไอที</span>
+    <strong>ร้านตุ้ยไอที</strong>
   </div>
   <a href="/employee/login.html" class="login-btn">
     <i class="fas fa-user-lock"></i> เข้าสู่ระบบ
@@ -276,22 +322,61 @@ footer img{
     <h1>ศูนย์บริการซ่อมคอมพิวเตอร์</h1>
     <p>
       รับซ่อม | รับซื้อ–ขาย iPhone iPad Macbook  
-      พร้อมระบบตรวจสอบงานออนไลน์
+      พร้อมระบบตรวจสอบสถานะงานออนไลน์
     </p>
-
     <a href="/customer/check_status.html" class="hero-btn">
       🔍 ตรวจสอบสถานะงานซ่อม
     </a>
   </div>
 </section>
 
+<div class="container">
+
+  <div class="check-box">
+    <h2>ตรวจสอบสถานะงานซ่อมของคุณได้ทันที</h2>
+    <a href="/customer/check_status.html">ตรวจสอบงานซ่อม</a>
+  </div>
+
+  <h3 class="section-title">บริการของร้าน</h3>
+  <div class="stats">
+    <div class="stat">
+      <i class="fas fa-tools"></i>
+      <h3>ซ่อมมาตรฐาน</h3>
+      <p>ตรวจสอบทุกขั้นตอนโดยช่างผู้เชี่ยวชาญ</p>
+    </div>
+    <div class="stat">
+      <i class="fas fa-clock"></i>
+      <h3>อัปเดตออนไลน์</h3>
+      <p>ลูกค้าตรวจสอบสถานะงานได้ตลอดเวลา</p>
+    </div>
+    <div class="stat">
+      <i class="fas fa-shield-alt"></i>
+      <h3>ข้อมูลปลอดภัย</h3>
+      <p>จัดการข้อมูลลูกค้าอย่างเป็นระบบ</p>
+    </div>
+    <div class="stat">
+      <i class="fas fa-headset"></i>
+      <h3>ติดต่อสะดวก</h3>
+      <p>สอบถามข้อมูลได้โดยตรงกับร้าน</p>
+    </div>
+  </div>
+
+  <h3 class="section-title">ขั้นตอนงานซ่อม</h3>
+  <div class="timeline">
+    <div class="step"><i class="fas fa-check-circle"></i> รับเครื่อง</div>
+    <div class="step"><i class="fas fa-spinner"></i> ตรวจสอบอาการ</div>
+    <div class="step"><i class="fas fa-wrench"></i> ดำเนินการซ่อม</div>
+    <div class="step"><i class="fas fa-box"></i> ซ่อมเสร็จ พร้อมรับเครื่อง</div>
+  </div>
+
+</div>
 
 <button class="contact-float">
   <i class="fas fa-headset"></i>
 </button>
 
 <footer>
-  <div>© 2025 ร้านตุ้ยไอที | Computer Repair Tracking System</div>
+  © 2025 ร้านตุ้ยไอที | Computer Repair Tracking System
 </footer>
 
 </body>
