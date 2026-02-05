@@ -35,14 +35,20 @@ body{
 }
 
 /* ================= HEADER ================= */
+/* ================= HEADER (WHITE) ================= */
 header{
-  background:var(--dark);
-  color:#fff;
+  background:#ffffff;                 /* เปลี่ยนเป็นสีขาว */
+  color:#111827;
   padding:14px 28px;
   display:flex;
   align-items:center;
   justify-content:space-between;
+  border-bottom:1px solid #e5e7eb;    /* เส้นบาง ๆ ดูแพง */
+  position:sticky;
+  top:0;
+  z-index:1000;
 }
+
 
 .header-left{
   display:flex;
