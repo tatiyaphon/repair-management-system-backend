@@ -55,6 +55,7 @@
       max-width:900px;
       margin:40px auto;
       padding:0 20px;
+      page-break-inside: avoid;
     }
 
     .card {
@@ -187,16 +188,14 @@
 
 <div id="job-details"></div>
 
-<!-- ✅ ปุ่มดูใบรับเครื่อง -->
-<div class="btn-group" style="margin-top:20px;">
-  <a
-    id="receipt-link"
-    target="_blank"
-    class="btn btn-primary"
-  >
-    <i class="fas fa-file-pdf"></i> ดูใบรับเครื่อง
-  </a>
-</div>
+<a
+  href="/api/jobs/${job._id}/receipt"
+  target="_blank"
+  class="btn-receipt"
+>
+  ดูใบรับเครื่อง
+</a>
+
       <hr>
               <h3 class="section-header"><i class="fas fa-tag"></i> แก้ไขประเภทงานซ่อม</h3>
       <form id="job-type-form">
