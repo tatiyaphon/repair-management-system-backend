@@ -488,6 +488,24 @@
             </div>
         </div>
     </main>
+<div class="content-section" style="margin-top:30px">
+  <h2 class="section-title">ประวัติการเบิกอะไหล่</h2>
+
+  <div class="table-responsive">
+    <table class="styled-table" id="withdrawHistoryTable">
+      <thead>
+        <tr>
+          <th>อะไหล่</th>
+          <th>จำนวน</th>
+          <th>ผู้เบิก</th>
+          <th>อ้างอิงงาน</th>
+          <th>วันที่</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
 
     <!-- Stock Modal -->
     <div id="stockModal" class="modal">
@@ -654,6 +672,7 @@ async function loadStock() {
   } catch {
     alert("❌ โหลดข้อมูลสต็อกไม่สำเร็จ");
   }
+    renderWithdrawHistory(); 
 }
 
 /* ================= RENDER ================= */
@@ -859,6 +878,26 @@ router.post("/", auth, requireRole("admin"), async (req, res) => {
 
   res.status(201).json({ message: "เพิ่มผู้ใช้สำเร็จ", user });
 });
+function renderWithdrawHistory() {
+  const tbody = document.querySelector("#withdrawHistoryTable tbody");
+  tbody.innerHTML = "";
+
+  stockData.forEach(stock => {
+    if (!stock.withdrawHistory) return;
+
+    stock.withdrawHistory.forEach(h => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${stock.name} (${stock.model})</td>
+        <td>${h.quantity}</td>
+        <td>${h.employeeName || "-"}</td>
+        <td>${h.jobRef || "-"}</td>
+        <td>${new Date(h.withdrawnAt).toLocaleString("th-TH")}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  });
+}
 
 </script>
 
