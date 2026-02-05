@@ -279,11 +279,12 @@ footer{
     text-align:center;
   }
 }
+/* ================= LOGIN BUTTON ================= */
 .login-wrapper{
   position:fixed;
   top:20px;
   right:20px;
-  z-index:1000; /* ต่ำกว่า popup */
+  z-index:1500;
 }
 
 .login-btn{
@@ -301,6 +302,29 @@ footer{
 .login-btn:hover{
   background:#1a252f;
 }
+
+/* ================= CONTACT FLOAT BUTTON ================= */
+.contact-float{
+  position:fixed;
+  bottom:24px;
+  right:24px;
+  width:56px;
+  height:56px;
+  border-radius:50%;
+  background:#2563eb;
+  color:#fff;
+  border:none;
+  font-size:22px;
+  cursor:pointer;
+  z-index:1600;
+  box-shadow:0 4px 12px rgba(0,0,0,.25);
+}
+
+.contact-float:hover{
+  background:#1e40af;
+}
+
+/* ================= CONTACT POPUP ================= */
 .popup{
   position:fixed;
   inset:0;
@@ -308,7 +332,7 @@ footer{
   display:none;
   align-items:center;
   justify-content:center;
-  z-index:2000; /* สูงสุด */
+  z-index:2000;
 }
 
 .popup.show{
@@ -319,8 +343,13 @@ footer{
   background:#fff;
   padding:25px;
   border-radius:14px;
-  width:280px;
+  width:90%;
+  max-width:320px;
   text-align:center;
+}
+
+.popup-box h3{
+  margin-top:0;
 }
 
 .popup-btn{
@@ -329,24 +358,25 @@ footer{
   justify-content:center;
   gap:8px;
   margin:10px 0;
-  padding:10px;
+  padding:12px;
   border-radius:8px;
   text-decoration:none;
   color:#fff;
   font-weight:500;
 }
 
-.popup-btn.phone{ background:#3498db; }
+.popup-btn.phone{ background:#2563eb; }
 .popup-btn.line{ background:#00b900; }
 
 .close-btn{
   margin-top:12px;
-  background:#ddd;
+  background:#e5e7eb;
   border:none;
   padding:8px 14px;
   border-radius:6px;
   cursor:pointer;
 }
+
 
 
 </style>
@@ -408,13 +438,19 @@ footer{
     </div>
 
 </div>
-<div style="position:absolute; top:20px; right:20px;">
+<!-- ปุ่มเข้าสู่ระบบ -->
+<div class="login-wrapper">
   <a href="/employee/login.html" class="login-btn">
     <i class="fas fa-user-lock"></i> เข้าสู่ระบบ
   </a>
 </div>
-<!-- ===== CONTACT POPUP ===== -->
-<!-- CONTACT POPUP -->
+
+<!-- ปุ่มลอยติดต่อ -->
+<button class="contact-float" onclick="openContact()">
+  <i class="fas fa-headset"></i>
+</button>
+
+<!-- popup ติดต่อ -->
 <div id="contactPopup" class="popup">
   <div class="popup-box">
     <h3>📞 ติดต่อร้าน</h3>
@@ -434,17 +470,13 @@ footer{
 </div>
 
 
+
 <footer>
     © 2025 ร้านตุ้ยไอที | Computer Repair Tracking System
 </footer>
 
 <script>
-function openContact(){
-    document.getElementById("contactPopup").style.display="flex";
-}
-function closeContact(){
-    document.getElementById("contactPopup").style.display="none";
-}
+
 function openContact(){
   document.getElementById("contactPopup").classList.add("show");
 }
