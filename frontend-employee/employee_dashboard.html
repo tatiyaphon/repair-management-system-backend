@@ -37,10 +37,13 @@
             --in_progress-color: #f39c12;
             --waiting_parts-color: #e74c3c;
             --completed-color: #2ecc71;
+            --cancelled-color: #6b7280;
+
 
             /* Job Type Colors */
             --claim-color: #9b59b6;
             --new-repair-color: #2c3e50;
+            
         }
 
         body {
@@ -567,7 +570,9 @@
 .btn-manage:active {
   transform: scale(0.96);
 }
-
+.status-cancelled {
+  background: var(--cancelled-color);
+}
     </style>
 </head>
 
@@ -703,6 +708,12 @@
         </div>
         <i class="fas fa-check-circle card-icon"></i>
     </a>
+    <a class="card card-link" href="technician_jobs.html?status=cancelled">
+        <div class="card-content">
+            <h2>งานที่ยกเลิก</h2>
+            <p id="cancelled-count">0</p>
+        </div>
+        <i class="fas fa-times-circle card-icon"></i>
 
 </div>
 
@@ -801,6 +812,7 @@ function statusClass(status) {
   }[status] || "";
 }
 
+
 /* =============================
    LOAD JOBS
 ============================= */
@@ -864,12 +876,19 @@ document.getElementById("yearFilter")?.addEventListener("change", applyFilter);
 ============================= */
 function updateCards() {
   const count = s => filteredJobs.filter(j => j.status === s).length;
+
   document.getElementById("monthly-total").textContent = filteredJobs.length;
   document.getElementById("new-jobs-count").textContent = count("รับเครื่อง");
   document.getElementById("in-progress-count").textContent = count("กำลังซ่อม");
   document.getElementById("waiting-parts-count").textContent = count("รออะไหล่");
   document.getElementById("completed-count").textContent = count("ซ่อมเสร็จ");
+
+  const cancelledEl = document.getElementById("cancelled-count");
+  if (cancelledEl) {
+    cancelledEl.textContent = count("ยกเลิก");
+  }
 }
+
 
 /* =============================
    TABLE
