@@ -4,7 +4,7 @@ const Job = require("../models/Job");
 const auth = require("../middleware/auth");
 const puppeteer = require("puppeteer");
 const Stock = require("../models/Stock");
-
+const verifyToken = require("../middleware/auth");
 
 console.log("✅ jobRoutes loaded");
 
