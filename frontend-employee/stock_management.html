@@ -1040,6 +1040,9 @@ function renderWithdrawHistory() {
   tbody.innerHTML = "";
 
   stockData.forEach(stock => {
+
+    if (filterType && stock.name !== filterType) return;
+
     if (!stock.withdrawHistory || !stock.withdrawHistory.length) return;
 
     stock.withdrawHistory.forEach(h => {
@@ -1053,6 +1056,7 @@ function renderWithdrawHistory() {
         <td>${new Date(h.withdrawnAt).toLocaleString("th-TH")}</td>
       `;
       tbody.appendChild(tr);
+      hasRow = true;
     });
   });
 
@@ -1109,6 +1113,12 @@ function initWithdrawFilter() {
     select.appendChild(opt);
   });
 }
+const withdrawFilter = document.getElementById("withdrawFilter");
+
+withdrawFilter.addEventListener("change", () => {
+  const selectedType = withdrawFilter.value;
+  renderWithdrawHistory(selectedType);
+});
 
 
 </script>
