@@ -849,11 +849,14 @@ async function loadStock() {
     stockData = await apiFetch("/stocks");
     renderStock(stockData);
     populateTypeFilter();
+
+     renderWithdrawFilter(stockData);     // ✅ สร้าง option
+    renderWithdrawHistory("");
   } catch {
     alert("❌ โหลดข้อมูลสต็อกไม่สำเร็จ");
   }
-    renderWithdrawHistory(); 
-    renderWithdrawFilter(stockData);
+    renderWithdrawHistory("");
+    
 }
 
 /* ================= RENDER ================= */
@@ -1033,15 +1036,16 @@ window.addEventListener("click", e => {
   }
 });
 
-function renderWithdrawHistory() {
+function renderWithdrawHistory(filterType = "") {
   const tbody = document.querySelector("#withdrawHistoryTable tbody");
   if (!tbody) return;
 
   tbody.innerHTML = "";
+  let hasRow = false;
 
   stockData.forEach(stock => {
-
     if (filterType && stock.name !== filterType) return;
+
     if (!stock.withdrawHistory || !stock.withdrawHistory.length) return;
 
     stock.withdrawHistory.forEach(h => {
@@ -1055,19 +1059,21 @@ function renderWithdrawHistory() {
         <td>${new Date(h.withdrawnAt).toLocaleString("th-TH")}</td>
       `;
       tbody.appendChild(tr);
+      hasRow = true;
     });
   });
 
-  if (!tbody.innerHTML) {
+  if (!hasRow) {
     tbody.innerHTML = `
       <tr>
         <td colspan="6" style="text-align:center;color:#9ca3af;">
-          ยังไม่มีประวัติการเบิกอะไหล่
+          ไม่พบรายการที่ตรงกับตัวกรอง
         </td>
       </tr>
     `;
   }
 }
+
 function renderWithdrawFilter(stockData = []) {
   const filter = document.getElementById("withdrawFilter");
   if (!filter) return;
@@ -1088,29 +1094,10 @@ function renderWithdrawFilter(stockData = []) {
     `;
   });
 }
-
-
-const withdrawnAt = document.getElementById("withdrawDate").value;
-
-const payload = {
-  quantity: Number(withdrawQuantity.value),
-  employeeName: withdrawEmployeeName.value,
-  jobRef: withdrawJobId.value || null,
-  withdrawnAt: withdrawnAt ? new Date(withdrawnAt) : new Date()
-};
-function initWithdrawFilter() {
-  const select = document.getElementById("withdrawFilterName");
-  if (!select) return;
-
-  const names = [...new Set(stockData.map(s => s.name))];
-
-  names.forEach(name => {
-    const opt = document.createElement("option");
-    opt.value = name;
-    opt.textContent = name;
-    select.appendChild(opt);
-  });
-}
+document.getElementById("withdrawFilter").addEventListener("change", function() {
+  const selectedType = this.value;
+  renderWithdrawHistory(selectedType);
+});
 
 
 </script>
