@@ -595,15 +595,15 @@ document
     }
 
     const res = await fetch(
-      `${API_BASE}/jobs/${currentJob._id}/withdraw`,
-      {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          stockId: partId,
-          quantity: qty
-        })
-      }
+  `${API_BASE}/jobs/${currentJob._id}/use-part`,
+  {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      stockId: partId,
+      quantity: qty
+    })
+  }
     );
 
     if (!res.ok) {
