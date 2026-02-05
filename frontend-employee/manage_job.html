@@ -386,24 +386,32 @@ let stockList = [];
 /* =========================
    FETCH JOB
 ========================= */
+function getJobId() {
+  return new URLSearchParams(location.search).get("id");
+}
+
 async function fetchJob() {
   const id = getJobId();
-  if (!id) return alert("ไม่พบ Job ID");
+  if (!id) {
+    alert("ไม่พบ Job ID");
+    return;
+  }
 
-  // 🔥 ใช้ API ที่มีอยู่จริง
-  const res = await fetch(`${API_BASE}/jobs`, { headers });
-  if (!res.ok) return alert("โหลดข้อมูลงานไม่สำเร็จ");
+  const res = await fetch(`${API_BASE}/jobs/${id}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    }
+  });
 
-  const jobs = await res.json();
-  currentJob = jobs.find(j => j._id === id);
-
-  if (!currentJob) {
+  if (!res.ok) {
     alert("ไม่พบงานซ่อม");
     return;
   }
 
+  currentJob = await res.json();
   renderJob();
 }
+
 
 
 /* =========================
