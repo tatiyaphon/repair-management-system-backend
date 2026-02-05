@@ -1,48 +1,24 @@
 const mongoose = require("mongoose");
 
-/* =========================
-   Withdraw History Schema
-========================= */
-const withdrawHistorySchema = new mongoose.Schema({
-  quantity: {
-    type: Number,
-    required: true
-  },
-  employeeName: {
-    type: String,
-    required: true
-  },
-  jobRef: {
-    type: String // เลขใบงาน / ใบรับเครื่อง
-  },
-  withdrawnAt: {
-    type: Date,
-    default: Date.now
-  }
-});
-
-/* =========================
-   Stock Schema
-========================= */
 const stockSchema = new mongoose.Schema({
   stockCode: {
     type: String,
     required: true,
-    unique: true   // เช่น CPU-001
+    unique: true
   },
   name: {
     type: String,
-    required: true, // เช่น cpu, battery
+    required: true,
     trim: true
   },
   type: {
     type: String,
-    required: true, // เช่น cpu, battery
+    required: true,
     trim: true
   },
   model: {
     type: String,
-    required: true  // เช่น Intel i5 Gen10
+    required: true
   },
   quantity: {
     type: Number,
@@ -54,18 +30,28 @@ const stockSchema = new mongoose.Schema({
     default: 0
   },
 
-  // ✅ ประวัติการเบิกอะไหล่
-   withdrawHistory: [
+  // ✅ เพิ่มตรงนี้
+  withdrawHistory: [
     {
-      quantity: Number,
-      employeeName: String,
-      jobRef: String,
+      quantity: {
+        type: Number,
+        required: true
+      },
+      employeeName: {
+        type: String,
+        required: true
+      },
+      jobRef: {
+        type: String,
+        default: "-"
+      },
       withdrawnAt: {
         type: Date,
         default: Date.now
       }
     }
   ]
+
 }, { timestamps: true });
 
 module.exports = mongoose.model("Stock", stockSchema);
