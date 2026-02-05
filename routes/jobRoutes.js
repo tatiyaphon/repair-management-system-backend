@@ -481,7 +481,7 @@ tbody td{
       <div>วันที่ ${new Date(job.receivedDate).toLocaleDateString("th-TH")}</div>
     </div>
   </div>
-
+      
   <!-- INFO -->
   <div class="info">
     <div class="box">
