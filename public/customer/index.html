@@ -279,17 +279,75 @@ footer{
     text-align:center;
   }
 }
+.login-wrapper{
+  position:fixed;
+  top:20px;
+  right:20px;
+  z-index:1000; /* ต่ำกว่า popup */
+}
+
 .login-btn{
   background:#2c3e50;
   color:#fff;
-  padding:8px 16px;
+  padding:8px 18px;
   border-radius:20px;
   text-decoration:none;
   font-size:0.95rem;
+  display:flex;
+  align-items:center;
+  gap:6px;
 }
+
 .login-btn:hover{
   background:#1a252f;
 }
+.popup{
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.4);
+  display:none;
+  align-items:center;
+  justify-content:center;
+  z-index:2000; /* สูงสุด */
+}
+
+.popup.show{
+  display:flex;
+}
+
+.popup-box{
+  background:#fff;
+  padding:25px;
+  border-radius:14px;
+  width:280px;
+  text-align:center;
+}
+
+.popup-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:8px;
+  margin:10px 0;
+  padding:10px;
+  border-radius:8px;
+  text-decoration:none;
+  color:#fff;
+  font-weight:500;
+}
+
+.popup-btn.phone{ background:#3498db; }
+.popup-btn.line{ background:#00b900; }
+
+.close-btn{
+  margin-top:12px;
+  background:#ddd;
+  border:none;
+  padding:8px 14px;
+  border-radius:6px;
+  cursor:pointer;
+}
+
 
 </style>
 </head>
@@ -356,18 +414,25 @@ footer{
   </a>
 </div>
 <!-- ===== CONTACT POPUP ===== -->
+<!-- CONTACT POPUP -->
 <div id="contactPopup" class="popup">
-    <div class="popup-box">
-        <h3>📞 ติดต่อร้าน</h3>
-        <a href="tel:0804641677" class="popup-btn phone">
-            <i class="fas fa-phone"></i> โทร 080-4641677
-        </a>
-        <a href="https://line.me/ti/p/@RepairShop" target="_blank" class="popup-btn line">
-            <i class="fab fa-line"></i> LINE @RepairShop
-        </a>
-        <button class="close-btn" onclick="closeContact()">ปิด</button>
-    </div>
+  <div class="popup-box">
+    <h3>📞 ติดต่อร้าน</h3>
+
+    <a href="tel:0804641677" class="popup-btn phone">
+      <i class="fas fa-phone"></i> โทร 080-4641677
+    </a>
+
+    <a href="https://line.me/ti/p/@RepairShop"
+       target="_blank"
+       class="popup-btn line">
+      <i class="fab fa-line"></i> LINE @RepairShop
+    </a>
+
+    <button class="close-btn" onclick="closeContact()">ปิด</button>
+  </div>
 </div>
+
 
 <footer>
     © 2025 ร้านตุ้ยไอที | Computer Repair Tracking System
@@ -379,6 +444,13 @@ function openContact(){
 }
 function closeContact(){
     document.getElementById("contactPopup").style.display="none";
+}
+function openContact(){
+  document.getElementById("contactPopup").classList.add("show");
+}
+
+function closeContact(){
+  document.getElementById("contactPopup").classList.remove("show");
 }
 </script>
 
