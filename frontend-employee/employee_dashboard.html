@@ -621,8 +621,13 @@
   text-align:center;
 }
 .dashboard-container {
-  padding-bottom: 0;   /* ❌ ไม่ให้เหลือพื้นที่ล่าง */
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  padding: 30px;
+  margin-bottom: 0;   /* ไม่ให้เกิด box ล่าง */
 }
+
 
     </style>
 </head>
@@ -707,7 +712,7 @@
     <!-- ==========================================================
          Main Content
     ========================================================== -->
-    <main class="container">
+    <main class=" dashboard-container">
         <!-- ส่วนหัว + ตัวกรองเดือน/ปี -->
         <div class="dashboard-header">
             <h2 class="dashboard-header-title">งานซ่อม</h2>
