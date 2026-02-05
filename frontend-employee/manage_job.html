@@ -550,6 +550,77 @@ document.getElementById("cancel-job-btn")?.addEventListener("click", () => {
     location.replace("employee_dashboard.html");
   }
 });
+document
+  .getElementById("job-type-form")
+  ?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (!currentJob || !currentJob._id) {
+      alert("ไม่พบ Job ID");
+      return;
+    }
+
+    const newType = document.getElementById("new-job-type").value;
+
+    if (!newType) {
+      alert("กรุณาเลือกประเภทงาน");
+      return;
+    }
+
+    await updateJob({ jobType: newType });
+
+    alert("บันทึกประเภทงานเรียบร้อยแล้ว");
+  });
+document
+  .getElementById("part-form")
+  ?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (!currentJob || !currentJob._id) {
+      alert("ไม่พบ Job ID");
+      return;
+    }
+
+    const partId = document.getElementById("part-model").value;
+    const qty = Number(document.getElementById("part-qty").value);
+
+    if (!partId) {
+      alert("กรุณาเลือกอะไหล่และรุ่น");
+      return;
+    }
+
+    if (qty <= 0) {
+      alert("จำนวนต้องมากกว่า 0");
+      return;
+    }
+
+    const res = await fetch(
+      `${API_BASE}/jobs/${currentJob._id}/withdraw`,
+      {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          stockId: partId,
+          quantity: qty
+        })
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(err.message || "ขอเบิกอะไหล่ไม่สำเร็จ");
+      return;
+    }
+
+    alert("ขอเบิกอะไหล่เรียบร้อยแล้ว");
+
+    // reset ฟอร์ม
+    document.getElementById("part-form").reset();
+    document.getElementById("part-model").disabled = true;
+
+    // โหลดงานใหม่ (อัปเดตรายการอะไหล่ที่ใช้)
+    await fetchJob();
+  });
 
 /* =========================
    INIT
