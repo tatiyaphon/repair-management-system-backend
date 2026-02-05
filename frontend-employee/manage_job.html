@@ -479,6 +479,13 @@ function renderJob() {
     <div><strong>ราคา:</strong> ${currentJob.priceQuoted || "-"} บาท</div>
   `;
 
+  // ===== ✅ ส่วนที่ต้องเพิ่ม =====
+  const receiptLink = document.getElementById("receipt-link");
+  if (receiptLink && currentJob._id) {
+    receiptLink.href = `/api/jobs/${currentJob._id}/receipt`;
+  }
+  // =============================
+
   document.getElementById("received-date").value =
     formatInputDate(currentJob.receivedDate);
   document.getElementById("start-date").value =
@@ -489,6 +496,7 @@ function renderJob() {
   document.getElementById("new-price").value = currentJob.priceQuoted || "";
   document.getElementById("new-job-type").value = currentJob.jobType || "";
 }
+
 
 /* =========================
    UPDATE HELPERS

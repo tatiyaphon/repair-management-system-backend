@@ -189,6 +189,15 @@ router.put("/:id", auth, async (req, res) => {
     res.status(500).json({ message: "อัปเดตงานซ่อมไม่สำเร็จ" });
   }
 });
+
+// jobRoutes.js
+router.get("/:id/receipt", verifyToken, async (req, res) => {
+  const job = await Job.findById(req.params.id);
+  if (!job) return res.status(404).send("ไม่พบงาน");
+
+  // สร้าง PDF หรือ render ใบรับเครื่อง
+});
+
 // POST /api/jobs/:id/withdraw
 router.post("/:id/use-part", verifyToken, async (req, res) => {
   try {
