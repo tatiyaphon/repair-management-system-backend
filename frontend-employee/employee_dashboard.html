@@ -295,12 +295,12 @@
         ========================================================== */
         .status-badge {
             display: inline-block;
-            padding: 5px 10px;
-            border-radius: 5px;
+            padding:8px 14px;
+            border-radius:8px;
             color: #fff;
             font-weight: 600;
-            font-size: .8rem;
-            min-width: 90px;
+            font-size: .85rem;
+            min-width:92px;
             text-align: center;
         }
 
@@ -600,6 +600,23 @@
   padding:0;              /* ❗ เอา padding ออก */
   overflow:hidden;        /* ❗ ให้หัวตารางชนขอบ */
   box-shadow:0 10px 25px rgba(0,0,0,.06);
+}
+/* คุมความกว้างคอลัมน์ */
+.styled-table th:nth-child(1),
+.styled-table td:nth-child(1){
+  width:140px; /* ID */
+}
+
+.styled-table th:nth-child(6),
+.styled-table td:nth-child(6){
+  width:130px; /* สถานะ */
+  text-align:center;
+}
+
+.styled-table th:nth-child(10),
+.styled-table td:nth-child(10){
+  width:110px; /* การจัดการ */
+  text-align:center;
 }
 
     </style>
