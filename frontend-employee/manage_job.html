@@ -168,8 +168,48 @@
       .nav-links{flex-wrap:wrap;justify-content:center;margin-top:10px;}
       .btn-group{flex-direction:column;}
       .btn{width:100%;justify-content:center;}
+      .btn-receipt {
+    width: 100%;
+    justify-content: center;
+  }
     }
+    .btn-receipt {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  color: #ffffff;
+
+  padding: 14px 30px;
+  font-size: 18px;
+  font-weight: 600;
+  text-decoration: none;
+
+  border-radius: 999px; /* pill */
+  border: none;
+  cursor: pointer;
+
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.35);
+  transition: all 0.25s ease;
+}
+
+.btn-receipt i {
+  font-size: 18px;
+}
+
+.btn-receipt:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px rgba(59, 130, 246, 0.45);
+}
+
+.btn-receipt:active {
+  transform: translateY(0);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.35);
+}
+
   </style>
+
 </head>
 <body>
   <header>

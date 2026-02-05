@@ -297,11 +297,34 @@ fetch(`${API_BASE}/jobs/${jobId}`, {
   return res.json();
 })
 .then(job => {
-  document.getElementById("receiptNo").textContent = job.receiptNumber;
-  document.getElementById("customerName").textContent = job.customerName;
-  // เติม field อื่น ๆ
+  // Header
+  document.getElementById("receiptNumber").textContent = `No. ${job.receiptNumber}`;
+  document.getElementById("receivedDate").textContent =
+    `วันที่ ${new Date(job.receivedDate).toLocaleDateString("th-TH")}`;
+
+  // Customer
+  document.getElementById("customerName").textContent = job.customerName || "-";
+  document.getElementById("customerPhone").textContent = job.customerPhone || "-";
+  document.getElementById("customerAddress").textContent = job.customerAddress || "-";
+  document.getElementById("accessories").textContent = job.accessories || "-";
+
+  // Job status
+  document.getElementById("jobStatus").textContent = job.status || "-";
+
+  // Device
+  document.getElementById("deviceDetail").textContent =
+    `${job.deviceType || ""} ${job.deviceModel || ""}`;
+  document.getElementById("symptom").textContent = job.symptom || "-";
+
+  // Price
+  document.getElementById("priceQuoted").textContent =
+    `${(job.priceQuoted ?? 0).toLocaleString()} บาท`;
+
+  // Signature
+  document.getElementById("signCustomer").textContent = job.customerName || "-";
 })
-.catch(() => {
+.catch(err => {
+  console.error(err);
   alert("ไม่สามารถโหลดใบรับเครื่องได้");
   location.href = "/employee/employee_dashboard.html";
 });
