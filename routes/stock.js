@@ -28,16 +28,26 @@ router.delete("/:id", verifyToken, async (req, res) => {
 
 /* เบิก */
 router.patch("/:id/withdraw", verifyToken, async (req, res) => {
-  const { quantity } = req.body;
-  const item = await Stock.findById(req.params.id);
+  const { quantity, employeeName, jobRef } = req.body;
 
-  if (!item || item.quantity < quantity) {
+  const stock = await Stock.findById(req.params.id);
+  if (!stock) return res.status(404).json({ message: "ไม่พบอะไหล่" });
+
+  if (stock.quantity < quantity) {
     return res.status(400).json({ message: "จำนวนไม่พอ" });
   }
 
-  item.quantity -= quantity;
-  await item.save();
-  res.json(item);
+  stock.quantity -= quantity;
+
+  stock.withdrawHistory.push({
+    quantity,
+    employeeName,
+    jobRef
+  });
+
+  await stock.save();
+  res.json({ message: "เบิกสำเร็จ", stock });
 });
+
 
 module.exports = router;

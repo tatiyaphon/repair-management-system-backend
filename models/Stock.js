@@ -1,5 +1,29 @@
 const mongoose = require("mongoose");
 
+/* =========================
+   Withdraw History Schema
+========================= */
+const withdrawHistorySchema = new mongoose.Schema({
+  quantity: {
+    type: Number,
+    required: true
+  },
+  employeeName: {
+    type: String,
+    required: true
+  },
+  jobRef: {
+    type: String // เลขใบงาน / ใบรับเครื่อง
+  },
+  withdrawnAt: {
+    type: Date,
+    default: Date.now
+  }
+});
+
+/* =========================
+   Stock Schema
+========================= */
 const stockSchema = new mongoose.Schema({
   stockCode: {
     type: String,
@@ -28,7 +52,14 @@ const stockSchema = new mongoose.Schema({
   price: {
     type: Number,
     default: 0
+  },
+
+  // ✅ ประวัติการเบิกอะไหล่
+  withdrawHistory: {
+    type: [withdrawHistorySchema],
+    default: []
   }
+
 }, { timestamps: true });
 
 module.exports = mongoose.model("Stock", stockSchema);

@@ -696,7 +696,6 @@ const itemStockCodeInput = document.getElementById("itemStockCode");
 const withdrawStockIdInput = document.getElementById("withdrawStockId");
 const withdrawItemNameDisplay = document.getElementById("withdrawItemName");
 const currentQuantityDisplay = document.getElementById("currentQuantity");
-const withdrawEmployeeIdInput = document.getElementById("withdrawEmployeeId");
 const withdrawEmployeeNameInput = document.getElementById("withdrawEmployeeName");
 const withdrawQuantityInput = document.getElementById("withdrawQuantity");
 const withdrawJobIdInput = document.getElementById("withdrawJobId");
@@ -878,10 +877,8 @@ withdrawForm.onsubmit = async e => {
 
   await apiFetch(`/stocks/${id}/withdraw`, {
     method: "PATCH",
-
     body: JSON.stringify({
       quantity: qty,
-      employeeId: withdrawEmployeeIdInput.value,
       employeeName: withdrawEmployeeNameInput.value,
       jobRef: withdrawJobIdInput.value
     })
@@ -913,31 +910,7 @@ window.addEventListener("click", e => {
     e.target.style.display = "none";
   }
 });
-router.post("/", auth, requireRole("admin"), async (req, res) => {
-  const { firstName, lastName, email, password, role } = req.body;
 
-  if (!firstName || !lastName || !email || !password) {
-    return res.status(400).json({ message: "ข้อมูลไม่ครบ" });
-  }
-
-  const exists = await Employee.findOne({ email });
-  if (exists) {
-    return res.status(409).json({ message: "อีเมลนี้ถูกใช้แล้ว" });
-  }
-
-  const hash = await bcrypt.hash(password, 10);
-
-  const user = await Employee.create({
-    firstName,
-    lastName,
-    email,
-    password: hash,
-    role,
-    mustChangePassword: true
-  });
-
-  res.status(201).json({ message: "เพิ่มผู้ใช้สำเร็จ", user });
-});
 function renderWithdrawHistory() {
   const tbody = document.querySelector("#withdrawHistoryTable tbody");
   if (!tbody) return;
