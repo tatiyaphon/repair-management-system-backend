@@ -75,7 +75,9 @@ header{
   background:url("/customer/banner.jpg") center/cover no-repeat;
   display:flex;
   align-items:center;
+  padding-bottom:120px; /* 🔴 เพิ่ม */
 }
+
 
 .hero-bg::before{
   content:"";
@@ -122,22 +124,25 @@ header{
 /* ================= MAIN ================= */
 .container{
   max-width:1200px;
-  margin:auto;
-  padding:70px 30px;
+  margin:-120px auto 0;   /* 🔴 ดึงขึ้นไปซ้อน hero */
+  padding:0 30px 70px;
+  position:relative;
+  z-index:5;
 }
 
 /* ================= CHECK BOX ================= */
 .check-box{
   background:linear-gradient(135deg,#1e3a8a,#2563eb);
   color:#fff;
-  border-radius:18px;
+  border-radius:20px;
   padding:40px;
   display:flex;
   justify-content:space-between;
   align-items:center;
   gap:20px;
-  box-shadow:0 20px 40px rgba(0,0,0,.2);
+  box-shadow:0 25px 60px rgba(0,0,0,.35); /* 🔴 เงาชัดขึ้น */
 }
+
 
 .check-box a{
   background:#fff;
@@ -213,6 +218,11 @@ footer{
 
 /* ================= MOBILE (TABLET) ================= */
 @media(max-width:768px){
+    .container{
+    margin:-80px auto 0;  /* 🔴 ซ้อนน้อยลง */
+    padding:0 16px 60px;
+  }
+
   .hero-bg{min-height:55vh}
   .hero-content{padding:28px}
   .hero-content h1{font-size:1.6rem}
