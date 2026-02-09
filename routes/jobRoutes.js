@@ -558,5 +558,38 @@ router.get("/:id", async (req, res) => {
     res.status(500).json({ message: "ดึงข้อมูลงานไม่สำเร็จ" });
   }
 });
+router.patch("/stocks/:id/withdraw", async (req, res) => {
+  try {
+    const { quantity, employeeName, jobRef } = req.body;
+
+    const stock = await Stock.findById(req.params.id);
+    if (!stock) {
+      return res.status(404).json({ message: "ไม่พบอะไหล่" });
+    }
+
+    if (quantity <= 0 || quantity > stock.quantity) {
+      return res.status(400).json({ message: "จำนวนเบิกไม่ถูกต้อง" });
+    }
+
+    // ✅ ตัดสต็อก
+    stock.quantity -= quantity;
+
+    // ✅ บันทึกประวัติการเบิก
+    stock.withdrawHistory.push({
+      quantity,
+      employeeName,
+      jobRef: jobRef || "-",
+      withdrawnAt: new Date()
+    });
+
+    // ✅ ต้อง save
+    await stock.save();
+
+    res.json({ message: "เบิกสำเร็จ" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "เกิดข้อผิดพลาด" });
+  }
+});
 
 module.exports = router;
