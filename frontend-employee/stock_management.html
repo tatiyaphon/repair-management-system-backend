@@ -1036,19 +1036,32 @@ window.addEventListener("click", e => {
   }
 });
 
-function renderWithdrawHistory(filterType = "") {
+function renderWithdrawHistory(filterType = "all", search = "") {
   const tbody = document.querySelector("#withdrawHistoryTable tbody");
   if (!tbody) return;
 
   tbody.innerHTML = "";
+
+  const keyword = search.toLowerCase();
+
   let hasRow = false;
 
   stockData.forEach(stock => {
-    if (filterType && stock.name !== filterType) return;
+    // filter ตามประเภท
+    if (filterType !== "all" && stock.name !== filterType) return;
 
-    if (!stock.withdrawHistory || !stock.withdrawHistory.length) return;
+    (stock.withdrawHistory || []).forEach(h => {
+      const text = `
+        ${stock.name}
+        ${stock.model}
+        ${h.employeeName || ""}
+        ${h.jobRef || ""}
+      `.toLowerCase();
 
-    stock.withdrawHistory.forEach(h => {
+      if (keyword && !text.includes(keyword)) return;
+
+      hasRow = true;
+
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>${stock.name}</td>
@@ -1059,7 +1072,6 @@ function renderWithdrawHistory(filterType = "") {
         <td>${new Date(h.withdrawnAt).toLocaleString("th-TH")}</td>
       `;
       tbody.appendChild(tr);
-      hasRow = true;
     });
   });
 
@@ -1067,12 +1079,13 @@ function renderWithdrawHistory(filterType = "") {
     tbody.innerHTML = `
       <tr>
         <td colspan="6" style="text-align:center;color:#9ca3af;">
-          ไม่พบรายการที่ตรงกับตัวกรอง
+          ไม่พบข้อมูลที่ค้นหา
         </td>
       </tr>
     `;
   }
 }
+
 
 function renderWithdrawFilter(stockData = []) {
   const filter = document.getElementById("withdrawFilter");
