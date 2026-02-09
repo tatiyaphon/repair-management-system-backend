@@ -1027,6 +1027,7 @@ withdrawForm.onsubmit = async e => {
     document.getElementById("withdrawFilter")?.value || "all",
     document.getElementById("withdrawSearch")?.value || ""
   );
+  await loadStock();
 };
 
 /* ================= INIT ================= */

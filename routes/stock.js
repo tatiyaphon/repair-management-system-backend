@@ -5,6 +5,7 @@ const verifyToken = require("../middleware/auth");
 
 /* ดึงทั้งหมด */
 router.get("/", verifyToken, async (_req, res) => {
+  res.set("Cache-Control", "no-store"); // 🔥 กัน cache
   res.json(await Stock.find());
 });
 
@@ -16,7 +17,11 @@ router.post("/", verifyToken, async (req, res) => {
 
 /* แก้ไข */
 router.put("/:id", verifyToken, async (req, res) => {
-  const item = await Stock.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  const item = await Stock.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true }
+  );
   res.json(item);
 });
 
@@ -26,9 +31,11 @@ router.delete("/:id", verifyToken, async (req, res) => {
   res.json({ message: "deleted" });
 });
 
-/* เบิก */
-router.patch("/stocks/:id/withdraw", async (req, res) => {
+/* ✅ เบิกอะไหล่ (ตัวเดียว ใช้งานจริง) */
+router.patch("/:id/withdraw", verifyToken, async (req, res) => {
   try {
+    console.log("🔥 withdraw route hit", req.params.id);
+
     const { quantity, employeeName, jobRef } = req.body;
 
     const stock = await Stock.findById(req.params.id);
@@ -40,10 +47,10 @@ router.patch("/stocks/:id/withdraw", async (req, res) => {
       return res.status(400).json({ message: "จำนวนเบิกไม่ถูกต้อง" });
     }
 
-    // ✅ ตัดสต็อก
+    // 🔻 ตัดสต็อก
     stock.quantity -= quantity;
 
-    // ✅ บันทึกประวัติการเบิก
+    // 📝 บันทึกประวัติการเบิก
     stock.withdrawHistory.push({
       quantity,
       employeeName,
@@ -51,29 +58,17 @@ router.patch("/stocks/:id/withdraw", async (req, res) => {
       withdrawnAt: new Date()
     });
 
-    // ✅ ต้อง save
     await stock.save();
 
-    res.json({ message: "เบิกสำเร็จ" });
+    res.json({
+      message: "เบิกสำเร็จ",
+      quantityLeft: stock.quantity
+    });
+
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "เกิดข้อผิดพลาด" });
   }
 });
 
-/* เบิกอะไหล่ */
-router.patch("/:id/withdraw", async (req, res) => {
-  try {
-    console.log("🔥 withdraw route hit", req.params.id);
-
-    const { quantity, employeeName, jobRef } = req.body;
-
-    // logic ต่อเดี๋ยวค่อยใส่
-    res.json({ message: "withdraw ok" });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
 module.exports = router;
-
