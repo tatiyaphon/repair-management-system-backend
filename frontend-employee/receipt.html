@@ -226,7 +226,7 @@ tbody td{
       <div class="row"><div class="label">ชื่อลูกค้า</div><div id="customerName">-</div></div>
       <div class="row"><div class="label">เบอร์โทร</div><div id="customerPhone">-</div></div>
       <div class="row"><div class="label">ที่อยู่</div><div id="customerAddress">-</div></div>
-      <div class="row"><div class="label">อุปกรณ์</div><div id="accessories">-</div></div>
+      <div class="row"><div class="label">อุปกรณ์</div><div id="accessory">-</div></div>
     </div>
 
     <div class="box">
@@ -306,7 +306,8 @@ fetch(`${API_BASE}/jobs/${jobId}`, {
   document.getElementById("customerName").textContent = job.customerName || "-";
   document.getElementById("customerPhone").textContent = job.customerPhone || "-";
   document.getElementById("customerAddress").textContent = job.customerAddress || "-";
-  document.getElementById("accessories").textContent = job.accessories || "-";
+  document.getElementById("accessories").textContent =job.accessory || "-";
+
 
   // Job status
   document.getElementById("jobStatus").textContent = job.status || "-";
