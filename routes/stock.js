@@ -61,5 +61,19 @@ router.patch("/stocks/:id/withdraw", async (req, res) => {
   }
 });
 
+/* เบิกอะไหล่ */
+router.patch("/:id/withdraw", async (req, res) => {
+  try {
+    console.log("🔥 withdraw route hit", req.params.id);
+
+    const { quantity, employeeName, jobRef } = req.body;
+
+    // logic ต่อเดี๋ยวค่อยใส่
+    res.json({ message: "withdraw ok" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;
+
