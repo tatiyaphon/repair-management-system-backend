@@ -1142,6 +1142,20 @@ withdrawSearchInput.addEventListener("input", () => {
     withdrawSearchInput.value
   );
 });
+async function withdrawFromJob(stockId, quantity) {
+  const jobId = currentJob.receiptNumber; // อ้างอิงงานซ่อม
+
+  await apiFetch(`/stocks/${stockId}/withdraw`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      quantity,
+      employeeName: userName,      // มาจาก login
+      jobRef: jobId                // 🔥 ผูกกับงานซ่อม
+    })
+  });
+
+  alert("เบิกอะไหล่สำเร็จ");
+}
 
 </script>
 
