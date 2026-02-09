@@ -771,14 +771,16 @@ function updateSummaryCards(jobs) {
 async function finishJob(jobId) {
   if (!confirm("ยืนยันปิดงานซ่อมนี้?")) return;
 
-  await apiFetch(`/jobs/${jobId}`, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ status: "ซ่อมเสร็จ" })
+  const res = await apiFetch(`/jobs/${jobId}/complete`, {
+    method: "PUT"
   });
 
+  if (!res) return;
+
+  alert("✅ ปิดงานเรียบร้อย");
   fetchMyJobs();
 }
+
 function initMonthYearFilter() {
   const monthSel = document.getElementById("monthFilter");
   const yearSel  = document.getElementById("yearFilter");
