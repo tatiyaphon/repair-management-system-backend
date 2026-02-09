@@ -196,35 +196,42 @@ router.post("/:id/use-part", verifyToken, async (req, res) => {
   try {
     const { stockId, quantity } = req.body;
 
+    if (!stockId || !quantity || quantity <= 0) {
+      return res.status(400).json({ message: "ข้อมูลไม่ครบหรือจำนวนไม่ถูกต้อง" });
+    }
+
+    // 1️⃣ หา Job
     const job = await Job.findById(req.params.id);
     if (!job) {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
 
+    // 2️⃣ หา Stock
     const stock = await Stock.findById(stockId);
     if (!stock) {
       return res.status(404).json({ message: "ไม่พบอะไหล่" });
     }
 
-    if (quantity <= 0 || quantity > stock.quantity) {
-      return res.status(400).json({ message: "จำนวนอะไหล่ไม่ถูกต้อง" });
+    if (stock.quantity < quantity) {
+      return res.status(400).json({ message: "จำนวนอะไหล่ไม่เพียงพอ" });
     }
 
-    // ✅ 1. ตัดสต็อก
+    // 3️⃣ ตัดสต็อก
     stock.quantity -= quantity;
 
-    // ✅ 2. บันทึกประวัติการเบิก (สำคัญ!)
+    // 4️⃣ บันทึกประวัติเบิก
     stock.withdrawHistory.push({
       quantity,
-      employeeName: req.user.name,           // จาก token
-      jobRef: job.receiptNumber              // ผูกกับงาน
+      employeeName: req.user.name || "ช่าง",
+      jobRef: job.receiptNumber || job._id
     });
 
     await stock.save();
 
-    // ✅ 3. บันทึกในงานซ่อม (อะไหล่ที่ใช้)
+    // 5️⃣ บันทึกอะไหล่ที่ใช้ในงาน
+    job.usedParts = job.usedParts || [];
     job.usedParts.push({
-      stock: stock._id,
+      stockId: stock._id,
       name: stock.name,
       model: stock.model,
       quantity
@@ -235,8 +242,8 @@ router.post("/:id/use-part", verifyToken, async (req, res) => {
     res.json({ message: "เบิกอะไหล่สำเร็จ" });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "เกิดข้อผิดพลาด" });
+    console.error("❌ use-part error:", err);
+    res.status(500).json({ message: "Server error" });
   }
 });
 
