@@ -828,13 +828,15 @@ let stockData = [];
 
 /* ================= API FETCH ================= */
 async function apiFetch(path, options = {}) {
-  const res = await fetch(`${API_BASE}${path}`, {
+  const res = await fetch(`${API_BASE}${path}?t=${Date.now()}`, {
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
+      Authorization: `Bearer ${token}`,
+      "Cache-Control": "no-cache"
     },
     ...options
   });
+
 
   if (res.status === 401 || res.status === 403) {
     alert("Session หมดอายุ กรุณาเข้าสู่ระบบใหม่");
@@ -1016,8 +1018,15 @@ withdrawForm.onsubmit = async e => {
   });
 
   alert("✅ เบิกสำเร็จ");
+
   withdrawModal.style.display = "none";
-  loadStock();
+
+  // 🔥 โหลดข้อมูลใหม่จริง
+  await loadStock();                 
+  renderWithdrawHistory(
+    document.getElementById("withdrawFilter")?.value || "all",
+    document.getElementById("withdrawSearch")?.value || ""
+  );
 };
 
 /* ================= INIT ================= */
