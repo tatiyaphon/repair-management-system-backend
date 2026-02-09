@@ -27,26 +27,38 @@ router.delete("/:id", verifyToken, async (req, res) => {
 });
 
 /* เบิก */
-router.post("/:id/withdraw", verifyToken, async (req, res) => {
-  const { quantity, employeeName, jobRef } = req.body;
+router.patch("/stocks/:id/withdraw", async (req, res) => {
+  try {
+    const { quantity, employeeName, jobRef } = req.body;
 
-  const stock = await Stock.findById(req.params.id);
-  if (!stock) return res.status(404).json({ message: "ไม่พบอะไหล่" });
+    const stock = await Stock.findById(req.params.id);
+    if (!stock) {
+      return res.status(404).json({ message: "ไม่พบอะไหล่" });
+    }
 
-  if (quantity > stock.quantity) {
-    return res.status(400).json({ message: "จำนวนไม่พอ" });
+    if (quantity <= 0 || quantity > stock.quantity) {
+      return res.status(400).json({ message: "จำนวนเบิกไม่ถูกต้อง" });
+    }
+
+    // ✅ ตัดสต็อก
+    stock.quantity -= quantity;
+
+    // ✅ บันทึกประวัติการเบิก
+    stock.withdrawHistory.push({
+      quantity,
+      employeeName,
+      jobRef: jobRef || "-",
+      withdrawnAt: new Date()
+    });
+
+    // ✅ ต้อง save
+    await stock.save();
+
+    res.json({ message: "เบิกสำเร็จ" });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "เกิดข้อผิดพลาด" });
   }
-
-  stock.quantity -= quantity;
-
-  stock.withdrawHistory.push({
-    quantity,
-    employeeName,
-    jobRef
-  });
-
-  await stock.save();
-  res.json({ message: "เบิกอะไหล่สำเร็จ" });
 });
 
 
