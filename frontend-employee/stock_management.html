@@ -1117,7 +1117,21 @@ document.getElementById("withdrawFilter").addEventListener("change", function() 
   const selectedType = this.value;
   renderWithdrawHistory(selectedType);
 });
+/* filter เปลี่ยน */
+withdrawFilter.addEventListener("change", () => {
+  renderWithdrawHistory(
+    withdrawFilter.value,
+    withdrawSearchInput.value
+  );
+});
 
+/* ค้นหา */
+withdrawSearchInput.addEventListener("input", () => {
+  renderWithdrawHistory(
+    withdrawFilter.value,
+    withdrawSearchInput.value
+  );
+});
 
 </script>
 
