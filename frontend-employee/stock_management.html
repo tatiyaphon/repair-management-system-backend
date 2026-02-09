@@ -820,6 +820,9 @@ const currentQuantityDisplay = document.getElementById("currentQuantity");
 const withdrawEmployeeNameInput = document.getElementById("withdrawEmployeeName");
 const withdrawQuantityInput = document.getElementById("withdrawQuantity");
 const withdrawJobIdInput = document.getElementById("withdrawJobId");
+const withdrawSearchInput = document.getElementById("withdrawSearch");
+const withdrawFilter = document.getElementById("withdrawFilter");
+
 
 let stockData = [];
 
@@ -847,17 +850,20 @@ async function apiFetch(path, options = {}) {
 async function loadStock() {
   try {
     stockData = await apiFetch("/stocks");
+
     renderStock(stockData);
     populateTypeFilter();
 
-     renderWithdrawFilter(stockData);     // ✅ สร้าง option
-    renderWithdrawHistory("");
+    renderWithdrawFilter(stockData);
+
+    // ✅ แสดงทั้งหมดตอนเปิดหน้า
+    renderWithdrawHistory("", "");
+
   } catch {
     alert("❌ โหลดข้อมูลสต็อกไม่สำเร็จ");
   }
-    renderWithdrawHistory("");
-    
 }
+
 
 /* ================= RENDER ================= */
 function renderStock(data) {
@@ -1048,7 +1054,7 @@ function renderWithdrawHistory(filterType = "all", search = "") {
 
   stockData.forEach(stock => {
     // filter ตามประเภท
-    if (filterType !== "all" && stock.name !== filterType) return;
+    if (filterType && filterType !== "all" && stock.name !== filterType) return;
 
     (stock.withdrawHistory || []).forEach(h => {
       const text = `
@@ -1099,14 +1105,14 @@ function renderWithdrawFilter(stockData = []) {
     }
   });
 
+  // ✅ value = "" = ทั้งหมด
   filter.innerHTML = `<option value="">ทั้งหมด</option>`;
 
   [...typeSet].sort().forEach(type => {
-    filter.innerHTML += `
-      <option value="${type}">${type}</option>
-    `;
+    filter.innerHTML += `<option value="${type}">${type}</option>`;
   });
 }
+
 document.getElementById("withdrawFilter").addEventListener("change", function() {
   const selectedType = this.value;
   renderWithdrawHistory(selectedType);
