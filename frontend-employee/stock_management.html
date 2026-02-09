@@ -1031,11 +1031,29 @@ withdrawForm.onsubmit = async e => {
 };
 
 /* ================= INIT ================= */
-document.addEventListener("DOMContentLoaded", () => {
-  loadStock();
+document.addEventListener("DOMContentLoaded", async () => {
+  // 1️⃣ โหลดข้อมูลสต็อกก่อน
+  await loadStock();
+
+  // 2️⃣ event filter เดิม
   searchInput.addEventListener("keyup", filterStock);
   typeFilterSelect.addEventListener("change", filterStock);
+
+  // 3️⃣ อ่าน jobRef จาก URL (ถ้ามี)
+  const params = new URLSearchParams(window.location.search);
+  const jobRef = params.get("jobRef");
+
+  if (jobRef) {
+    // ใส่ค่าให้ช่องค้นหาประวัติเบิก
+    if (withdrawSearchInput) {
+      withdrawSearchInput.value = jobRef;
+    }
+
+    // เรียก render ประวัติเบิกทันที
+    renderWithdrawHistory("all", jobRef);
+  }
 });
+
 /* ================= MODAL CLOSE ================= */
 document.querySelectorAll(".close-btn").forEach(btn => {
   btn.addEventListener("click", () => {
@@ -1155,6 +1173,9 @@ async function withdrawFromJob(stockId, quantity) {
   });
 
   alert("เบิกอะไหล่สำเร็จ");
+
+  window.location.href =
+  `/employee/stock_management.html?jobRef=${currentJob.receiptNumber}`;
 }
 
 </script>

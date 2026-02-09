@@ -191,13 +191,10 @@ router.put("/:id", auth, async (req, res) => {
 });
 
 // POST /api/jobs/:id/withdraw
+// routes/jobRoutes.js
 router.post("/:id/use-part", verifyToken, async (req, res) => {
   try {
     const { stockId, quantity } = req.body;
-
-    if (!stockId || !quantity || quantity <= 0) {
-      return res.status(400).json({ message: "ข้อมูลไม่ครบถ้วน" });
-    }
 
     const job = await Job.findById(req.params.id);
     if (!job) {
@@ -209,32 +206,40 @@ router.post("/:id/use-part", verifyToken, async (req, res) => {
       return res.status(404).json({ message: "ไม่พบอะไหล่" });
     }
 
-    if (stock.quantity < quantity) {
-      return res.status(400).json({ message: "อะไหล่ไม่เพียงพอ" });
+    if (quantity <= 0 || quantity > stock.quantity) {
+      return res.status(400).json({ message: "จำนวนอะไหล่ไม่ถูกต้อง" });
     }
 
-    // ตัดสต็อก
+    // ✅ 1. ตัดสต็อก
     stock.quantity -= quantity;
+
+    // ✅ 2. บันทึกประวัติการเบิก (สำคัญ!)
+    stock.withdrawHistory.push({
+      quantity,
+      employeeName: req.user.name,           // จาก token
+      jobRef: job.receiptNumber              // ผูกกับงาน
+    });
+
     await stock.save();
 
-    // บันทึกอะไหล่ที่ใช้กับงาน
-    job.usedParts = job.usedParts || [];
+    // ✅ 3. บันทึกในงานซ่อม (อะไหล่ที่ใช้)
     job.usedParts.push({
       stock: stock._id,
       name: stock.name,
       model: stock.model,
-      quantity,
-      usedAt: new Date()
+      quantity
     });
 
     await job.save();
 
-    res.json({ message: "เบิกอะไหล่เรียบร้อย", job });
+    res.json({ message: "เบิกอะไหล่สำเร็จ" });
+
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "เกิดข้อผิดพลาดในการเบิกอะไหล่" });
+    res.status(500).json({ message: "เกิดข้อผิดพลาด" });
   }
 });
+
 
 /* ==================================================
    PUT /api/jobs/:id/complete
