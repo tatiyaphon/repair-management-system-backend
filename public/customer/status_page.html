@@ -408,6 +408,11 @@ box.innerHTML = `
       ${new Date(j.receivedDate).toLocaleDateString("th-TH")}
     </div>
     <div class="detail-item">
+      <strong>วันที่เริ่มซ่อม:</strong>
+      ${j.startDate ? new Date(j.startDate).toLocaleDateString("th-TH") : "-"}
+    </div>
+    
+    <div class="detail-item">
       <strong>วันที่ซ่อมเสร็จ:</strong>
       ${j.finishDate ? new Date(j.finishDate).toLocaleDateString("th-TH") : "-"}
     </div>
