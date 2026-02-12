@@ -407,10 +407,10 @@
       <hr>
 
      <!-- ================= ค่าใช้จ่าย ================= -->
-<div class="accordion-item">
-  <div class="accordion-header" onclick="toggleSection(this)">
-    <i class="fas fa-dollar-sign"></i> ค่าใช้จ่าย
-    <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+ <div class="accordion-item">
+  <div class="accordion-header">
+    <span><i class="fas fa-sync"></i> ค่าใช้จ่าย</span>
+    <i class="fas fa-chevron-down"></i>
   </div>
 
   <div class="accordion-content">
@@ -434,10 +434,10 @@
 <hr>
 
 <!-- ================= ขอเบิกอะไหล่ ================= -->
-<div class="accordion-item">
-  <div class="accordion-header" onclick="toggleSection(this)">
-    <i class="fas fa-box"></i> ขอเบิกอะไหล่
-    <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+ <div class="accordion-item">
+  <div class="accordion-header">
+    <span><i class="fas fa-sync"></i> ขอเบิกอะไหล่</span>
+    <i class="fas fa-chevron-down"></i>
   </div>
 
   <div class="accordion-content">
@@ -594,6 +594,7 @@ async function fetchJob() {
 
   currentJob = await res.json();
   renderJob();
+  renderParts();
 
   // ✅ ตั้งลิงก์ใบรับเครื่องหลังโหลดงาน
   const receiptLink = document.getElementById("receipt-link");
@@ -834,6 +835,32 @@ document.addEventListener("click", function(e){
 function toggleSection(header) {
   const item = header.parentElement;
   item.classList.toggle("active");
+}
+function renderParts() {
+  const list = document.getElementById("parts-list");
+  if (!list) return;
+
+  if (!currentJob.usedParts || currentJob.usedParts.length === 0) {
+    list.innerHTML = `
+      <div style="color:#999;text-align:center;padding:10px">
+        ยังไม่มีการเบิกอะไหล่
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = currentJob.usedParts.map(p => `
+    <div class="history-item">
+      <div>
+        <strong>${p.name || "-"}</strong>
+        (${p.model || "-"})
+        <br>
+        จำนวน: ${p.quantity}
+      </div>
+      <div>
+        ${p.usedAt ? new Date(p.usedAt).toLocaleDateString("th-TH") : ""}
+      </div>
+    </div>
+  `).join("");
 }
 
 /* =========================

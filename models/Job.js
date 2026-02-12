@@ -121,7 +121,9 @@ const jobSchema = new mongoose.Schema(
         usedAt: Date
       }
     ]
+    
   },
+  
   {
     timestamps: true
   }
