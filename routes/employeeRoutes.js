@@ -11,12 +11,12 @@ const nodemailer = require("nodemailer");
 const router = express.Router();
 
 /* ==============================
-   SMTP (แก้ให้ใช้ port 587)
+   SMTP (ใช้ port 587 สำหรับ Render)
 ============================== */
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
-  secure: false, // 🔥 สำคัญ
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -29,7 +29,24 @@ const transporter = nodemailer.createTransport({
 router.get("/", verifyToken, requireRole("admin"), async (req, res) => {
   const employees = await Employee.find()
     .select("_id firstName lastName email role phone active avatar online");
+
   res.json(employees);
+});
+
+/* =====================================
+   GET /api/employees/tech
+===================================== */
+router.get("/tech", verifyToken, async (req, res) => {
+  try {
+    const techs = await Employee.find({
+      role: "tech",
+      active: true
+    }).select("_id firstName lastName");
+
+    res.json(techs);
+  } catch (err) {
+    res.status(500).json({ message: "โหลดรายชื่อช่างไม่สำเร็จ" });
+  }
 });
 
 /* =====================================
@@ -107,7 +124,6 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
 
     } catch (mailErr) {
       console.error("❌ Email send failed:", mailErr.message);
-      // 🔥 ไม่ throw error ให้ระบบล้ม
     }
 
     res.status(201).json({
@@ -118,6 +134,66 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
   } catch (err) {
     console.error("CREATE EMPLOYEE ERROR:", err);
     res.status(500).json({ message: "เพิ่มผู้ใช้ไม่สำเร็จ" });
+  }
+});
+
+/* =====================================
+   PUT /api/employees/:id (admin)
+===================================== */
+router.put("/:id", verifyToken, requireRole("admin"), async (req, res) => {
+  try {
+    const { firstName, lastName, phone, role, active } = req.body;
+
+    const user = await Employee.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "ไม่พบผู้ใช้นี้" });
+    }
+
+    if (req.user.userId === req.params.id && role && role !== "admin") {
+      return res.status(400).json({
+        message: "ไม่สามารถเปลี่ยนสิทธิ์ของตัวเองได้"
+      });
+    }
+
+    await Employee.findByIdAndUpdate(req.params.id, {
+      firstName,
+      lastName,
+      phone,
+      role,
+      active
+    });
+
+    res.json({ message: "แก้ไขข้อมูลผู้ใช้เรียบร้อย" });
+
+  } catch (err) {
+    console.error("UPDATE EMPLOYEE ERROR:", err);
+    res.status(500).json({ message: "แก้ไขผู้ใช้ไม่สำเร็จ" });
+  }
+});
+
+/* =====================================
+   GET /api/employees/:id/profile
+===================================== */
+router.get("/:id/profile", verifyToken, async (req, res) => {
+  try {
+    if (
+      req.user.role !== "admin" &&
+      req.user.userId !== req.params.id
+    ) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    const user = await Employee.findById(req.params.id)
+      .select("firstName lastName email role phone avatar active");
+
+    if (!user) {
+      return res.status(404).json({ message: "ไม่พบผู้ใช้" });
+    }
+
+    res.json(user);
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 });
 
@@ -135,6 +211,25 @@ router.delete("/:id", verifyToken, requireRole("admin"), async (req, res) => {
 
   } catch (err) {
     res.status(500).json({ message: "ลบผู้ใช้ไม่สำเร็จ" });
+  }
+});
+
+/* =====================================
+   GET /api/employees/me
+===================================== */
+router.get("/me", verifyToken, async (req, res) => {
+  try {
+    const user = await Employee.findById(req.user.userId)
+      .select("firstName lastName email role phone avatar active");
+
+    if (!user) {
+      return res.status(404).json({ message: "ไม่พบผู้ใช้" });
+    }
+
+    res.json(user);
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
   }
 });
 
