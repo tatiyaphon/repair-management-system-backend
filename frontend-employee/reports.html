@@ -360,18 +360,15 @@ async function apiFetch(path) {
    LOAD REPORT
 ========================= */
 async function loadReport() {
- 
-  const jobTable     = document.getElementById("jobTable");
 
-  if (!jobTable || !stockTable) return;
+  const jobTable = document.getElementById("jobTable");
+  if (!jobTable) return;
 
   try {
-   const jobs = await apiFetch("/jobs");
+    const jobs = await apiFetch("/jobs");
 
-
-    
-    // ===== JOB TABLE =====
     jobTable.innerHTML = "";
+
     jobs.forEach(j => {
       const tr = document.createElement("tr");
       tr.innerHTML = `
@@ -392,12 +389,12 @@ async function loadReport() {
       jobTable.appendChild(tr);
     });
 
-
   } catch (err) {
     console.error(err);
     alert("❌ โหลดรายงานไม่สำเร็จ");
   }
 }
+
 
 /* =========================
    PROFILE (TOP BAR)
