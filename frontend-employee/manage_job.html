@@ -225,6 +225,49 @@
   background: #2c80b4;
   transform: translateY(-2px);
 }
+/* ===== Accordion Style ===== */
+.accordion-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,.05);
+}
+
+.accordion-header {
+  padding: 15px 20px;
+  cursor: pointer;
+  background: #f8f9fa;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.accordion-header:hover {
+  background: #eef2f7;
+}
+
+.accordion-header i {
+  transition: transform 0.3s;
+}
+
+.accordion-item.active .accordion-header i {
+  transform: rotate(180deg);
+}
+
+.accordion-content {
+  display: none;
+  padding: 20px;
+  border-top: 1px solid #eee;
+}
+
+.accordion-item.active .accordion-content {
+  display: block;
+  animation: fadeIn 0.3s ease-in-out;
+}
 
   </style>
 
@@ -246,60 +289,77 @@
 
 <div id="job-details"></div>
       <hr>
-              <h3 class="section-header"><i class="fas fa-tag"></i> แก้ไขประเภทงานซ่อม</h3>
-      <form id="job-type-form">
-        <div class="form-group">
-          <label for="new-job-type">ประเภทงาน:</label>
-          <select id="new-job-type" required>
-            <option value="">-- เลือกประเภท --</option>
-            <option value="ซ่อมใหม่">ซ่อมใหม่</option>
-            <option value="เคลม">เคลม</option>
-          </select>
-        </div>
-        <div class="btn-group">
-          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> บันทึกประเภท</button>
-        </div>
-      </form>
+              <div class="accordion-item">
+  <div class="accordion-header">
+    <span><i class="fas fa-tag"></i> แก้ไขประเภทงานซ่อม</span>
+    <i class="fas fa-chevron-down"></i>
+  </div>
+  <div class="accordion-content">
+    <form id="job-type-form">
+      <select id="new-job-type" required>
+        <option value="">-- เลือกประเภท --</option>
+        <option value="ซ่อมใหม่">ซ่อมใหม่</option>
+        <option value="เคลม">เคลม</option>
+      </select>
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> บันทึกประเภท
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
       <hr>
 
-      <h3 class="section-header"><i class="fas fa-calendar-alt"></i> แก้ไขวันที่งานซ่อม</h3>
-      <form id="date-form">
-        <div class="form-group">
-          <label for="received-date">วันที่รับเครื่อง:</label>
-          <input type="date" id="received-date" required />
-        </div>
-        <div class="form-group">
-          <label for="start-date">วันเริ่มซ่อม:</label>
-          <input type="date" id="start-date" />
-        </div>
-        <div class="form-group">
-          <label for="finish-date">วันที่ซ่อมเสร็จ:</label>
-          <input type="date" id="finish-date" />
-        </div>
-        <div class="btn-group">
-          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> บันทึกวันที่</button>
-        </div>
-      </form>
+      <div class="accordion-item">
+  <div class="accordion-header">
+    <span><i class="fas fa-calendar-alt"></i> แก้ไขวันที่งานซ่อม</span>
+    <i class="fas fa-chevron-down"></i>
+  </div>
+  <div class="accordion-content">
+    <form id="date-form">
+      <label>วันที่รับเครื่อง</label>
+      <input type="date" id="received-date" required />
+      <label>วันเริ่มซ่อม</label>
+      <input type="date" id="start-date" />
+      <label>วันที่ซ่อมเสร็จ</label>
+      <input type="date" id="finish-date" />
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> บันทึกวันที่
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
       <hr>
 
-      <h3 class="section-header"><i class="fas fa-sync"></i> อัปเดตสถานะงานซ่อม</h3>
-      <form id="status-form">
-        <div class="form-group">
-        <select id="new-status">
-  <option value="รับเครื่อง">รับเครื่อง</option>
-  <option value="กำลังซ่อม">กำลังซ่อม</option>
-  <option value="รออะไหล่">รออะไหล่</option>
-  <option value="ซ่อมเสร็จ">ซ่อมเสร็จ</option>
-  <option value="ยกเลิก">ยกเลิก</option>
-</select>
+     <div class="accordion-item">
+  <div class="accordion-header">
+    <span><i class="fas fa-sync"></i> อัปเดตสถานะงานซ่อม</span>
+    <i class="fas fa-chevron-down"></i>
+  </div>
+  <div class="accordion-content">
+    <form id="status-form">
+      <select id="new-status">
+        <option value="รับเครื่อง">รับเครื่อง</option>
+        <option value="กำลังซ่อม">กำลังซ่อม</option>
+        <option value="รออะไหล่">รออะไหล่</option>
+        <option value="ซ่อมเสร็จ">ซ่อมเสร็จ</option>
+        <option value="ยกเลิก">ยกเลิก</option>
+      </select>
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> บันทึกสถานะ
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
-        </div>
-        <div class="btn-group">
-          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> บันทึกสถานะ</button>
-        </div>
-      </form>
 
       <hr>
 
@@ -558,7 +618,6 @@ function renderJob() {
   document.getElementById("new-job-type").value = currentJob.jobType || "";
 }
 
-
 /* =========================
    UPDATE HELPERS
 ========================= */
@@ -582,7 +641,6 @@ async function updateJob(body) {
 
   await fetchJob();
 }
-
 
 /* =========================
    EVENTS
@@ -690,6 +748,20 @@ document
     // โหลดงานใหม่ (อัปเดตรายการอะไหล่ที่ใช้)
     await fetchJob();
   });
+/* ===== Accordion Toggle ===== */
+document.addEventListener("click", function(e){
+  const header = e.target.closest(".accordion-header");
+  if(!header) return;
+
+  const item = header.parentElement;
+
+  // ปิดอันอื่นก่อน
+  document.querySelectorAll(".accordion-item").forEach(el=>{
+    if(el !== item) el.classList.remove("active");
+  });
+
+  item.classList.toggle("active");
+});
 
 /* =========================
    INIT
