@@ -1631,6 +1631,7 @@ document.getElementById("btn-add-user")?.addEventListener("click", async () => {
   const firstName = document.getElementById("new-user-firstname").value.trim();
   const lastName  = document.getElementById("new-user-lastname").value.trim();
   const email     = document.getElementById("new-user-email").value.trim();
+  const phone     = document.getElementById("new-user-phone").value.trim(); // ✅ เพิ่ม
   const password  = document.getElementById("new-user-password").value.trim();
   const role      = document.getElementById("new-user-role").value;
 
@@ -1649,6 +1650,7 @@ document.getElementById("btn-add-user")?.addEventListener("click", async () => {
       firstName,
       lastName,
       email,
+      phone,     // ✅ ส่ง phone ไปด้วย
       password,
       role
     })
@@ -1663,15 +1665,15 @@ document.getElementById("btn-add-user")?.addEventListener("click", async () => {
 
   alert("✅ เพิ่มผู้ใช้เรียบร้อย");
 
-  // เคลียร์ฟอร์ม
   document.getElementById("new-user-firstname").value = "";
   document.getElementById("new-user-lastname").value = "";
   document.getElementById("new-user-email").value = "";
+  document.getElementById("new-user-phone").value = ""; // ✅ เคลียร์
   document.getElementById("new-user-password").value = "";
 
-  // โหลดตารางใหม่
   init();
 });
+
 function toggleProfile() {
   const dropdown = document.getElementById("profileDropdown");
   dropdown.classList.toggle("show");
