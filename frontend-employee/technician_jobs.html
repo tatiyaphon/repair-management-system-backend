@@ -57,14 +57,13 @@
         .container { max-width:1300px; margin:30px auto; padding:0 20px; }
 
         /* 2. Header and Navigation */
-        header {
+       header {
   background: var(--primary-color);
   color: #fff;
   padding: 15px 40px;
   display: flex;
   align-items: center;
-  justify-content: flex-end; /* ⭐ ชิดขวาทั้งหมด */
-  gap: 30px;
+  justify-content: space-between; /* ⭐ แยกซ้าย-ขวา */
 }
 
 
@@ -81,10 +80,11 @@
             margin-left: 20px;
         }
 
-        .nav-links { 
-            display:flex; 
-            gap:20px; 
-            align-items:center; }
+       .nav-links {
+  display: flex;
+  gap: 20px;
+  margin-left: auto; /* ⭐ ดันเมนูไปขวา */
+}
 
         .nav-link {
             color:rgba(255,255,255,.7);
