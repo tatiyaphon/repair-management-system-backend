@@ -268,6 +268,49 @@
   display: block;
   animation: fadeIn 0.3s ease-in-out;
 }
+/* ===== Accordion ===== */
+.accordion-item {
+  margin-bottom: 15px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+}
+
+.accordion-header {
+  background: #f0f4f8;
+  padding: 15px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.accordion-header:hover {
+  background: #e2e8f0;
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+  background: #fff;
+  padding: 0 20px;
+}
+
+.accordion-item.active .accordion-content {
+  max-height: 1000px;
+  padding: 20px;
+}
+
+.accordion-icon {
+  transition: transform 0.3s;
+}
+
+.accordion-item.active .accordion-icon {
+  transform: rotate(180deg);
+}
 
   </style>
 
@@ -363,42 +406,68 @@
 
       <hr>
 
-      <h3 class="section-header"><i class="fas fa-dollar-sign"></i> ค่าใช้จ่าย</h3>
-      <form id="price-form">
-        <div class="form-group">
-          <label for="new-price">ราคา (บาท):</label>
-          <input type="number" id="new-price" min="0" step="100" placeholder="เช่น 1500" />
-        </div>
-        <div class="btn-group">
-          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> บันทึกราคา</button>
-          <button type="button" id="approve-price-btn" class="btn btn-approve"><i class="fas fa-check-circle"></i> อนุมัติราคา (ปิดงาน)</button>
-        </div>
-      </form>
+     <!-- ================= ค่าใช้จ่าย ================= -->
+<div class="accordion-item">
+  <div class="accordion-header" onclick="toggleSection(this)">
+    <i class="fas fa-dollar-sign"></i> ค่าใช้จ่าย
+    <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+  </div>
 
-      <hr>
+  <div class="accordion-content">
+    <form id="price-form">
+      <div class="form-group">
+        <label for="new-price">ราคา (บาท):</label>
+        <input type="number" id="new-price" min="0" step="100" placeholder="เช่น 1500" />
+      </div>
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> บันทึกราคา
+        </button>
+        <button type="button" id="approve-price-btn" class="btn btn-approve">
+          <i class="fas fa-check-circle"></i> อนุมัติราคา (ปิดงาน)
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
 
-      <h3 class="section-header"><i class="fas fa-box"></i> ขอเบิกอะไหล่</h3>
-      <form id="part-form">
-        <div class="form-group">
-          <label>เลือกอะไหล่:</label>
-<select id="part-name">
-  <option value="">-- เลือกอะไหล่ --</option>
-</select>
+<hr>
 
-<label>เลือกรุ่น:</label>
-<select id="part-model" disabled>
-  <option value="">-- เลือกรุ่น --</option>
-</select>
+<!-- ================= ขอเบิกอะไหล่ ================= -->
+<div class="accordion-item">
+  <div class="accordion-header" onclick="toggleSection(this)">
+    <i class="fas fa-box"></i> ขอเบิกอะไหล่
+    <span class="accordion-icon"><i class="fas fa-chevron-down"></i></span>
+  </div>
 
-        </div>
-        <div class="form-group">
-          <label for="part-qty">จำนวน:</label>
-          <input type="number" id="part-qty" min="1" value="1" required />
-        </div>
-        <div class="btn-group">
-          <button type="submit" class="btn btn-primary"><i class="fas fa-truck"></i> ขอเบิก</button>
-        </div>
-      </form>
+  <div class="accordion-content">
+    <form id="part-form">
+      <div class="form-group">
+        <label>เลือกอะไหล่:</label>
+        <select id="part-name">
+          <option value="">-- เลือกอะไหล่ --</option>
+        </select>
+
+        <label>เลือกรุ่น:</label>
+        <select id="part-model" disabled>
+          <option value="">-- เลือกรุ่น --</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="part-qty">จำนวน:</label>
+        <input type="number" id="part-qty" min="1" value="1" required />
+      </div>
+
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-truck"></i> ขอเบิก
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 
       <hr>
 
@@ -762,6 +831,10 @@ document.addEventListener("click", function(e){
 
   item.classList.toggle("active");
 });
+function toggleSection(header) {
+  const item = header.parentElement;
+  item.classList.toggle("active");
+}
 
 /* =========================
    INIT
