@@ -3,15 +3,24 @@ const mongoose = require("mongoose");
 const employeeSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName:  { type: String, required: true },
-  email:     { type: String, required: true, unique: true },
+
+  email: {
+    type: String,
+    required: true,
+    unique: true,
+    lowercase: true,
+    trim: true,
+    match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+  },
+
   password:  { type: String, required: true },
-  
 
   role: {
     type: String,
     enum: ["admin", "tech", "staff"],
     default: "staff"
   },
+
   phone: { type: String, default: "-" },
 
   avatar: {
@@ -22,12 +31,12 @@ const employeeSchema = new mongoose.Schema({
   mustChangePassword: { type: Boolean, default: true },
   active: { type: Boolean, default: true },
 
-  // ✅ เพิ่มตรงนี้
   online: { 
     type: Boolean, 
     default: false 
   }
 
 }, { timestamps: true });
+
 
 module.exports = mongoose.model("Employee", employeeSchema);

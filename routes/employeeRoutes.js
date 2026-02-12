@@ -38,32 +38,59 @@ router.get("/tech", verifyToken, async (req, res) => {
    POST /api/employees (admin)
 ===================================== */
 router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
-  const { firstName, lastName, email, password, role, phone } = req.body;
+  try {
+    let { firstName, lastName, email, password, role, phone } = req.body;
 
-  if (!firstName || !lastName || !email || !password) {
-    return res.status(400).json({ message: "ข้อมูลไม่ครบ" });
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({ message: "ข้อมูลไม่ครบ" });
+    }
+
+    // ✅ แปลง email เป็นตัวพิมพ์เล็ก และตัดช่องว่าง
+    email = email.trim().toLowerCase();
+
+    // ✅ ตรวจสอบรูปแบบอีเมล
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        message: "รูปแบบอีเมลไม่ถูกต้อง"
+      });
+    }
+
+    // ✅ ป้องกันอีเมลซ้ำแบบ case-insensitive
+    const exists = await Employee.findOne({
+      email: { $regex: new RegExp(`^${email}$`, "i") }
+    });
+
+    if (exists) {
+      return res.status(409).json({
+        message: "อีเมลนี้ถูกใช้แล้ว"
+      });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+
+    const user = await Employee.create({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email,
+      phone,
+      password: hash,
+      role,
+      active: true,
+      mustChangePassword: true
+    });
+
+    res.status(201).json({
+      message: "เพิ่มผู้ใช้สำเร็จ",
+      user
+    });
+
+  } catch (err) {
+    console.error("CREATE EMPLOYEE ERROR:", err);
+    res.status(500).json({ message: "เพิ่มผู้ใช้ไม่สำเร็จ" });
   }
-
-  const exists = await Employee.findOne({ email });
-  if (exists) {
-    return res.status(409).json({ message: "อีเมลนี้ถูกใช้แล้ว" });
-  }
-
-  const hash = await bcrypt.hash(password, 10);
-
-  const user = await Employee.create({
-    firstName,
-    lastName,
-    email,
-    phone,
-    password: hash,
-    role,
-    active: true,
-    mustChangePassword: true
-  });
-
-  res.status(201).json({ message: "เพิ่มผู้ใช้สำเร็จ", user });
 });
+
 
 /* =====================================
    PUT /api/employees/:id (admin)
