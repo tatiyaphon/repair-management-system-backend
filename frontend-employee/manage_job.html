@@ -225,48 +225,6 @@
   background: #2c80b4;
   transform: translateY(-2px);
 }
-/* ===== TAB NAVIGATION ===== */
-.tab-bar {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 30px;
-  border-top: 1px solid #eee;
-  padding-top: 20px;
-  overflow-x: auto;
-}
-
-.tab-item {
-  flex: 1;
-  text-align: center;
-  padding: 12px;
-  border-radius: 12px;
-  cursor: pointer;
-  transition: .3s;
-  font-weight: 600;
-  background: #ecf0f1;
-  white-space: nowrap;
-}
-
-.tab-item:hover {
-  background: #dfe6e9;
-}
-
-.tab-item.active {
-  background: var(--secondary-color);
-  color: #fff;
-  box-shadow: 0 4px 10px rgba(0,0,0,.1);
-}
-
-/* ซ่อน section */
-.tab-section {
-  display: none;
-  animation: fadeIn .3s ease-in-out;
-}
-
-.tab-section.active {
-  display: block;
-}
 
   </style>
 
@@ -282,99 +240,118 @@
     </nav>
   </header>
 
-  <!-- ===== TAB CONTENT AREA ===== -->
-<div class="tab-content-wrapper">
+  <div class="container">
+    <div class="card">
+      <h2><i class="fas fa-cogs"></i> จัดการงานซ่อม</h2>
 
-  <!-- ประเภทงาน -->
-  <div class="tab-content active" id="tab-type">
-    <h3 class="section-header"><i class="fas fa-tag"></i> แก้ไขประเภทงานซ่อม</h3>
-    <form id="job-type-form">
-      <select id="new-job-type" required>
-        <option value="">-- เลือกประเภท --</option>
-        <option value="ซ่อมใหม่">ซ่อมใหม่</option>
-        <option value="เคลม">เคลม</option>
-      </select>
+<div id="job-details"></div>
+      <hr>
+              <h3 class="section-header"><i class="fas fa-tag"></i> แก้ไขประเภทงานซ่อม</h3>
+      <form id="job-type-form">
+        <div class="form-group">
+          <label for="new-job-type">ประเภทงาน:</label>
+          <select id="new-job-type" required>
+            <option value="">-- เลือกประเภท --</option>
+            <option value="ซ่อมใหม่">ซ่อมใหม่</option>
+            <option value="เคลม">เคลม</option>
+          </select>
+        </div>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> บันทึกประเภท</button>
+        </div>
+      </form>
+
+      <hr>
+
+      <h3 class="section-header"><i class="fas fa-calendar-alt"></i> แก้ไขวันที่งานซ่อม</h3>
+      <form id="date-form">
+        <div class="form-group">
+          <label for="received-date">วันที่รับเครื่อง:</label>
+          <input type="date" id="received-date" required />
+        </div>
+        <div class="form-group">
+          <label for="start-date">วันเริ่มซ่อม:</label>
+          <input type="date" id="start-date" />
+        </div>
+        <div class="form-group">
+          <label for="finish-date">วันที่ซ่อมเสร็จ:</label>
+          <input type="date" id="finish-date" />
+        </div>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> บันทึกวันที่</button>
+        </div>
+      </form>
+
+      <hr>
+
+      <h3 class="section-header"><i class="fas fa-sync"></i> อัปเดตสถานะงานซ่อม</h3>
+      <form id="status-form">
+        <div class="form-group">
+        <select id="new-status">
+  <option value="รับเครื่อง">รับเครื่อง</option>
+  <option value="กำลังซ่อม">กำลังซ่อม</option>
+  <option value="รออะไหล่">รออะไหล่</option>
+  <option value="ซ่อมเสร็จ">ซ่อมเสร็จ</option>
+  <option value="ยกเลิก">ยกเลิก</option>
+</select>
+
+        </div>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> บันทึกสถานะ</button>
+        </div>
+      </form>
+
+      <hr>
+
+      <h3 class="section-header"><i class="fas fa-dollar-sign"></i> ค่าใช้จ่าย</h3>
+      <form id="price-form">
+        <div class="form-group">
+          <label for="new-price">ราคา (บาท):</label>
+          <input type="number" id="new-price" min="0" step="100" placeholder="เช่น 1500" />
+        </div>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> บันทึกราคา</button>
+          <button type="button" id="approve-price-btn" class="btn btn-approve"><i class="fas fa-check-circle"></i> อนุมัติราคา (ปิดงาน)</button>
+        </div>
+      </form>
+
+      <hr>
+
+      <h3 class="section-header"><i class="fas fa-box"></i> ขอเบิกอะไหล่</h3>
+      <form id="part-form">
+        <div class="form-group">
+          <label>เลือกอะไหล่:</label>
+<select id="part-name">
+  <option value="">-- เลือกอะไหล่ --</option>
+</select>
+
+<label>เลือกรุ่น:</label>
+<select id="part-model" disabled>
+  <option value="">-- เลือกรุ่น --</option>
+</select>
+
+        </div>
+        <div class="form-group">
+          <label for="part-qty">จำนวน:</label>
+          <input type="number" id="part-qty" min="1" value="1" required />
+        </div>
+        <div class="btn-group">
+          <button type="submit" class="btn btn-primary"><i class="fas fa-truck"></i> ขอเบิก</button>
+        </div>
+      </form>
+
+      <hr>
+
+      <h3 class="section-header"><i class="fas fa-list"></i> รายการอะไหล่ที่ใช้</h3>
+      <div id="parts-list"></div>
+
+      <hr>
+
       <div class="btn-group">
-        <button type="submit" class="btn btn-primary">บันทึก</button>
+        <button id="cancel-job-btn" class="btn btn-cancel"><i class="fas fa-ban"></i> ยกเลิกงานซ่อม</button>
       </div>
-    </form>
-  </div>
-
-  <!-- วันที่ -->
-  <div class="tab-content" id="tab-date">
-    <h3 class="section-header"><i class="fas fa-calendar-alt"></i> แก้ไขวันที่</h3>
-    <form id="date-form">
-      <input type="date" id="received-date" />
-      <input type="date" id="start-date" />
-      <input type="date" id="finish-date" />
-      <div class="btn-group">
-        <button type="submit" class="btn btn-primary">บันทึก</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- สถานะ -->
-  <div class="tab-content" id="tab-status">
-    <h3 class="section-header"><i class="fas fa-sync"></i> อัปเดตสถานะ</h3>
-    <form id="status-form">
-      <select id="new-status">
-        <option value="รับเครื่อง">รับเครื่อง</option>
-        <option value="กำลังซ่อม">กำลังซ่อม</option>
-        <option value="รออะไหล่">รออะไหล่</option>
-        <option value="ซ่อมเสร็จ">ซ่อมเสร็จ</option>
-        <option value="ยกเลิก">ยกเลิก</option>
-      </select>
-      <div class="btn-group">
-        <button type="submit" class="btn btn-primary">บันทึก</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- ราคา -->
-  <div class="tab-content" id="tab-price">
-    <h3 class="section-header"><i class="fas fa-dollar-sign"></i> ค่าใช้จ่าย</h3>
-    <form id="price-form">
-      <input type="number" id="new-price" />
-      <div class="btn-group">
-        <button type="submit" class="btn btn-primary">บันทึก</button>
-        <button type="button" id="approve-price-btn" class="btn btn-approve">ปิดงาน</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- อะไหล่ -->
-  <div class="tab-content" id="tab-parts">
-    <h3 class="section-header"><i class="fas fa-box"></i> ขอเบิกอะไหล่</h3>
-    <form id="part-form">
-      <select id="part-name"></select>
-      <select id="part-model" disabled></select>
-      <input type="number" id="part-qty" min="1" value="1" />
-      <div class="btn-group">
-        <button type="submit" class="btn btn-primary">ขอเบิก</button>
-      </div>
-    </form>
-  </div>
-
-  <!-- ยกเลิก -->
-  <div class="tab-content" id="tab-cancel">
-    <h3 class="section-header"><i class="fas fa-ban"></i> ยกเลิกงาน</h3>
-    <div class="btn-group">
-      <button id="cancel-job-btn" class="btn btn-cancel">ยกเลิกงานซ่อม</button>
     </div>
   </div>
-
-</div>
-
-
-<!-- ===== TAB MENU ===== -->
-<div class="tab-menu">
-  <button class="tab-btn active" data-tab="tab-type">ประเภท</button>
-  <button class="tab-btn" data-tab="tab-date">วันที่</button>
-  <button class="tab-btn" data-tab="tab-status">สถานะ</button>
-  <button class="tab-btn" data-tab="tab-price">ราคา</button>
-  <button class="tab-btn" data-tab="tab-parts">อะไหล่</button>
-  <button class="tab-btn" data-tab="tab-cancel">ยกเลิก</button>
-</div>
 
 <script>
 /* ==========================================================
@@ -713,25 +690,6 @@ document
     // โหลดงานใหม่ (อัปเดตรายการอะไหล่ที่ใช้)
     await fetchJob();
   });
-/* =========================
-   TAB SWITCH SYSTEM
-========================= */
-document.querySelectorAll(".tab-btn").forEach(btn => {
-  btn.addEventListener("click", () => {
-
-    document.querySelectorAll(".tab-btn")
-      .forEach(b => b.classList.remove("active"));
-
-    document.querySelectorAll(".tab-panel")
-      .forEach(p => p.classList.remove("active"));
-
-    btn.classList.add("active");
-
-    const tab = btn.dataset.tab;
-    document.getElementById("tab-" + tab)
-      .classList.add("active");
-  });
-});
 
 /* =========================
    INIT
