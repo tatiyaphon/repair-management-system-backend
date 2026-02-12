@@ -360,26 +360,16 @@ async function apiFetch(path) {
    LOAD REPORT
 ========================= */
 async function loadReport() {
-  const totalJobsEl   = document.getElementById("totalJobs");
-  const inProgressEl = document.getElementById("inProgress");
-  const waitingEl    = document.getElementById("waiting");
-  const completedEl  = document.getElementById("completed");
+ 
   const jobTable     = document.getElementById("jobTable");
-  const stockTable   = document.getElementById("stockTable");
 
   if (!jobTable || !stockTable) return;
 
   try {
-    const [jobs, stocks] = await Promise.all([
-      apiFetch("/jobs"),
-    ]);
+   const jobs = await apiFetch("/jobs");
 
-    // ===== SUMMARY =====
-    if (totalJobsEl)   totalJobsEl.textContent   = jobs.length;
-    if (inProgressEl) inProgressEl.textContent = jobs.filter(j => j.status === "กำลังซ่อม").length;
-    if (waitingEl)    waitingEl.textContent    = jobs.filter(j => j.status === "รออะไหล่").length;
-    if (completedEl)  completedEl.textContent  = jobs.filter(j => j.status === "ซ่อมเสร็จ").length;
 
+    
     // ===== JOB TABLE =====
     jobTable.innerHTML = "";
     jobs.forEach(j => {
@@ -402,19 +392,6 @@ async function loadReport() {
       jobTable.appendChild(tr);
     });
 
-    // ===== LOW STOCK =====
-    stockTable.innerHTML = "";
-    stocks
-      .filter(s => s.quantity <= 5)
-      .forEach(s => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${s.name}</td>
-          <td>${s.model}</td>
-          <td style="color:red;font-weight:600">${s.quantity}</td>
-        `;
-        stockTable.appendChild(tr);
-      });
 
   } catch (err) {
     console.error(err);
