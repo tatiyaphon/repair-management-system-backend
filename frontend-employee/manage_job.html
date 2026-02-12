@@ -225,6 +225,45 @@
   background: #2c80b4;
   transform: translateY(-2px);
 }
+/* ===== Accordion ===== */
+.accordion {
+  margin-top: 20px;
+}
+
+.accordion-item {
+  border-radius: 10px;
+  margin-bottom: 15px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,.06);
+  background: #fff;
+}
+
+.accordion-header {
+  padding: 16px 20px;
+  cursor: pointer;
+  background: #f4f7f9;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.accordion-header:hover {
+  background: #e9f1f5;
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+  padding: 0 20px;
+}
+
+.accordion-content.active {
+  padding: 20px;
+  max-height: 1000px;
+}
 
   </style>
 
@@ -246,7 +285,12 @@
 
 <div id="job-details"></div>
       <hr>
-              <h3 class="section-header"><i class="fas fa-tag"></i> แก้ไขประเภทงานซ่อม</h3>
+              <div class="accordion-item">
+    <div class="accordion-header">
+      <span><i class="fas fa-tag"></i> แก้ไขประเภทงานซ่อม</span>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="accordion-content">
       <form id="job-type-form">
         <div class="form-group">
           <label for="new-job-type">ประเภทงาน:</label>
@@ -263,7 +307,12 @@
 
       <hr>
 
-      <h3 class="section-header"><i class="fas fa-calendar-alt"></i> แก้ไขวันที่งานซ่อม</h3>
+      <div class="accordion-item">
+    <div class="accordion-header">
+      <span><i class="fas fa-calendar-alt"></i> แก้ไขวันที่งานซ่อม</span>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="accordion-content">
       <form id="date-form">
         <div class="form-group">
           <label for="received-date">วันที่รับเครื่อง:</label>
@@ -284,7 +333,12 @@
 
       <hr>
 
-      <h3 class="section-header"><i class="fas fa-sync"></i> อัปเดตสถานะงานซ่อม</h3>
+     <div class="accordion-item">
+    <div class="accordion-header">
+      <span><i class="fas fa-sync"></i> อัปเดตสถานะงาน</span>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="accordion-content">
       <form id="status-form">
         <div class="form-group">
         <select id="new-status">
@@ -303,7 +357,12 @@
 
       <hr>
 
-      <h3 class="section-header"><i class="fas fa-dollar-sign"></i> ค่าใช้จ่าย</h3>
+    <div class="accordion-item">
+    <div class="accordion-header">
+      <span><i class="fas fa-dollar-sign"></i> ค่าใช้จ่าย</span>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="accordion-content">
       <form id="price-form">
         <div class="form-group">
           <label for="new-price">ราคา (บาท):</label>
@@ -317,7 +376,12 @@
 
       <hr>
 
-      <h3 class="section-header"><i class="fas fa-box"></i> ขอเบิกอะไหล่</h3>
+     <div class="accordion-item">
+    <div class="accordion-header">
+      <span><i class="fas fa-box"></i> ขอเบิกอะไหล่</span>
+      <i class="fas fa-chevron-down"></i>
+    </div>
+    <div class="accordion-content">
       <form id="part-form">
         <div class="form-group">
           <label>เลือกอะไหล่:</label>
@@ -699,6 +763,25 @@ document.addEventListener("DOMContentLoaded", async () => {
   await fetchStock();
   await fetchJob();
 });
+/* =========================
+   ACCORDION CONTROL
+========================= */
+document.querySelectorAll(".accordion-header").forEach(header => {
+  header.addEventListener("click", () => {
+    const content = header.nextElementSibling;
+
+    // ปิดอันอื่นก่อน
+    document.querySelectorAll(".accordion-content").forEach(c => {
+      if (c !== content) {
+        c.classList.remove("active");
+      }
+    });
+
+    // เปิด/ปิดอันที่คลิก
+    content.classList.toggle("active");
+  });
+});
+
 </script>
 </div>
 </body>
