@@ -419,6 +419,19 @@
     padding: 14px 18px;
   }
 }
+.summary-card {
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 25px rgba(0,0,0,.15);
+}
+
+.summary-card.active {
+  border: 3px solid #1abc9c;
+}
 
     </style>
 </head>
@@ -501,25 +514,28 @@
         <div class="user" id="user-meta">—</div>
     </header>
 
-    <main class="container">
-        <section class="cards" aria-label="สรุปงานของฉัน">
-            <div class="card primary">
-                <h3>งานทั้งหมดของฉัน</h3>
-                <div class="num" id="my-total">0</div>
-            </div>
-            <div class="card new">
-                <h3>คิวใหม่</h3>
-                <div class="num" id="my-new">0</div>
-            </div>
-            <div class="card progress-wait">
-                <h3>กำลังดำเนินการ / รออะไหล่</h3>
-                <div class="num" id="my-inprogress">0</div>
-            </div>
-            <div class="card success">
-                <h3>เสร็จสิ้น</h3>
-                <div class="num" id="my-completed">0</div>
-            </div>
-        </section>
+    <div class="cards">
+  <div class="card summary-card active" data-status="all">
+    <h2 id="totalJobs">0</h2>
+    <span>งานทั้งหมดของฉัน</span>
+  </div>
+
+  <div class="card summary-card" data-status="รับเครื่อง">
+    <h2 id="newJobs">0</h2>
+    <span>คิวใหม่</span>
+  </div>
+
+  <div class="card summary-card" data-status="processing">
+    <h2 id="processingJobs">0</h2>
+    <span>กำลังดำเนินการ / รออะไหล่</span>
+  </div>
+
+  <div class="card summary-card" data-status="ซ่อมเสร็จ">
+    <h2 id="doneJobs">0</h2>
+    <span>เสร็จสิ้น</span>
+  </div>
+</div>
+
 
         <div class="toolbar">
     <input
@@ -578,6 +594,7 @@ const userId   = localStorage.getItem("userId");
 const userName = localStorage.getItem("userName");
 
 let allJobs = [];
+let currentFilter = "all";
 
 if (!token || !userId) {
   localStorage.clear();
@@ -860,10 +877,44 @@ function applyFilters() {
     el.addEventListener("input", applyFilters);
     el.addEventListener("change", applyFilters);
   });
+function filterByStatus(status) {
+
+  currentFilter = status;
+
+  let filtered = [];
+
+  if (status === "all") {
+    filtered = allJobs;
+  }
+  else if (status === "inprogress") {
+    filtered = allJobs.filter(j =>
+      j.status === "กำลังซ่อม" ||
+      j.status === "รออะไหล่"
+    );
+  }
+  else {
+    filtered = allJobs.filter(j =>
+      j.status === status
+    );
+  }
+
+  renderJobs(filtered);
+
+  highlightActiveCard(status);
+}
+function highlightActiveCard(status) {
+  const cards = document.querySelectorAll(".summary-card");
+  cards.forEach(card => {
+    if (card.getAttribute("data-status") === status) {
+      card.classList.add("active");
+    } else {
+      card.classList.remove("active");
+    }
+  });
+}
 
 
 </script>
-
 
 </body>
 </html>
