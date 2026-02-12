@@ -285,13 +285,6 @@ select{
 
 <h1><i class="fas fa-chart-bar"></i> รายงานสรุประบบงานซ่อม</h1>
 
-<!-- SUMMARY -->
-<div class="cards">
-  <div class="card"><h2 id="totalJobs">0</h2><span>งานทั้งหมด</span></div>
-  <div class="card"><h2 id="inProgress">0</h2><span>กำลังดำเนินการ</span></div>
-  <div class="card"><h2 id="waiting">0</h2><span>รออะไหล่</span></div>
-  <div class="card"><h2 id="completed">0</h2><span>ซ่อมเสร็จ</span></div>
-</div>
 
 <!-- FILTER -->
 <div class="section">
@@ -323,21 +316,6 @@ select{
       </tr>
     </thead>
     <tbody id="jobTable"></tbody>
-  </table>
-</div>
-
-<!-- STOCK -->
-<div class="section">
-  <h3>อะไหล่คงเหลือน้อย</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>ชื่ออะไหล่</th>
-        <th>รุ่น</th>
-        <th>คงเหลือ</th>
-      </tr>
-    </thead>
-    <tbody id="stockTable"></tbody>
   </table>
 </div>
 
@@ -394,7 +372,6 @@ async function loadReport() {
   try {
     const [jobs, stocks] = await Promise.all([
       apiFetch("/jobs"),
-      apiFetch("/stocks")
     ]);
 
     // ===== SUMMARY =====
