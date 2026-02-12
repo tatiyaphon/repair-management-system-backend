@@ -5,21 +5,26 @@ const bcrypt = require("bcryptjs");
 const Employee = require("../models/Employee");
 const verifyToken = require("../middleware/auth");
 
-
 /* =========================
    POST /api/auth/login
 ========================= */
 router.post("/login", async (req, res) => {
   try {
-    const { email, password } = req.body;
+    let { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: "Email และ password จำเป็นต้องกรอก" });
+      return res.status(400).json({
+        error: "Email และ password จำเป็นต้องกรอก"
+      });
     }
+
+    email = email.trim().toLowerCase();
 
     const user = await Employee.findOne({ email });
     if (!user || user.active === false) {
-      return res.status(401).json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+      return res.status(401).json({
+        error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+      });
     }
 
     const isMatch = user.password.startsWith("$2")
@@ -27,23 +32,29 @@ router.post("/login", async (req, res) => {
       : password === user.password;
 
     if (!isMatch) {
-      return res.status(401).json({ error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง" });
+      return res.status(401).json({
+        error: "อีเมลหรือรหัสผ่านไม่ถูกต้อง"
+      });
+    }
+
+    // 🔐 บล็อกถ้ายังไม่ยืนยันอีเมล
+    if (!user.isVerified) {
+      return res.status(403).json({
+        error: "กรุณายืนยันอีเมลก่อนเข้าสู่ระบบ"
+      });
     }
 
     // ✅ อัปเดตสถานะออนไลน์
     user.online = true;
 
-
     // upgrade password ถ้ายังไม่ bcrypt
     if (!user.password.startsWith("$2")) {
       user.password = await bcrypt.hash(password, 10);
       user.mustChangePassword = true;
-
     }
 
     await user.save();
 
-    // ✅ สร้าง token และเก็บใส่ตัวแปร
     const token = jwt.sign(
       { userId: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -65,12 +76,46 @@ router.post("/login", async (req, res) => {
     console.error("LOGIN ERROR:", err);
     res.status(500).json({ error: "Login failed" });
   }
-
-
 });
 
 
+/* =========================
+   GET /api/auth/verify/:token
+========================= */
+router.get("/verify/:token", async (req, res) => {
+  try {
+    const decoded = jwt.verify(
+      req.params.token,
+      process.env.JWT_SECRET
+    );
 
+    const user = await Employee.findById(decoded.id);
+    if (!user) {
+      return res.status(404).send("ไม่พบผู้ใช้");
+    }
+
+    if (user.isVerified) {
+      return res.send("บัญชีนี้ยืนยันแล้ว");
+    }
+
+    user.isVerified = true;
+    await user.save();
+
+    res.send(`
+      <h2>✅ ยืนยันอีเมลสำเร็จ</h2>
+      <p>สามารถกลับไปเข้าสู่ระบบได้แล้ว</p>
+    `);
+
+  } catch (err) {
+    console.error("VERIFY ERROR:", err);
+    res.status(400).send("❌ ลิงก์ไม่ถูกต้องหรือหมดอายุ");
+  }
+});
+
+
+/* =========================
+   POST /api/auth/logout
+========================= */
 router.post("/logout", verifyToken, async (req, res) => {
   await Employee.findByIdAndUpdate(req.user.userId, {
     online: false
@@ -79,12 +124,9 @@ router.post("/logout", verifyToken, async (req, res) => {
 });
 
 
-
 /* =========================
    POST /api/auth/change-password
-   ผู้ใช้เปลี่ยนรหัสผ่านเอง
 ========================= */
-// change-password
 router.post("/change-password", verifyToken, async (req, res) => {
   try {
     const { oldPassword, newPassword } = req.body;
@@ -95,10 +137,11 @@ router.post("/change-password", verifyToken, async (req, res) => {
       });
     }
 
-    // ✅ ใช้ userId เท่านั้น
     const user = await Employee.findById(req.user.userId);
     if (!user || user.active === false) {
-      return res.status(404).json({ message: "ไม่พบผู้ใช้" });
+      return res.status(404).json({
+        message: "ไม่พบผู้ใช้"
+      });
     }
 
     let isMatch = false;
@@ -120,6 +163,7 @@ router.post("/change-password", verifyToken, async (req, res) => {
     await user.save();
 
     res.json({ message: "เปลี่ยนรหัสผ่านสำเร็จ" });
+
   } catch (err) {
     console.error("CHANGE PASSWORD ERROR:", err);
     res.status(500).json({
@@ -131,7 +175,6 @@ router.post("/change-password", verifyToken, async (req, res) => {
 
 /* =========================
    POST /api/auth/reset-admin
-   ใช้เฉพาะกรณีลืมรหัส
 ========================= */
 router.post("/reset-admin", async (req, res) => {
   try {
@@ -141,9 +184,15 @@ router.post("/reset-admin", async (req, res) => {
       return res.status(403).json({ message: "Forbidden" });
     }
 
-    const user = await Employee.findOne({ email, role: "admin" });
+    const user = await Employee.findOne({
+      email,
+      role: "admin"
+    });
+
     if (!user) {
-      return res.status(404).json({ message: "Admin not found" });
+      return res.status(404).json({
+        message: "Admin not found"
+      });
     }
 
     user.password = await bcrypt.hash(newPassword, 10);

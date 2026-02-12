@@ -7,6 +7,16 @@ const verifyToken = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 
 const router = express.Router();
+const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
+
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
 
 /* =====================================
    GET /api/employees (admin)
@@ -45,10 +55,8 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
       return res.status(400).json({ message: "ข้อมูลไม่ครบ" });
     }
 
-    // ✅ แปลง email เป็นตัวพิมพ์เล็ก และตัดช่องว่าง
     email = email.trim().toLowerCase();
 
-    // ✅ ตรวจสอบรูปแบบอีเมล
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(email)) {
       return res.status(400).json({
@@ -56,7 +64,6 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
       });
     }
 
-    // ✅ ป้องกันอีเมลซ้ำแบบ case-insensitive
     const exists = await Employee.findOne({
       email: { $regex: new RegExp(`^${email}$`, "i") }
     });
@@ -77,11 +84,38 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
       password: hash,
       role,
       active: true,
-      mustChangePassword: true
+      mustChangePassword: true,
+      isVerified: false   // ✅ สำคัญ
+    });
+
+    // ==============================
+    // 📧 ส่งอีเมลยืนยัน
+    // ==============================
+    const verifyToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    const verifyLink = `${process.env.BASE_URL}/api/auth/verify/${verifyToken}`;
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "ยืนยันอีเมลระบบร้านตุ้ยไอที",
+      html: `
+        <h2>ยืนยันบัญชีของคุณ</h2>
+        <p>กรุณาคลิกปุ่มด้านล่างเพื่อยืนยันอีเมล</p>
+        <a href="${verifyLink}" 
+           style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
+           ยืนยันอีเมล
+        </a>
+        <p>ลิงก์นี้จะหมดอายุใน 24 ชั่วโมง</p>
+      `
     });
 
     res.status(201).json({
-      message: "เพิ่มผู้ใช้สำเร็จ",
+      message: "เพิ่มผู้ใช้สำเร็จ และส่งอีเมลยืนยันแล้ว",
       user
     });
 
@@ -90,6 +124,7 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
     res.status(500).json({ message: "เพิ่มผู้ใช้ไม่สำเร็จ" });
   }
 });
+
 
 
 /* =====================================
