@@ -380,6 +380,22 @@ box.innerHTML = `
     <div class="detail-item"><strong>เบอร์:</strong> ${j.customerPhone || "-"}</div>
     <div class="detail-item"><strong>ที่อยู่:</strong> ${j.customerAddress || "-"}</div>
     <div class="detail-item"><strong>อุปกรณ์ที่มาด้วย:</strong> ${j.accessory || "-"}</div>
+
+    <div class="status-box">
+  <h2><i class="fas fa-user"></i> ข้อมูลลูกค้า</h2>
+  <div class="detail-item"><strong>เลขใบเสร็จ:</strong> ${j.receiptNumber}</div>
+  <div class="detail-item"><strong>ชื่อ:</strong> ${j.customerName}</div>
+  <div class="detail-item"><strong>เบอร์:</strong> ${j.customerPhone || "-"}</div>
+  <div class="detail-item"><strong>ที่อยู่:</strong> ${j.customerAddress || "-"}</div>
+  <div class="detail-item"><strong>อุปกรณ์ที่มาด้วย:</strong> ${j.accessory || "-"}</div>
+
+  <div class="detail-item">
+    <strong>ประเภทการรับเครื่อง:</strong> 
+    ${j.jobType === "เคลม" 
+      ? '<span style="color:#e67e22;font-weight:600;">🔁 เคลมสินค้า</span>' 
+      : '<span style="color:#2980b9;font-weight:600;">🛠 รับเครื่องใหม่</span>'
+    }
+  </div>
   </div>
 
   <!-- ข้อมูลเครื่อง -->
