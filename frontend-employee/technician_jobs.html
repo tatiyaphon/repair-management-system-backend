@@ -462,6 +462,9 @@
 .job-card .info strong {
   font-size: 15px;
 }
+.group-cancelled {
+  background: #95a5a6;
+}
 
     </style>
 </head>
@@ -780,7 +783,8 @@ function renderJobsGrouped(jobs) {
     "รับเครื่อง",
     "กำลังซ่อม",
     "รออะไหล่",
-    "ซ่อมเสร็จ"
+    "ซ่อมเสร็จ",
+    "ยกเลิก"
   ];
 
   statuses.forEach(status => {
@@ -797,6 +801,7 @@ if (status === "รับเครื่อง") groupClass = "group-new";
 if (status === "กำลังซ่อม") groupClass = "group-progress";
 if (status === "รออะไหล่") groupClass = "group-wait";
 if (status === "ซ่อมเสร็จ") groupClass = "group-done";
+if (status === "ยกเลิก") groupClass = "group-cancelled";
 
 section.innerHTML = `
   <h3 class="group-header ${groupClass}">
