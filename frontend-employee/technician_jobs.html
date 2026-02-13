@@ -791,11 +791,18 @@ function renderJobsGrouped(jobs) {
     const section = document.createElement("div");
     section.className = "job-group";
 
-    section.innerHTML = `
-      <h3 class="group-title">
-        ${status} (${groupJobs.length})
-      </h3>
-    `;
+    let groupClass = "";
+
+if (status === "รับเครื่อง") groupClass = "group-new";
+if (status === "กำลังซ่อม") groupClass = "group-progress";
+if (status === "รออะไหล่") groupClass = "group-wait";
+if (status === "ซ่อมเสร็จ") groupClass = "group-done";
+
+section.innerHTML = `
+  <h3 class="group-header ${groupClass}">
+    ${status} (${groupJobs.length})
+  </h3>
+`;
 
     const table = document.createElement("table");
     table.className = "styled-table";
