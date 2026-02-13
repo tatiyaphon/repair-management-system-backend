@@ -416,6 +416,17 @@
     padding: 14px 18px;
   }
 }
+.job-group {
+  margin-bottom: 40px;
+}
+
+.group-title {
+  background: #2c3e50;
+  color: #fff;
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
 
     </style>
 </head>
@@ -539,24 +550,20 @@
   </div>
 
         <section class="content-section">
-            <table id="jobTable" class="styled-table" aria-label="ตารางงานของฉัน">
-                <thead>
-                    <tr>
-                        <th>รหัสงาน</th>
-                        <th>ประเภท</th>
-                        <th>ลูกค้า</th>
-                        <th>เครื่อง</th>
-                        <th>อาการ</th>
-                        <th>สถานะ</th>
-                        <th>วันที่รับ</th>
-                        <th>จัดการ</th>
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            </table>
-            <div id="emptyBox" class="empty" style="display:none;"><i class="fas fa-box-open"></i> ยังไม่มีงานในรายการของคุณ</div>
-            <div class="note">* ปุ่ม <strong>เสร็จสิ้น</strong> จะปรากฏเฉพาะงานสถานะ 'กำลังดำเนินการ' หรือ 'รออะไหล่'</div>
-        </section>
+
+    <div id="jobGroups"></div>
+
+    <div id="emptyBox" class="empty" style="display:none;">
+        <i class="fas fa-box-open"></i> ยังไม่มีงานในรายการของคุณ
+    </div>
+
+    <div class="note">
+        * ปุ่ม <strong>เสร็จสิ้น</strong> จะปรากฏเฉพาะงานสถานะ 
+        'กำลังดำเนินการ' หรือ 'รออะไหล่'
+    </div>
+
+</section>
+
     </main>
 
 <script>
@@ -721,51 +728,85 @@ async function fetchMyJobs() {
 /* =====================
    RENDER TABLE
 ===================== */
-function renderJobs(jobs) {
-  const tbody = document.querySelector("#jobTable tbody");
+function renderJobsGrouped(jobs) {
+  const container = document.getElementById("jobGroups");
   const emptyBox = document.getElementById("emptyBox");
 
-  tbody.innerHTML = "";
+  container.innerHTML = "";
 
   if (!jobs.length) {
-    emptyBox && (emptyBox.style.display = "block");
+    emptyBox.style.display = "block";
     return;
   }
-  emptyBox && (emptyBox.style.display = "none");
 
-  jobs.forEach(job => {
-    const statusClass = STATUS_CLASS_MAP[job.status] || "new";
+  emptyBox.style.display = "none";
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${job.receiptNumber}</td>
-      <td>${job.jobType || "-"}</td>
-      <td>${job.customerName}</td>
-      <td>${job.deviceType} ${job.deviceModel}</td>
-      <td>${job.symptom}</td>
-      <td>
-        <span class="status-badge status-${statusClass}">
-          ${job.status}
-        </span>
-      </td>
-      <td>${job.receivedDate
-        ? new Date(job.receivedDate).toLocaleDateString("th-TH")
-        : "-"}</td>
-      <td>
-        <a class="action-btn" href="manage_job.html?id=${job._id}">
-          จัดการ
-        </a>
-        ${
-          ["กำลังซ่อม","รออะไหล่"].includes(job.status)
-            ? `<button class="finish-btn"
-                onclick="finishJob('${job._id}')">เสร็จสิ้น</button>`
-            : ""
-        }
-      </td>
+  const statuses = [
+    "รับเครื่อง",
+    "กำลังซ่อม",
+    "รออะไหล่",
+    "ซ่อมเสร็จ"
+  ];
+
+  statuses.forEach(status => {
+
+    const groupJobs = jobs.filter(j => j.status === status);
+    if (!groupJobs.length) return;
+
+    const section = document.createElement("div");
+    section.className = "job-group";
+
+    section.innerHTML = `
+      <h3 class="group-title">
+        ${status} (${groupJobs.length})
+      </h3>
     `;
-    tbody.appendChild(tr);
+
+    const table = document.createElement("table");
+    table.className = "styled-table";
+
+    table.innerHTML = `
+      <thead>
+        <tr>
+          <th>รหัสงาน</th>
+          <th>ลูกค้า</th>
+          <th>เครื่อง</th>
+          <th>วันที่รับ</th>
+          <th>จัดการ</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    `;
+
+    const tbody = table.querySelector("tbody");
+
+    groupJobs.forEach(job => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${job.receiptNumber}</td>
+        <td>${job.customerName}</td>
+        <td>${job.deviceType} ${job.deviceModel}</td>
+        <td>${
+          job.receivedDate
+            ? new Date(job.receivedDate).toLocaleDateString("th-TH")
+            : "-"
+        }</td>
+        <td>
+          <a class="action-btn" href="manage_job.html?id=${job._id}">
+            จัดการ
+          </a>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+    section.appendChild(table);
+    container.appendChild(section);
   });
 }
+
 
 /* =====================
    SUMMARY
@@ -847,7 +888,7 @@ function applyFilters() {
     return true;
   });
 
-  renderJobs(result);
+  renderJobsGrouped(result);
 }
 ["searchInput", "statusFilter", "monthFilter", "yearFilter"]
   .forEach(id => {
