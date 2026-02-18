@@ -644,6 +644,11 @@
                 <h3>เสร็จสิ้น</h3>
                 <div class="num" id="my-completed">0</div>
             </div>
+            <div class="card cancelled">
+                <h3>ยกเลิก</h3>
+                <div id="my-cancelled">0</div>
+            </div>
+
         </section>
 
         <div class="toolbar">
@@ -942,7 +947,11 @@ function updateSummaryCards(jobs) {
 
   document.getElementById("my-completed").innerText =
     jobs.filter(j => j.status === "ซ่อมเสร็จ").length;
+
+  document.getElementById("my-cancelled").innerText =
+    jobs.filter(j => j.status === "ยกเลิก").length;
 }
+
 
 
 /* =====================
