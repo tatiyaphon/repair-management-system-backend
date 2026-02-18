@@ -51,10 +51,12 @@ body{
 }
 
 .brand h1{
-    font-size:1.2rem;
+    font-size:1rem;
     font-weight:600;
     margin:0;
+    white-space:nowrap;   /* 👈 บังคับไม่ให้ตัดบรรทัด */
 }
+
 
 .nav-link{
     text-decoration:none;
@@ -73,7 +75,7 @@ body{
 /* ================= CONTAINER ================= */
 .container{
     max-width:1100px;
-    margin:-90px auto 0 auto;
+    margin:-60px auto 0 auto;
     padding:50px 20px;
 }
 
@@ -262,12 +264,13 @@ footer{
 /* ================= HERO ================= */
 .hero{
     background:linear-gradient(135deg,#2563eb,#3b82f6);
-    padding:80px 20px 120px 20px;
+    padding:60px 20px 90px 20px;   /* ลดความสูงลง */
     text-align:center;
     color:#fff;
     position:relative;
     overflow:hidden;
 }
+
 
 /* ลูกเล่นพื้นหลัง */
 .hero::after{
@@ -290,7 +293,21 @@ footer{
 .hero-content p{
     opacity:.9;
 }
+@media(max-width:768px){
 
+    .hero{
+        padding:50px 20px 80px;
+    }
+
+    .hero-content h2{
+        font-size:1.5rem;
+        line-height:1.4;
+    }
+
+    .hero-content p{
+        font-size:0.9rem;
+    }
+}
 
 </style>
 </head>
