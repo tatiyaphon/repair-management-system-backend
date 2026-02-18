@@ -1666,7 +1666,7 @@ document.getElementById("btn-add-user")
       alert("❌ " + (data.message || "เพิ่มผู้ใช้ไม่สำเร็จ"));
       return;
     }
-
+    await init();
     alert("✅ เพิ่มผู้ใช้เรียบร้อย");
 
     document.getElementById("new-user-firstname").value = "";
@@ -1674,8 +1674,6 @@ document.getElementById("btn-add-user")
     document.getElementById("new-user-email").value = "";
     document.getElementById("new-user-phone").value = "";
     document.getElementById("new-user-password").value = "";
-
-    await init();
 
   } catch (err) {
     console.error(err);
