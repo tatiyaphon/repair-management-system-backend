@@ -707,10 +707,10 @@ function renderJob() {
 /* =========================
    UPDATE HELPERS
 ========================= */
-async function updateJob(body) {
+async function updateJob(body, successMessage = "บันทึกข้อมูลเรียบร้อยแล้ว") {
   if (!currentJob || !currentJob._id) {
     alert("ไม่พบ Job ID");
-    return;
+    return false;
   }
 
   const res = await fetch(`${API_BASE}/jobs/${currentJob._id}`, {
@@ -722,88 +722,96 @@ async function updateJob(body) {
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
     alert(err.message || "อัปเดตงานไม่สำเร็จ");
-    return;
+    return false;
   }
 
   await fetchJob();
+
+  alert("✅ " + successMessage);
+  return true;
 }
+
 
 /* =========================
    EVENTS
 ========================= */
-document.getElementById("status-form")?.addEventListener("submit", e => {
+
+// ✅ อัปเดตสถานะ
+document.getElementById("status-form")?.addEventListener("submit", async e => {
   e.preventDefault();
-  updateJob({ status: document.getElementById("new-status").value });
+
+  await updateJob(
+    { status: document.getElementById("new-status").value },
+    "อัปเดตสถานะเรียบร้อยแล้ว"
+  );
 });
 
-document.getElementById("date-form")?.addEventListener("submit", e => {
+// ✅ อัปเดตวันที่
+document.getElementById("date-form")?.addEventListener("submit", async e => {
   e.preventDefault();
-  updateJob({
+
+  await updateJob({
     receivedDate: document.getElementById("received-date").value,
     startDate: document.getElementById("start-date").value,
     finishDate: document.getElementById("finish-date").value
-  });
+  }, "บันทึกวันที่เรียบร้อยแล้ว");
 });
 
-document.getElementById("price-form")?.addEventListener("submit", e => {
+// ✅ อัปเดตราคา
+document.getElementById("price-form")?.addEventListener("submit", async e => {
   e.preventDefault();
-  updateJob({ priceQuoted: Number(document.getElementById("new-price").value) });
+
+  await updateJob(
+    { priceQuoted: Number(document.getElementById("new-price").value) },
+    "บันทึกราคาเรียบร้อยแล้ว"
+  );
 });
 
-document.getElementById("approve-price-btn")?.addEventListener("click", () => {
-  if (confirm("ยืนยันปิดงาน?")) {
-    updateJob({ status: "ซ่อมเสร็จ" });
-    location.replace("employee_dashboard.html");
+// ✅ ปิดงาน
+document.getElementById("approve-price-btn")?.addEventListener("click", async () => {
+  if (!confirm("ยืนยันปิดงาน?")) return;
+
+  const success = await updateJob(
+    { status: "ซ่อมเสร็จ" },
+    "ปิดงานเรียบร้อยแล้ว"
+  );
+
+  if (success) {
+    window.location.href = "technician_jobs.html";
   }
 });
 
+// ✅ ยกเลิกงาน
 document.getElementById("cancel-job-btn")?.addEventListener("click", async () => {
-
   if (!confirm("ยืนยันการยกเลิกงานนี้?")) return;
 
-  if (!currentJob || !currentJob._id) {
-    alert("ไม่พบ Job ID");
-    return;
+  const success = await updateJob(
+    { status: "ยกเลิก" },
+    "ยกเลิกงานเรียบร้อยแล้ว"
+  );
+
+  if (success) {
+    window.location.href = "technician_jobs.html";
   }
-
-  const res = await fetch(`${API_BASE}/jobs/${currentJob._id}`, {
-    method: "PUT",
-    headers,
-    body: JSON.stringify({ status: "ยกเลิก" })
-  });
-
-  if (!res.ok) {
-    alert("ยกเลิกไม่สำเร็จ");
-    return;
-  }
-
-  alert("ยกเลิกงานเรียบร้อย");
-
-  // ⭐ เด้งไปหน้างานของฉัน
-  window.location.href = "technician_jobs.html";
 });
 
-document
-  .getElementById("job-type-form")
-  ?.addEventListener("submit", async (e) => {
-    e.preventDefault();
+// ✅ แก้ประเภทงาน
+document.getElementById("job-type-form")?.addEventListener("submit", async e => {
+  e.preventDefault();
 
-    if (!currentJob || !currentJob._id) {
-      alert("ไม่พบ Job ID");
-      return;
-    }
+  const newType = document.getElementById("new-job-type").value;
 
-    const newType = document.getElementById("new-job-type").value;
+  if (!newType) {
+    alert("กรุณาเลือกประเภทงาน");
+    return;
+  }
 
-    if (!newType) {
-      alert("กรุณาเลือกประเภทงาน");
-      return;
-    }
+  await updateJob(
+    { jobType: newType },
+    "บันทึกประเภทงานเรียบร้อยแล้ว"
+  );
+});
 
-    await updateJob({ jobType: newType });
-
-    alert("บันทึกประเภทงานเรียบร้อยแล้ว");
-  });
 document
   .getElementById("part-form")
   ?.addEventListener("submit", async (e) => {
