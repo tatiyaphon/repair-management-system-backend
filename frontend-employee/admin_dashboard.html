@@ -1627,11 +1627,13 @@ document.addEventListener("DOMContentLoaded", () => {
   loadProfile();
   init();
 });
-document.getElementById("btn-add-user")?.addEventListener("click", async () => {
+document.getElementById("btn-add-user")
+  ?.addEventListener("click", async () => {
+
   const firstName = document.getElementById("new-user-firstname").value.trim();
   const lastName  = document.getElementById("new-user-lastname").value.trim();
   const email     = document.getElementById("new-user-email").value.trim();
-  const phone     = document.getElementById("new-user-phone").value.trim(); // ✅ เพิ่ม
+  const phone     = document.getElementById("new-user-phone").value.trim();
   const password  = document.getElementById("new-user-password").value.trim();
   const role      = document.getElementById("new-user-role").value;
 
@@ -1640,39 +1642,47 @@ document.getElementById("btn-add-user")?.addEventListener("click", async () => {
     return;
   }
 
-  const res = await fetch("/api/employees", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify({
-      firstName,
-      lastName,
-      email,
-      phone,     // ✅ ส่ง phone ไปด้วย
-      password,
-      role
-    })
-  });
+  try {
 
-  const data = await res.json();
+    const res = await fetch("/api/employees", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        firstName,
+        lastName,
+        email,
+        phone,
+        password,
+        role
+      })
+    });
 
-  if (!res.ok) {
-    alert(data.message || "เพิ่มผู้ใช้ไม่สำเร็จ");
-    return;
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      alert("❌ " + (data.message || "เพิ่มผู้ใช้ไม่สำเร็จ"));
+      return;
+    }
+
+    alert("✅ เพิ่มผู้ใช้เรียบร้อย");
+
+    document.getElementById("new-user-firstname").value = "";
+    document.getElementById("new-user-lastname").value = "";
+    document.getElementById("new-user-email").value = "";
+    document.getElementById("new-user-phone").value = "";
+    document.getElementById("new-user-password").value = "";
+
+    await init();
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์");
   }
-
-  alert("✅ เพิ่มผู้ใช้เรียบร้อย");
-
-  document.getElementById("new-user-firstname").value = "";
-  document.getElementById("new-user-lastname").value = "";
-  document.getElementById("new-user-email").value = "";
-  document.getElementById("new-user-phone").value = ""; // ✅ เคลียร์
-  document.getElementById("new-user-password").value = "";
-
-  init();
 });
+
 
 function toggleProfile() {
   const dropdown = document.getElementById("profileDropdown");
