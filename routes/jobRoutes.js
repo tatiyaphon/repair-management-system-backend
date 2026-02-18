@@ -494,6 +494,7 @@ tbody td{
       <div class="row"><div class="label">เบอร์โทร</div>${job.customerPhone || "-"}</div>
       <div class="row"><div class="label">ที่อยู่</div>${job.customerAddress || "-"}</div>
       <div class="row"><div class="label">อุปกรณ์ที่มาด้วย</div>${job.accessory || "-"}</div>
+      <div class="row"><div class="label">ประเภทงาน</div>${job.jobType || "-"}</div>
     </div>
 
     <div class="box">
