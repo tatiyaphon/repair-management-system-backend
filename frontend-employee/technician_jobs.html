@@ -465,6 +465,85 @@
 .group-cancelled {
   background: #95a5a6;
 }
+/* =========================================
+   STATUS FILTER BAR (Modern Dashboard Style)
+========================================= */
+
+.status-filter-bar {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin: 5px 0 25px;
+  padding: 15px 20px;
+  background: var(--card-background);
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+}
+
+.status-pill {
+  border: none;
+  padding: 10px 20px;
+  border-radius: 50px;
+  font-family: 'Kanit', sans-serif;
+  font-weight: 600;
+  cursor: pointer;
+  transition: .3s;
+  background: #ecf0f1;
+  color: var(--text-color);
+  font-size: 14px;
+  letter-spacing: .3px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.status-pill:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(0,0,0,.08);
+}
+
+.status-pill.active {
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* สี active ตามสถานะ */
+.status-pill[data-status="all"].active {
+  background: var(--primary-color);
+}
+
+.status-pill.new.active {
+  background: var(--new-color);
+}
+
+.status-pill.progress.active {
+  background: var(--in_progress-color);
+}
+
+.status-pill.wait.active {
+  background: var(--waiting_parts-color);
+}
+
+.status-pill.done.active {
+  background: var(--completed-color);
+}
+
+.status-pill.cancel.active {
+  background: var(--cancelled-color);
+}
+
+/* Responsive */
+@media(max-width:768px){
+  .status-filter-bar{
+    padding:12px;
+    gap:10px;
+  }
+
+  .status-pill{
+    font-size:13px;
+    padding:8px 14px;
+  }
+}
 
     </style>
 </head>
@@ -574,14 +653,6 @@
   placeholder="ค้นหา: ชื่อลูกค้า / เครื่อง / อาการ / รหัสงาน"
 />
 
-<select id="statusFilter">
-  <option value="all">ทุกสถานะ</option>
-  <option value="รับเครื่อง">รับเครื่อง</option>
-  <option value="กำลังซ่อม">กำลังซ่อม</option>
-  <option value="รออะไหล่">รออะไหล่</option>
-  <option value="ซ่อมเสร็จ">ซ่อมเสร็จ</option>
-</select>
-
 <select id="monthFilter"></select>
 <select id="yearFilter"></select>
 
@@ -601,6 +672,15 @@
     </div>
 
 </section>
+<!-- ===== STATUS FILTER BAR ===== -->
+<div class="status-filter-bar">
+  <button class="status-pill active" data-status="all">ทั้งหมด</button>
+  <button class="status-pill new" data-status="รับเครื่อง">รับเครื่อง</button>
+  <button class="status-pill progress" data-status="กำลังซ่อม">กำลังซ่อม</button>
+  <button class="status-pill wait" data-status="รออะไหล่">รออะไหล่</button>
+  <button class="status-pill done" data-status="ซ่อมเสร็จ">ซ่อมเสร็จ</button>
+  <button class="status-pill cancel" data-status="ยกเลิก">ยกเลิก</button>
+</div>
 
     </main>
 
@@ -912,7 +992,6 @@ function initMonthYearFilter() {
 }
 function applyFilters() {
   const q      = document.getElementById("searchInput")?.value.toLowerCase() || "";
-  const status = document.getElementById("statusFilter")?.value || "all";
   const month  = document.getElementById("monthFilter")?.value || "all";
   const year   = document.getElementById("yearFilter")?.value || "all";
 
@@ -926,17 +1005,23 @@ function applyFilters() {
     `.toLowerCase();
 
     if (q && !text.includes(q)) return false;
-    if (status !== "all" && j.status !== status) return false;
+
+    if (selectedStatus !== "all" && j.status !== selectedStatus)
+      return false;
 
     const d = new Date(j.receivedDate);
-    if (month !== "all" && d.getMonth() + 1 !== Number(month)) return false;
-    if (year  !== "all" && d.getFullYear() !== Number(year)) return false;
+    if (month !== "all" && d.getMonth() + 1 !== Number(month))
+      return false;
+
+    if (year !== "all" && d.getFullYear() !== Number(year))
+      return false;
 
     return true;
   });
 
   renderJobsGrouped(result);
 }
+
 ["searchInput", "statusFilter", "monthFilter", "yearFilter"]
   .forEach(id => {
     const el = document.getElementById(id);
@@ -946,6 +1031,19 @@ function applyFilters() {
     el.addEventListener("change", applyFilters);
   });
 
+document.querySelectorAll(".status-pill").forEach(btn => {
+  btn.addEventListener("click", () => {
+
+    document.querySelectorAll(".status-pill")
+      .forEach(b => b.classList.remove("active"));
+
+    btn.classList.add("active");
+
+    selectedStatus = btn.dataset.status;
+
+    applyFilters();
+  });
+});
 
 </script>
 
