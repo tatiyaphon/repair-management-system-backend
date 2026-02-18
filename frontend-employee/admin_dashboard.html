@@ -1278,7 +1278,7 @@
       <input type="text" id="new-user-firstname" placeholder="ชื่อจริง" />
       <input type="text" id="new-user-lastname" placeholder="นามสกุล" />
       <input type="email" id="new-user-email" placeholder="อีเมล (ใช้เข้าสู่ระบบ)" />
-      <input type="number" id="new-user-phone" placeholder="เบอร์โทรศัพท์" />
+      <input type="tel" id="new-user-phone" placeholder="เบอร์โทรศัพท์" pattern="[0-9]{10}" inputmode="numeric"/>
       <input type="password"id="new-user-password"placeholder="รหัสผ่านเริ่มต้น" />
 
       <select id="new-user-role">
@@ -1672,7 +1672,10 @@ document.getElementById("btn-add-user")
     document.getElementById("new-user-firstname").value = "";
     document.getElementById("new-user-lastname").value = "";
     document.getElementById("new-user-email").value = "";
-    document.getElementById("new-user-phone").value = "";
+    document.getElementById("new-user-phone")
+  .addEventListener("input", function() {
+    this.value = this.value.replace(/[^0-9]/g, "");
+  });
     document.getElementById("new-user-password").value = "";
 
   } catch (err) {
