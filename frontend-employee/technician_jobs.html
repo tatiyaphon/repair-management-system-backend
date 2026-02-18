@@ -844,6 +844,7 @@ async function fetchMyJobs() {
    RENDER TABLE
 ===================== */
 function renderJobsGrouped(jobs) {
+
   const container = document.getElementById("jobGroups");
   const emptyBox = document.getElementById("emptyBox");
 
@@ -856,79 +857,62 @@ function renderJobsGrouped(jobs) {
 
   emptyBox.style.display = "none";
 
-  const statuses = [
-    "รับเครื่อง",
-    "กำลังซ่อม",
-    "รออะไหล่",
-    "ซ่อมเสร็จ",
-    "ยกเลิก"
-  ];
+  const table = document.createElement("table");
+  table.className = "styled-table";
 
-  statuses.forEach(status => {
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>รหัสงาน</th>
+        <th>ลูกค้า</th>
+        <th>เครื่อง</th>
+        <th>วันที่รับ</th>
+        <th>สถานะ</th>
+        <th>จัดการ</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
 
-    const groupJobs = jobs.filter(j => j.status === status);
-    if (!groupJobs.length) return;
+  const tbody = table.querySelector("tbody");
 
-    const section = document.createElement("div");
-    section.className = "job-group";
+  jobs.forEach(job => {
 
-    let groupClass = "";
+    const statusClass = {
+      "รับเครื่อง": "status-new",
+      "กำลังซ่อม": "status-in_progress",
+      "รออะไหล่": "status-waiting_parts",
+      "ซ่อมเสร็จ": "status-completed",
+      "ยกเลิก": "status-cancelled"
+    }[job.status] || "";
 
-if (status === "รับเครื่อง") groupClass = "group-new";
-if (status === "กำลังซ่อม") groupClass = "group-progress";
-if (status === "รออะไหล่") groupClass = "group-wait";
-if (status === "ซ่อมเสร็จ") groupClass = "group-done";
-if (status === "ยกเลิก") groupClass = "group-cancelled";
+    const tr = document.createElement("tr");
 
-section.innerHTML = `
-  <h3 class="group-header ${groupClass}">
-    ${status} (${groupJobs.length})
-  </h3>
-`;
-
-    const table = document.createElement("table");
-    table.className = "styled-table";
-
-    table.innerHTML = `
-      <thead>
-        <tr>
-          <th>รหัสงาน</th>
-          <th>ลูกค้า</th>
-          <th>เครื่อง</th>
-          <th>วันที่รับ</th>
-          <th>จัดการ</th>
-        </tr>
-      </thead>
-      <tbody></tbody>
+    tr.innerHTML = `
+      <td>${job.receiptNumber}</td>
+      <td>${job.customerName}</td>
+      <td>${job.deviceType} ${job.deviceModel}</td>
+      <td>${
+        job.receivedDate
+          ? new Date(job.receivedDate).toLocaleDateString("th-TH")
+          : "-"
+      }</td>
+      <td>
+        <span class="status-badge ${statusClass}">
+          ${job.status}
+        </span>
+      </td>
+      <td>
+        <a class="action-btn" href="manage_job.html?id=${job._id}">
+          จัดการ
+        </a>
+      </td>
     `;
 
-    const tbody = table.querySelector("tbody");
-
-    groupJobs.forEach(job => {
-      const tr = document.createElement("tr");
-
-      tr.innerHTML = `
-        <td>${job.receiptNumber}</td>
-        <td>${job.customerName}</td>
-        <td>${job.deviceType} ${job.deviceModel}</td>
-        <td>${
-          job.receivedDate
-            ? new Date(job.receivedDate).toLocaleDateString("th-TH")
-            : "-"
-        }</td>
-        <td>
-          <a class="action-btn" href="manage_job.html?id=${job._id}">
-            จัดการ
-          </a>
-        </td>
-      `;
-
-      tbody.appendChild(tr);
-    });
-
-    section.appendChild(table);
-    container.appendChild(section);
+    tbody.appendChild(tr);
   });
+
+  container.appendChild(table);
 }
 
 
@@ -1017,6 +1001,7 @@ function applyFilters() {
   });
 
   renderJobsGrouped(result);
+  updateSummaryCards(result);
 }
 
 ["searchInput", "statusFilter", "monthFilter", "yearFilter"]
