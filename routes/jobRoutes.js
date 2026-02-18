@@ -490,11 +490,11 @@ tbody td{
   <div class="info">
     <div class="box">
       <h3>ข้อมูลลูกค้า</h3>
-      <div class="row"><div class="label">ชื่อลูกค้า</div>${job.customerName}</div>
-      <div class="row"><div class="label">เบอร์โทร</div>${job.customerPhone || "-"}</div>
-      <div class="row"><div class="label">ที่อยู่</div>${job.customerAddress || "-"}</div>
-      <div class="row"><div class="label">อุปกรณ์ที่มาด้วย</div>${job.accessory || "-"}</div>
-      <div class="row"><div class="label">ประเภทงาน</div>${job.jobType || "-"}</div>
+      <div class="row"><div class="label">ชื่อลูกค้า :</div>${job.customerName}</div>
+      <div class="row"><div class="label">เบอร์โทร :</div>${job.customerPhone || "-"}</div>
+      <div class="row"><div class="label">ที่อยู่ :</div>${job.customerAddress || "-"}</div>
+      <div class="row"><div class="label">อุปกรณ์ที่มาด้วย :</div>${job.accessory || "-"}</div>
+      <div class="row"><div class="label">ประเภทงาน :</div>${job.jobType || "-"}</div>
     </div>
 
     <div class="box">
