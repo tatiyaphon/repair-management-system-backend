@@ -683,7 +683,7 @@
 
 <script>
 /* ==================================================
-   technician_jobs.html — FIXED VERSION
+   technician_jobs.html — FINAL / PRODUCTION READY
 ================================================== */
 
 const API_BASE = "/api";
@@ -697,7 +697,6 @@ const userId   = localStorage.getItem("userId");
 const userName = localStorage.getItem("userName");
 
 let allJobs = [];
-let selectedStatus = "all";   // ⭐ โหลดมา = ทั้งหมด
 
 if (!token || !userId) {
   localStorage.clear();
@@ -705,7 +704,20 @@ if (!token || !userId) {
 }
 
 /* =====================
-   API FETCH
+   STATUS MAP
+===================== */
+const STATUS_CLASS_MAP = {
+  "รับเครื่อง": "new",
+  "กำลังซ่อม": "in_progress",
+  "รออะไหล่": "waiting_parts",
+  "ซ่อมเสร็จ": "completed",
+  "ยกเลิก": "cancelled"
+};
+
+
+
+/* =====================
+   API FETCH (กลาง)
 ===================== */
 async function apiFetch(path, options = {}) {
   const res = await fetch(`${API_BASE}${path}`, {
@@ -736,12 +748,6 @@ document.addEventListener("DOMContentLoaded", () => {
     userMeta.textContent = `${userName || "ผู้ใช้งาน"} (${role || "-"})`;
   }
 
-  // ⭐ ทำให้ปุ่มทั้งหมด active ตั้งแต่แรก
-  document.querySelectorAll(".status-pill")
-    .forEach(b => b.classList.remove("active"));
-
-  document.querySelector('.status-pill[data-status="all"]')
-    ?.classList.add("active");
 
   loadProfile();
   fetchMyJobs();
@@ -753,7 +759,68 @@ document.addEventListener("DOMContentLoaded", () => {
       dropdown.classList.remove("show");
     }
   });
+
 });
+
+/* =====================
+   TOGGLE PROFILE
+===================== */
+function toggleProfile() {
+  document.getElementById("profileDropdown")?.classList.toggle("show");
+}
+
+/* =====================
+   LOAD PROFILE
+===================== */
+async function loadProfile() {
+  const user = await apiFetch(`/employees/${userId}/profile`);
+  if (!user) return;
+
+  const avatar = user.avatar || "/uploads/profile/default.jpg";
+  const avatarUrl = avatar.startsWith("http")
+    ? avatar
+    : `${location.origin}${avatar}`;
+
+  document.getElementById("profileAvatarSmall").src = avatarUrl;
+  document.getElementById("profileAvatarLarge").src = avatarUrl;
+}
+
+/* =====================
+   UPLOAD AVATAR
+===================== */
+async function uploadAvatar(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const fd = new FormData();
+  fd.append("avatar", file);
+
+  const res = await fetch(`${API_BASE}/employees/profile/avatar`, {
+    method: "POST",
+    headers: { Authorization: `Bearer ${token}` },
+    body: fd
+  });
+
+  if (!res.ok) {
+    alert("อัปโหลดไม่สำเร็จ");
+    return;
+  }
+
+  alert("✅ เปลี่ยนรูปโปรไฟล์เรียบร้อย");
+  loadProfile();
+}
+
+async function logout() {
+  await fetch("/api/auth/logout", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    }
+  });
+
+  localStorage.clear();
+  location.href = "login.html";
+}
 
 /* =====================
    FETCH MY JOBS
@@ -762,12 +829,14 @@ async function fetchMyJobs() {
   const jobs = await apiFetch("/jobs/my");
   if (!jobs) return;
 
+  // เก็บงานทั้งหมด
   allJobs = jobs;
 
-  updateSummaryCards(allJobs);   // ⭐ การ์ดบนใช้ทั้งหมดเสมอ
-  initMonthYearFilter();
-  renderJobsGrouped(allJobs);    // ⭐ โหลดครั้งแรกโชว์ทั้งหมด
+  initMonthYearFilter();   // 🔹 สร้างเดือน/ปี
+  applyFilters();          // 🔹 render ครั้งแรก
+  updateSummaryCards(allJobs);
 }
+
 
 /* =====================
    RENDER TABLE
@@ -844,8 +913,9 @@ function renderJobsGrouped(jobs) {
   container.appendChild(table);
 }
 
+
 /* =====================
-   SUMMARY (การ์ดบน)
+   SUMMARY
 ===================== */
 function updateSummaryCards(jobs) {
   document.getElementById("my-total").innerText = jobs.length;
@@ -862,17 +932,55 @@ function updateSummaryCards(jobs) {
     jobs.filter(j => j.status === "ซ่อมเสร็จ").length;
 }
 
-/* =====================
-   FILTER (เฉพาะตาราง)
-===================== */
-function applyFilters() {
 
+/* =====================
+   FINISH JOB
+===================== */
+async function finishJob(jobId) {
+  if (!confirm("ยืนยันปิดงานซ่อมนี้?")) return;
+
+  const res = await apiFetch(`/jobs/${jobId}/complete`, {
+    method: "PUT"
+  });
+
+  if (!res) return;
+
+  alert("✅ ปิดงานเรียบร้อย");
+  fetchMyJobs();
+}
+
+function initMonthYearFilter() {
+  const monthSel = document.getElementById("monthFilter");
+  const yearSel  = document.getElementById("yearFilter");
+
+  if (!monthSel || !yearSel) return;
+
+  monthSel.innerHTML = `<option value="all">ทุกเดือน</option>`;
+  yearSel.innerHTML  = `<option value="all">ทุกปี</option>`;
+
+  // เดือน
+  for (let m = 1; m <= 12; m++) {
+    monthSel.innerHTML += `<option value="${m}">${m}</option>`;
+  }
+
+  // ปี (ดึงจากวันที่รับเครื่อง)
+  const years = [...new Set(
+    allJobs
+      .map(j => new Date(j.receivedDate))
+      .filter(d => !isNaN(d))
+      .map(d => d.getFullYear())
+  )].sort((a, b) => b - a);
+
+  years.forEach(y => {
+    yearSel.innerHTML += `<option value="${y}">${y}</option>`;
+  });
+}
+function applyFilters() {
   const q      = document.getElementById("searchInput")?.value.toLowerCase() || "";
   const month  = document.getElementById("monthFilter")?.value || "all";
   const year   = document.getElementById("yearFilter")?.value || "all";
 
   const result = allJobs.filter(j => {
-
     const text = `
       ${j.receiptNumber}
       ${j.customerName}
@@ -896,12 +1004,19 @@ function applyFilters() {
     return true;
   });
 
-  renderJobsGrouped(result);  // ⭐ ไม่กระทบการ์ดบน
+  renderJobsGrouped(result);
+  updateSummaryCards(result);
 }
 
-/* =====================
-   STATUS BUTTONS
-===================== */
+["searchInput", "statusFilter", "monthFilter", "yearFilter"]
+  .forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+
+    el.addEventListener("input", applyFilters);
+    el.addEventListener("change", applyFilters);
+  });
+
 document.querySelectorAll(".status-pill").forEach(btn => {
   btn.addEventListener("click", () => {
 
@@ -915,18 +1030,6 @@ document.querySelectorAll(".status-pill").forEach(btn => {
     applyFilters();
   });
 });
-
-/* =====================
-   SEARCH / MONTH / YEAR
-===================== */
-["searchInput", "monthFilter", "yearFilter"]
-  .forEach(id => {
-    const el = document.getElementById(id);
-    if (!el) return;
-
-    el.addEventListener("input", applyFilters);
-    el.addEventListener("change", applyFilters);
-  });
 
 </script>
 
