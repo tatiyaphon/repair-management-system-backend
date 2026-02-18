@@ -757,12 +757,32 @@ document.getElementById("approve-price-btn")?.addEventListener("click", () => {
   }
 });
 
-document.getElementById("cancel-job-btn")?.addEventListener("click", () => {
-  if (confirm("ยกเลิกงานนี้?")) {
-    updateJob({ status: "ยกเลิก" });
-    location.replace("employee_dashboard.html");
+document.getElementById("cancel-job-btn")?.addEventListener("click", async () => {
+
+  if (!confirm("ยืนยันการยกเลิกงานนี้?")) return;
+
+  if (!currentJob || !currentJob._id) {
+    alert("ไม่พบ Job ID");
+    return;
   }
+
+  const res = await fetch(`${API_BASE}/jobs/${currentJob._id}`, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify({ status: "ยกเลิก" })
+  });
+
+  if (!res.ok) {
+    alert("ยกเลิกไม่สำเร็จ");
+    return;
+  }
+
+  alert("ยกเลิกงานเรียบร้อย");
+
+  // ⭐ เด้งไปหน้างานของฉัน
+  window.location.href = "technician_jobs.html";
 });
+
 document
   .getElementById("job-type-form")
   ?.addEventListener("submit", async (e) => {
@@ -887,15 +907,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   await fetchStock();
   await fetchJob();
 });
-await apiFetch(`/jobs/${jobId}/cancel`, {
-  method: "PUT"
-});
-
-alert("ยกเลิกงานเรียบร้อย");
-
-// เด้งไปงานของฉัน
-location.href = "technician_jobs.html";
-
 </script>
 </div>
 </body>
