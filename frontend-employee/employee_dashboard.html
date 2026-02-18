@@ -177,7 +177,7 @@
         .dashboard-grid {
             display: grid;
             gap: 24px;
-            grid-template-columns: repeat(5, 1fr);
+            grid-template-columns: repeat(4, 1fr);
             margin-bottom: 0;
             padding-bottom: 0;
         }
@@ -768,13 +768,6 @@
         </div>
         <i class="fas fa-check-circle card-icon"></i>
     </a>
-    <a class="card card-link" href="technician_jobs.html?status=cancelled">
-        <div class="card-content">
-            <h2>งานที่ยกเลิก</h2>
-            <p id="cancelled-count">0</p>
-        </div>
-        <i class="fas fa-times-circle card-icon"></i>
-    </a>
 
 </div>
       <div class="table-box">
@@ -947,10 +940,6 @@ function updateCards() {
   document.getElementById("waiting-parts-count").textContent = count("รออะไหล่");
   document.getElementById("completed-count").textContent = count("ซ่อมเสร็จ");
 
-  const cancelledEl = document.getElementById("cancelled-count");
-  if (cancelledEl) {
-    cancelledEl.textContent = count("ยกเลิก");
-  }
 }
 
 
