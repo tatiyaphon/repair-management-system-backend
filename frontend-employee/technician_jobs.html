@@ -830,9 +830,7 @@ async function fetchMyJobs() {
   if (!jobs) return;
 
   // เก็บงานทั้งหมด
-  allJobs = jobs.filter(j =>
-    j.status !== "ยกเลิก"
-  );
+  allJobs = jobs;
 
   initMonthYearFilter();   // 🔹 สร้างเดือน/ปี
   applyFilters();          // 🔹 render ครั้งแรก
@@ -921,13 +919,19 @@ function renderJobsGrouped(jobs) {
 ===================== */
 function updateSummaryCards(jobs) {
   document.getElementById("my-total").innerText = jobs.length;
+
   document.getElementById("my-new").innerText =
     jobs.filter(j => j.status === "รับเครื่อง").length;
+
   document.getElementById("my-inprogress").innerText =
-    jobs.filter(j => ["กำลังซ่อม","รออะไหล่"].includes(j.status)).length;
+    jobs.filter(j =>
+      ["กำลังซ่อม","รออะไหล่"].includes(j.status)
+    ).length;
+
   document.getElementById("my-completed").innerText =
     jobs.filter(j => j.status === "ซ่อมเสร็จ").length;
 }
+
 
 /* =====================
    FINISH JOB

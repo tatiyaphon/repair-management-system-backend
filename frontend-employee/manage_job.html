@@ -887,6 +887,15 @@ document.addEventListener("DOMContentLoaded", async () => {
   await fetchStock();
   await fetchJob();
 });
+await apiFetch(`/jobs/${jobId}/cancel`, {
+  method: "PUT"
+});
+
+alert("ยกเลิกงานเรียบร้อย");
+
+// เด้งไปงานของฉัน
+location.href = "technician_jobs.html";
+
 </script>
 </div>
 </body>
