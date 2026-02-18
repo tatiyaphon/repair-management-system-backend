@@ -112,7 +112,7 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
 
       const verifyLink = `${process.env.BASE_URL}/api/auth/verify/${verifyToken}`;
 
-      await transporter.sendMail({
+      transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: user.email,
         subject: "ยืนยันอีเมลระบบร้านตุ้ยไอที",
@@ -120,14 +120,15 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
           <h2>ยืนยันบัญชีของคุณ</h2>
           <p>กรุณาคลิกปุ่มด้านล่างเพื่อยืนยันอีเมล</p>
           <a href="${verifyLink}" 
-             style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
-             ยืนยันอีเมล
+            style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
+            ยืนยันอีเมล
           </a>
           <p>ลิงก์นี้จะหมดอายุใน 24 ชั่วโมง</p>
         `
-      });
+      })
+      .then(() => console.log("✅ Email sent successfully"))
+      .catch(err => console.error("❌ Email send failed:", err.message));
 
-      console.log("✅ Email sent successfully");
 
     } catch (mailErr) {
       console.error("❌ Email send failed:", mailErr.message);
