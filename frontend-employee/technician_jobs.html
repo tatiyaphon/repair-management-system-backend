@@ -697,6 +697,8 @@ const userId   = localStorage.getItem("userId");
 const userName = localStorage.getItem("userName");
 
 let allJobs = [];
+let selectedStatus = "all";
+
 
 if (!token || !userId) {
   localStorage.clear();
@@ -748,9 +750,18 @@ document.addEventListener("DOMContentLoaded", () => {
     userMeta.textContent = `${userName || "ผู้ใช้งาน"} (${role || "-"})`;
   }
 
+  // ⭐ ตั้งค่าเริ่มต้นเป็นทั้งหมดเสมอ
+  selectedStatus = "all";
+
+  // ⭐ ทำให้ปุ่มทั้งหมด active ตั้งแต่แรก
+  document.querySelectorAll(".status-pill")
+    .forEach(b => b.classList.remove("active"));
+
+  document.querySelector('.status-pill[data-status="all"]')
+    ?.classList.add("active");
 
   loadProfile();
-  fetchMyJobs();
+  fetchMyJobs();   // ⭐ โหลดงานทั้งหมดทันที
 
   document.addEventListener("click", e => {
     const menu = document.getElementById("profileMenu");
@@ -761,6 +772,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
 });
+
 
 /* =====================
    TOGGLE PROFILE
@@ -829,13 +841,13 @@ async function fetchMyJobs() {
   const jobs = await apiFetch("/jobs/my");
   if (!jobs) return;
 
-  // เก็บงานทั้งหมด
   allJobs = jobs;
 
-  initMonthYearFilter();   // 🔹 สร้างเดือน/ปี
-  applyFilters();          // 🔹 render ครั้งแรก
-  updateSummaryCards(allJobs);
+  updateSummaryCards(allJobs);   // ⭐ การ์ดบนใช้ทั้งหมดเสมอ
+  initMonthYearFilter();
+  renderJobsGrouped(allJobs);    // ⭐ โหลดครั้งแรกโชว์ทั้งหมด
 }
+
 
 
 /* =====================
@@ -976,11 +988,13 @@ function initMonthYearFilter() {
   });
 }
 function applyFilters() {
+
   const q      = document.getElementById("searchInput")?.value.toLowerCase() || "";
   const month  = document.getElementById("monthFilter")?.value || "all";
   const year   = document.getElementById("yearFilter")?.value || "all";
 
   const result = allJobs.filter(j => {
+
     const text = `
       ${j.receiptNumber}
       ${j.customerName}
@@ -1004,9 +1018,9 @@ function applyFilters() {
     return true;
   });
 
-  renderJobsGrouped(result);
-  updateSummaryCards(result);
+  renderJobsGrouped(result);   // ⭐ แค่ render ตาราง
 }
+
 
 ["searchInput", "statusFilter", "monthFilter", "yearFilter"]
   .forEach(id => {
