@@ -258,39 +258,39 @@ router.post("/forgot-password", async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "ไม่พบผู้ใช้นี้" });
     }
-    // สร้าง token
+
     const resetToken = crypto.randomBytes(32).toString("hex");
 
     user.resetToken = resetToken;
-    user.resetTokenExpire = Date.now() + 1000 * 60 * 30; // 30 นาที
+    user.resetTokenExpire = Date.now() + 1000 * 60 * 30;
 
     await user.save();
 
     const resetLink =
-      `${process.env.BASE_URL}/reset_password.html?token=${resetToken}`;
+  `${process.env.BASE_URL}/employee/reset_password.html?token=${resetToken}`;
 
 
-   await sgMail.send({
-  to: user.email,
-  from: process.env.EMAIL_USER,   // ต้องเป็น email ที่ verify แล้วใน SendGrid
-  subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
-  html: `
-    <h2>รีเซ็ตรหัสผ่าน</h2>
-    <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
-    <a href="${resetLink}"
-       style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
-       ตั้งรหัสผ่านใหม่
-    </a>
-    <p>ลิงก์จะหมดอายุใน 30 นาที</p>
-  `
-});
-
+    await sgMail.send({
+      to: user.email,
+      from: process.env.EMAIL_USER, // ต้อง verified ใน SendGrid
+      subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
+      html: `
+        <h2>รีเซ็ตรหัสผ่าน</h2>
+        <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
+        <a href="${resetLink}"
+           style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
+           ตั้งรหัสผ่านใหม่
+        </a>
+        <p>ลิงก์จะหมดอายุใน 30 นาที</p>
+      `
+    });
 
     res.json({ message: "ส่งลิงก์รีเซ็ตแล้ว" });
 
   } catch (err) {
-    console.error("FORGOT PASSWORD ERROR:", err);
+    console.error("FORGOT PASSWORD ERROR:", err.response?.body || err);
     res.status(500).json({ message: "เกิดข้อผิดพลาด" });
   }
 });
+
 module.exports = router;
