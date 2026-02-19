@@ -207,24 +207,28 @@ router.post("/reset-admin", async (req, res) => {
     res.status(500).json({ message: "Reset failed" });
   }
 });
-router.post("/reset-password", async (req, res) => {
+// ===============================
+// POST /api/auth/reset-password/:token
+// ===============================
+router.post("/reset-password/:token", async (req, res) => {
   try {
+    const { password } = req.body;
+    const { token } = req.params;
 
-    const { token, newPassword } = req.body;
+    const user = await Employee.findOne({
+      resetToken: token,
+      resetTokenExpire: { $gt: Date.now() }
+    });
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-
-    const user = await Employee.findById(decoded.id);
-
-    if (!user || user.resetToken !== token || user.resetTokenExpire < Date.now()) {
-      return res.status(400).json({ message: "ลิงก์หมดอายุแล้ว" });
+    if (!user) {
+      return res.status(400).json({ message: "ลิงก์หมดอายุหรือไม่ถูกต้อง" });
     }
 
-    const hash = await bcrypt.hash(newPassword, 10);
+    const hash = await bcrypt.hash(password, 10);
 
     user.password = hash;
-    user.resetToken = null;
-    user.resetTokenExpire = null;
+    user.resetToken = undefined;
+    user.resetTokenExpire = undefined;
     user.mustChangePassword = false;
 
     await user.save();
@@ -232,8 +236,44 @@ router.post("/reset-password", async (req, res) => {
     res.json({ message: "เปลี่ยนรหัสผ่านสำเร็จ" });
 
   } catch (err) {
-    res.status(400).json({ message: "Token ไม่ถูกต้องหรือหมดอายุ" });
+    res.status(500).json({ message: "ไม่สามารถรีเซ็ตได้" });
   }
 });
 
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    const user = await Employee.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "ไม่พบอีเมลนี้ในระบบ" });
+    }
+
+    // สร้าง reset token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+
+    user.resetToken = resetToken;
+    user.resetTokenExpire = Date.now() + 1000 * 60 * 30; // 30 นาที
+    await user.save();
+
+    const resetLink = `${process.env.BASE_URL}/reset_password.html?token=${resetToken}`;
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "รีเซ็ตรหัสผ่าน",
+      html: `
+        <h3>กดลิงก์ด้านล่างเพื่อตั้งรหัสใหม่</h3>
+        <a href="${resetLink}">${resetLink}</a>
+        <p>ลิงก์หมดอายุใน 30 นาที</p>
+      `
+    });
+
+    res.json({ message: "ส่งลิงก์รีเซ็ตแล้ว" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "เกิดข้อผิดพลาด" });
+  }
+});
 module.exports = router;
