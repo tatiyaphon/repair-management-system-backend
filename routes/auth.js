@@ -269,31 +269,22 @@ router.post("/forgot-password", async (req, res) => {
     const resetLink =
       `${process.env.BASE_URL}/reset_password.html?token=${resetToken}`;
 
-    // ส่งเมล
-    const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 587,
-      secure: false,
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-      }
-    });
 
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
-      html: `
-        <h2>รีเซ็ตรหัสผ่าน</h2>
-        <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
-        <a href="${resetLink}" 
-           style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
-           ตั้งรหัสผ่านใหม่
-        </a>
-        <p>ลิงก์จะหมดอายุใน 30 นาที</p>
-      `
-    });
+   await sgMail.send({
+  to: user.email,
+  from: process.env.EMAIL_USER,   // ต้องเป็น email ที่ verify แล้วใน SendGrid
+  subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
+  html: `
+    <h2>รีเซ็ตรหัสผ่าน</h2>
+    <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
+    <a href="${resetLink}"
+       style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
+       ตั้งรหัสผ่านใหม่
+    </a>
+    <p>ลิงก์จะหมดอายุใน 30 นาที</p>
+  `
+});
+
 
     res.json({ message: "ส่งลิงก์รีเซ็ตแล้ว" });
 
