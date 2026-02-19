@@ -1,7 +1,8 @@
 const express = require("express");
 const router = express.Router();
 const Stock = require("../models/Stock");
-const verifyToken = require("../middleware/auth");
+const auth = require("../middleware/auth");
+
 
 /* ดึงทั้งหมด */
 router.get("/", verifyToken, async (_req, res) => {
