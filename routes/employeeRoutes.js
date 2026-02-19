@@ -292,6 +292,50 @@ router.post(
     }
   }
 );
+router.post("/forgot-password", async (req, res) => {
+  try {
 
+    const { email } = req.body;
+
+    const user = await Employee.findOne({ email });
+    if (!user) {
+      return res.status(404).json({ message: "ไม่พบอีเมลนี้" });
+    }
+
+    const resetToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    user.resetToken = resetToken;
+    user.resetTokenExpire = Date.now() + 15 * 60 * 1000;
+    await user.save();
+
+    const resetLink =
+      `${process.env.BASE_URL}/employee/reset_password.html?token=${resetToken}`;
+
+    await sgMail.send({
+      to: user.email,
+      from: process.env.EMAIL_USER, // ต้องเป็นอีเมลที่ Verify แล้วใน SendGrid
+      subject: "รีเซ็ตรหัสผ่านระบบร้านตุ้ยไอที",
+      html: `
+        <h2>รีเซ็ตรหัสผ่าน</h2>
+        <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสใหม่</p>
+        <a href="${resetLink}"
+           style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
+           ตั้งรหัสผ่านใหม่
+        </a>
+        <p>ลิงก์หมดอายุใน 15 นาที</p>
+      `
+    });
+
+    res.json({ message: "ส่งลิงก์รีเซ็ตแล้ว" });
+
+  } catch (err) {
+    console.error("FORGOT PASSWORD ERROR:", err);
+    res.status(500).json({ message: "ส่งลิงก์ไม่สำเร็จ" });
+  }
+});
 
 module.exports = router;
