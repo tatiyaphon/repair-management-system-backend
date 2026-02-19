@@ -6,6 +6,7 @@ const cors     = require("cors");
 const path     = require("path");
 const morgan   = require("morgan");
 const bcrypt   = require("bcryptjs");
+const helmet = require("helmet");
 
 
 const Employee = require("./models/Employee");
@@ -14,9 +15,12 @@ const stockRoutes = require("./routes/stock");
 const app  = express();
 const PORT = process.env.PORT || 5000;
 
+
 /* =========================
    MIDDLEWARE
 ========================= */
+app.use(helmet());
+
 app.use(cors({
   origin: [
     "https://tui-it.org",
@@ -33,9 +37,9 @@ app.use(morgan("dev"));
 ========================= */
 app.use(express.static(path.join(__dirname, "public")));
 app.use("/employee", express.static(path.join(__dirname, "frontend-employee")));
-app.use("/customer", express.static(path.join(__dirname, "public/customer")));
+
 app.use("/uploads",  express.static(path.join(__dirname, "public/uploads")));
-app.use("/customer", express.static(path.join(__dirname, "public")));
+
 /* =========================
    ROOT
 ========================= */
