@@ -292,5 +292,18 @@ router.post("/forgot-password", async (req, res) => {
     res.status(500).json({ message: "เกิดข้อผิดพลาด" });
   }
 });
+router.get("/monthly-report", verifyToken, requireRole("admin"), async (req,res) => {
+  const data = await Job.aggregate([
+    {
+      $group: {
+        _id: { $month: "$createdAt" },
+        totalJobs: { $sum: 1 },
+        totalIncome: { $sum: "$priceQuoted" }
+      }
+    }
+  ]);
+
+  res.json(data);
+});
 
 module.exports = router;

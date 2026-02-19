@@ -6,6 +6,9 @@ const cors     = require("cors");
 const path     = require("path");
 const morgan   = require("morgan");
 const bcrypt   = require("bcryptjs");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+
 
 
 const Employee = require("./models/Employee");
@@ -17,16 +20,35 @@ const PORT = process.env.PORT || 5000;
 /* =========================
    MIDDLEWARE
 ========================= */
+
+// 🔐 Security Headers
+app.use(helmet());
+
+// 🚫 Rate Limit (กันยิง API ถี่เกิน)
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 นาที
+  max: 100 // 100 requests ต่อ IP
+});
+
+app.use(limiter);
+
+// 🚫 จำกัด login brute force
+app.use("/api/auth/login", rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5
+}));
+
+// 🌍 CORS
 app.use(cors({
   origin: [
     "https://tui-it.org",
     "https://www.tui-it.org"
   ]
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
-
 
 /* =========================
    STATIC FILES
@@ -51,6 +73,8 @@ app.use("/api/employees", require("./routes/employeeRoutes"));
 app.use("/api/customers", require("./routes/customers"));
 app.use("/api/stocks",    require("./routes/stock"));
 app.use("/api/jobs",      require("./routes/jobRoutes"));
+app.use("/api/activity", require("./routes/activityRoutes"));
+
 
 
 

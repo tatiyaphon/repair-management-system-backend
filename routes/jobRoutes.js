@@ -4,7 +4,7 @@ const Job = require("../models/Job");
 const auth = require("../middleware/auth");
 const puppeteer = require("puppeteer");
 const Stock = require("../models/Stock");
-const verifyToken = require("../middleware/auth");
+const Activity = require("../models/ActivityLog");
 
 console.log("✅ jobRoutes loaded");
 
@@ -22,8 +22,6 @@ router.get("/", auth, async (req, res) => {
     res.status(500).json({ message: "โหลดข้อมูลงานซ่อมไม่สำเร็จ" });
   }
 });
-
-
 
 router.get("/my", auth, async (req, res) => {
   try {
@@ -73,19 +71,56 @@ router.get("/receipt/:receiptNumber", async (req, res) => {
 
 router.put("/:id/complete", auth, async (req, res) => {
   try {
+
     const job = await Job.findById(req.params.id);
-    if (!job) return res.status(404).json({ message: "ไม่พบงานซ่อม" });
+    if (!job) {
+      return res.status(404).json({ message: "ไม่พบงานซ่อม" });
+    }
+
+    // 🔒 กันสิทธิ์ (เฉพาะ admin หรือ tech ที่รับผิดชอบงาน)
+    if (
+      req.user.role !== "admin" &&
+      job.assignedTo?.toString() !== req.user.userId
+    ) {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์ปิดงานนี้" });
+    }
+
+    // กันปิดซ้ำ
+    if (job.status === "ซ่อมเสร็จ") {
+      return res.status(400).json({ message: "งานนี้ถูกปิดแล้ว" });
+    }
+
+    const oldStatus = job.status;
 
     job.status = "ซ่อมเสร็จ";
     job.finishDate = new Date();
     await job.save();
 
-    res.json({ message: "ปิดงานเรียบร้อย", job });
+    /* =========================
+       🔥 ACTIVITY LOG
+    ========================= */
+    await Activity.create({
+      userId: req.user.userId,
+      userName: req.user.userName || "Unknown",
+      action: "COMPLETE_JOB",
+      detail: `ปิดงาน ${job.receiptNumber} (${oldStatus} → ซ่อมเสร็จ)`,
+      jobId: job._id,
+      ipAddress: req.ip
+    });
+
+    res.json({
+      message: "ปิดงานเรียบร้อย",
+      job
+    });
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "ไม่สามารถปิดงานได้" });
+    console.error("COMPLETE JOB ERROR:", err);
+    res.status(500).json({
+      message: "ไม่สามารถปิดงานได้"
+    });
   }
 });
+
 /* ==================================================
    GET /api/jobs (พนักงาน / แอดมิน)
 ================================================== */
@@ -102,70 +137,90 @@ router.put("/:id/complete", auth, async (req, res) => {
 ================================================== */
 router.post("/", auth, async (req, res) => {
   try {
+
     if (!req.user || !req.user.userId) {
-  return res.status(401).json({ message: "Unauthorized" });
-}
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
     const {
-  customerName,
-  customerPhone,
-  customerAddress,
-  deviceType,
-  deviceModel,
-  symptom,
-  accessory,
-  priceQuoted,
-  assignedTo
-} = req.body;
+      customerName,
+      customerPhone,
+      customerAddress,
+      deviceType,
+      deviceModel,
+      symptom,
+      accessory,
+      priceQuoted,
+      assignedTo
+    } = req.body;
 
-   if (!customerName || !deviceType || !deviceModel || !symptom) {
-  return res.status(400).json({ message: "กรุณากรอกข้อมูลให้ครบถ้วน" });
-}
-/* =========================
-   GENERATE RECEIPT NUMBER
-========================= */
-const now = new Date();
+    if (!customerName || !deviceType || !deviceModel || !symptom) {
+      return res.status(400).json({
+        message: "กรุณากรอกข้อมูลให้ครบถ้วน"
+      });
+    }
 
-const dateStr = now
-  .toISOString()
-  .slice(0, 10)
-  .replace(/-/g, "");
+    /* =========================
+       GENERATE RECEIPT NUMBER (กันชน)
+    ========================= */
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
 
-const start = new Date();
-start.setHours(0, 0, 0, 0);
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
 
-const end = new Date();
-end.setHours(23, 59, 59, 999);
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
 
-const countToday = await Job.countDocuments({
-  createdAt: { $gte: start, $lte: end }
-});
+    const countToday = await Job.countDocuments({
+      createdAt: { $gte: start, $lte: end }
+    });
 
-const receiptNumber = `IN${dateStr}-${String(countToday + 1).padStart(3, "0")}`;
+    const receiptNumber =
+      `IN${dateStr}-${String(countToday + 1).padStart(3, "0")}`;
 
-
+    /* =========================
+       CREATE JOB
+    ========================= */
     const job = await Job.create({
-  customerName,
-  customerPhone,
-  customerAddress,
-  receiptNumber, // 👈 จากระบบ
-  deviceType,
-  deviceModel,
-  symptom,
-  accessory,
-  priceQuoted: Number(priceQuoted) || 0,
-  status: "รับเครื่อง",
-  receivedDate: new Date(),
-  createdBy: req.user.userId,
-  assignedTo: assignedTo || null
-});
+      customerName: customerName.trim(),
+      customerPhone: customerPhone || "-",
+      customerAddress: customerAddress || "-",
+      receiptNumber,
+      deviceType,
+      deviceModel,
+      symptom,
+      accessory,
+      priceQuoted: Number(priceQuoted) || 0,
+      status: "รับเครื่อง",
+      receivedDate: new Date(),
+      createdBy: req.user.userId,
+      assignedTo: assignedTo || null
+    });
 
+    /* =========================
+       🔥 ACTIVITY LOG
+    ========================= */
 
-    res.status(201).json({ message: "รับเครื่องสำเร็จ", job });
+    await Activity.create({
+      userId: req.user.userId,
+      userName: req.user.userName || "Unknown",
+      action: "CREATE_JOB",
+      detail: `สร้างงานใหม่ ${receiptNumber}`,
+      jobId: job._id,
+      ipAddress: req.ip
+    });
+
+    res.status(201).json({
+      message: "รับเครื่องสำเร็จ",
+      job
+    });
 
   } catch (err) {
     console.error("POST /api/jobs ERROR =", err);
-    res.status(500).json({ message: "บันทึกงานซ่อมไม่สำเร็จ" });
+    res.status(500).json({
+      message: "บันทึกงานซ่อมไม่สำเร็จ"
+    });
   }
 });
 
@@ -180,56 +235,107 @@ router.put("/:id", auth, async (req, res) => {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
 
+    /* =========================
+       🔐 CHECK PERMISSION
+    ========================= */
+    if (
+      req.user.role !== "admin" &&
+      job.assignedTo?.toString() !== req.user.userId &&
+      job.createdBy?.toString() !== req.user.userId
+    ) {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์แก้ไขงานนี้" });
+    }
+
+    const oldStatus = job.status;
+
     Object.assign(job, req.body);
     await job.save();
 
+    /* =========================
+       🔥 ACTIVITY LOG
+    ========================= */
+    await Activity.create({
+      userId: req.user.userId,
+      userName: req.user.userName || "Unknown",
+      action: "UPDATE_JOB",
+      detail: `แก้ไขงาน ${job.receiptNumber} (สถานะ: ${oldStatus} → ${job.status})`,
+      jobId: job._id,
+      ipAddress: req.ip
+    });
+
     res.json({ message: "อัปเดตงานซ่อมสำเร็จ", job });
+
   } catch (err) {
-    console.error(err);
+    console.error("UPDATE JOB ERROR:", err);
     res.status(500).json({ message: "อัปเดตงานซ่อมไม่สำเร็จ" });
   }
 });
 
 // POST /api/jobs/:id/withdraw
 // routes/jobRoutes.js
-router.post("/:id/use-part", verifyToken, async (req, res) => {
+router.post("/:id/use-part", auth, async (req, res) => {
   try {
     const { stockId, quantity } = req.body;
 
     if (!stockId || !quantity || quantity <= 0) {
-      return res.status(400).json({ message: "ข้อมูลไม่ครบหรือจำนวนไม่ถูกต้อง" });
+      return res.status(400).json({
+        message: "ข้อมูลไม่ครบหรือจำนวนไม่ถูกต้อง"
+      });
     }
 
-    // 1️⃣ หา Job
+    /* =========================
+       1️⃣ หา Job
+    ========================= */
     const job = await Job.findById(req.params.id);
     if (!job) {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
 
-    // 2️⃣ หา Stock
+    /* =========================
+       🔐 เช็คสิทธิ์
+    ========================= */
+    if (
+      req.user.role !== "admin" &&
+      job.assignedTo?.toString() !== req.user.userId
+    ) {
+      return res.status(403).json({
+        message: "ไม่มีสิทธิ์เบิกอะไหล่ในงานนี้"
+      });
+    }
+
+    /* =========================
+       2️⃣ หา Stock
+    ========================= */
     const stock = await Stock.findById(stockId);
     if (!stock) {
       return res.status(404).json({ message: "ไม่พบอะไหล่" });
     }
 
     if (stock.quantity < quantity) {
-      return res.status(400).json({ message: "จำนวนอะไหล่ไม่เพียงพอ" });
+      return res.status(400).json({
+        message: "จำนวนอะไหล่ไม่เพียงพอ"
+      });
     }
 
-    // 3️⃣ ตัดสต็อก
+    /* =========================
+       3️⃣ ตัดสต็อก
+    ========================= */
     stock.quantity -= quantity;
 
-    // 4️⃣ บันทึกประวัติเบิก
     stock.withdrawHistory.push({
       quantity,
-      employeeName: req.user.name || "ช่าง",
-      jobRef: job.receiptNumber || job._id
+      employeeName: req.user.userName || "Unknown",
+      jobRef: job.receiptNumber,
+      withdrawnAt: new Date()
     });
 
     await stock.save();
 
-    // 5️⃣ บันทึกอะไหล่ที่ใช้ในงาน
+    /* =========================
+       4️⃣ บันทึกในงาน
+    ========================= */
     job.usedParts = job.usedParts || [];
+
     job.usedParts.push({
       stockId: stock._id,
       name: stock.name,
@@ -239,6 +345,18 @@ router.post("/:id/use-part", verifyToken, async (req, res) => {
 
     await job.save();
 
+    /* =========================
+       5️⃣ Activity Log
+    ========================= */
+    await Activity.create({
+      userId: req.user.userId,
+      userName: req.user.userName || "Unknown",
+      action: "USE_PART",
+      detail: `เบิก ${stock.name} x${quantity} สำหรับงาน ${job.receiptNumber}`,
+      jobId: job._id,
+      ipAddress: req.ip
+    });
+
     res.json({ message: "เบิกอะไหล่สำเร็จ" });
 
   } catch (err) {
@@ -246,6 +364,7 @@ router.post("/:id/use-part", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 
 
 /* ==================================================
@@ -257,7 +376,7 @@ router.post("/:id/use-part", verifyToken, async (req, res) => {
    GET /api/jobs/:id/receipt
    สร้าง PDF ใบรับเครื่อง (Render ใช้ได้)
 ================================================== */
-router.get("/:id/receipt", async (req, res) => {
+router.get("/:id/receipt", auth, async (req, res)=> {
   try {
     const job = await Job.findById(req.params.id);
     if (!job) return res.status(404).send("ไม่พบงานซ่อม");
@@ -559,7 +678,8 @@ tbody td{
 router.get("/:id", async (req, res) => {
   try {
     const job = await Job.findById(req.params.id)
-      .populate("assignedTo", "firstName lastName");
+       .populate("assignedTo", "firstName lastName")
+      .populate("createdBy", "firstName lastName");
 
     if (!job) {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
@@ -569,39 +689,6 @@ router.get("/:id", async (req, res) => {
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "ดึงข้อมูลงานไม่สำเร็จ" });
-  }
-});
-router.patch("/stocks/:id/withdraw", async (req, res) => {
-  try {
-    const { quantity, employeeName, jobRef } = req.body;
-
-    const stock = await Stock.findById(req.params.id);
-    if (!stock) {
-      return res.status(404).json({ message: "ไม่พบอะไหล่" });
-    }
-
-    if (quantity <= 0 || quantity > stock.quantity) {
-      return res.status(400).json({ message: "จำนวนเบิกไม่ถูกต้อง" });
-    }
-
-    // ✅ ตัดสต็อก
-    stock.quantity -= quantity;
-
-    // ✅ บันทึกประวัติการเบิก
-    stock.withdrawHistory.push({
-      quantity,
-      employeeName,
-      jobRef: jobRef || "-",
-      withdrawnAt: new Date()
-    });
-
-    // ✅ ต้อง save
-    await stock.save();
-
-    res.json({ message: "เบิกสำเร็จ" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "เกิดข้อผิดพลาด" });
   }
 });
 
