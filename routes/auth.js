@@ -6,6 +6,8 @@ const Employee = require("../models/Employee");
 const verifyToken = require("../middleware/auth");
 const crypto = require("crypto");
 const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 
 /* =========================
@@ -256,7 +258,6 @@ router.post("/forgot-password", async (req, res) => {
     if (!user) {
       return res.status(404).json({ message: "ไม่พบผู้ใช้นี้" });
     }
-
     // สร้าง token
     const resetToken = crypto.randomBytes(32).toString("hex");
 
