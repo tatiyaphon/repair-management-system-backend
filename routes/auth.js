@@ -207,5 +207,33 @@ router.post("/reset-admin", async (req, res) => {
     res.status(500).json({ message: "Reset failed" });
   }
 });
+router.post("/reset-password", async (req, res) => {
+  try {
+
+    const { token, newPassword } = req.body;
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await Employee.findById(decoded.id);
+
+    if (!user || user.resetToken !== token || user.resetTokenExpire < Date.now()) {
+      return res.status(400).json({ message: "ลิงก์หมดอายุแล้ว" });
+    }
+
+    const hash = await bcrypt.hash(newPassword, 10);
+
+    user.password = hash;
+    user.resetToken = null;
+    user.resetTokenExpire = null;
+    user.mustChangePassword = false;
+
+    await user.save();
+
+    res.json({ message: "เปลี่ยนรหัสผ่านสำเร็จ" });
+
+  } catch (err) {
+    res.status(400).json({ message: "Token ไม่ถูกต้องหรือหมดอายุ" });
+  }
+});
 
 module.exports = router;

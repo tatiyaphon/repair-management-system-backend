@@ -3,10 +3,11 @@ const mongoose = require("mongoose");
 const employeeSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName:  { type: String, required: true },
+
   isVerified: {
-  type: Boolean,
-  default: false
-},
+    type: Boolean,
+    default: false
+  },
 
   email: {
     type: String,
@@ -17,7 +18,7 @@ const employeeSchema = new mongoose.Schema({
     match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   },
 
-  password:  { type: String, required: true },
+  password: { type: String, required: true },
 
   role: {
     type: String,
@@ -38,10 +39,22 @@ const employeeSchema = new mongoose.Schema({
   online: { 
     type: Boolean, 
     default: false 
+  },
+
+  /* ===============================
+     🔐 RESET PASSWORD SYSTEM
+  =============================== */
+
+  resetToken: {
+    type: String,
+    default: null
+  },
+
+  resetTokenExpire: {
+    type: Date,
+    default: null
   }
 
-    
 }, { timestamps: true });
-
 
 module.exports = mongoose.model("Employee", employeeSchema);

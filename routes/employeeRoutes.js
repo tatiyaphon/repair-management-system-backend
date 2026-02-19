@@ -240,5 +240,50 @@ router.get("/me", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+/* =====================================
+   SEND RESET LINK (admin)
+===================================== */
+router.post("/:id/send-reset-link", verifyToken, requireRole("admin"), async (req, res) => {
+  try {
+
+    const user = await Employee.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "ไม่พบผู้ใช้" });
+    }
+
+    const resetToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }  // ลิงก์หมดอายุ 15 นาที
+    );
+
+    user.resetToken = resetToken;
+    user.resetTokenExpire = Date.now() + 15 * 60 * 1000;
+    await user.save();
+
+    const resetLink = `${process.env.BASE_URL}/employee/reset_password.html?token=${resetToken}`;
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "รีเซ็ตรหัสผ่านระบบร้านตุ้ยไอที",
+      html: `
+        <h2>รีเซ็ตรหัสผ่าน</h2>
+        <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสใหม่</p>
+        <a href="${resetLink}"
+           style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
+           ตั้งรหัสผ่านใหม่
+        </a>
+        <p>ลิงก์นี้จะหมดอายุใน 15 นาที</p>
+      `
+    });
+
+    res.json({ message: "ส่งลิงก์รีเซ็ตแล้ว" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "ส่งลิงก์ไม่สำเร็จ" });
+  }
+});
 
 module.exports = router;
