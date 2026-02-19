@@ -22,14 +22,22 @@ const PORT = process.env.PORT || 5000;
 ========================= */
 
 // 🔐 Security Headers
-app.use(helmet());
+/* =========================
+   MIDDLEWARE
+========================= */
 
-// 🚫 Rate Limit (กันยิง API ถี่เกิน)
+// 🔐 Security Headers (ปิด CSP เพราะเว็บใช้ inline script)
+app.use(
+  helmet({
+    contentSecurityPolicy: false
+  })
+);
+
+// 🚫 Rate Limit
 const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 นาที
-  max: 100 // 100 requests ต่อ IP
+  windowMs: 15 * 60 * 1000,
+  max: 100
 });
-
 app.use(limiter);
 
 // 🚫 จำกัด login brute force
