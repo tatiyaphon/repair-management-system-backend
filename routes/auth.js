@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const Employee = require("../models/Employee");
 const verifyToken = require("../middleware/auth");
 const crypto = require("crypto");
+const requireRole = require("../middleware/requireRole");
 
 const sgMail = require("@sendgrid/mail");
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
