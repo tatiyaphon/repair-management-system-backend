@@ -5,6 +5,7 @@ const bcrypt = require("bcryptjs");
 const Employee = require("../models/Employee");
 const verifyToken = require("../middleware/auth");
 const crypto = require("crypto");
+const nodemailer = require("nodemailer");
 
 
 /* =========================
@@ -246,35 +247,57 @@ router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
 
-    const user = await Employee.findOne({ email });
-    if (!user) {
-      return res.status(404).json({ message: "ไม่พบอีเมลนี้ในระบบ" });
+    if (!email) {
+      return res.status(400).json({ message: "กรุณากรอกอีเมล" });
     }
 
-    // สร้าง reset token
+    const user = await Employee.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: "ไม่พบผู้ใช้นี้" });
+    }
+
+    // สร้าง token
     const resetToken = crypto.randomBytes(32).toString("hex");
 
     user.resetToken = resetToken;
     user.resetTokenExpire = Date.now() + 1000 * 60 * 30; // 30 นาที
+
     await user.save();
 
-    const resetLink = `${process.env.BASE_URL}/reset_password.html?token=${resetToken}`;
+    const resetLink =
+      `${process.env.BASE_URL}/reset_password.html?token=${resetToken}`;
+
+    // ส่งเมล
+    const transporter = nodemailer.createTransport({
+      host: "smtp.gmail.com",
+      port: 587,
+      secure: false,
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: "รีเซ็ตรหัสผ่าน",
+      to: email,
+      subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
       html: `
-        <h3>กดลิงก์ด้านล่างเพื่อตั้งรหัสใหม่</h3>
-        <a href="${resetLink}">${resetLink}</a>
-        <p>ลิงก์หมดอายุใน 30 นาที</p>
+        <h2>รีเซ็ตรหัสผ่าน</h2>
+        <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
+        <a href="${resetLink}" 
+           style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
+           ตั้งรหัสผ่านใหม่
+        </a>
+        <p>ลิงก์จะหมดอายุใน 30 นาที</p>
       `
     });
 
     res.json({ message: "ส่งลิงก์รีเซ็ตแล้ว" });
 
   } catch (err) {
-    console.error(err);
+    console.error("FORGOT PASSWORD ERROR:", err);
     res.status(500).json({ message: "เกิดข้อผิดพลาด" });
   }
 });
