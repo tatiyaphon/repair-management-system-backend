@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const Employee = require("../models/Employee");
 const verifyToken = require("../middleware/auth");
+const crypto = require("crypto");
+
 
 /* =========================
    POST /api/auth/login
