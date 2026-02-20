@@ -124,11 +124,16 @@
 }
 
 .profile-avatar{
-  width:40px;
-  height:40px;
-  border-radius:50%;
-  object-fit:cover;
-  margin-left:20px;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #1abc9c;
+  transition: 0.2s;
+}
+
+.profile-avatar:hover{
+  transform: scale(1.05);
 }
 
 
@@ -449,16 +454,14 @@
 }
 
 .profile-trigger {
+  cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  background: #fff;
-  color: #2c3e50;
-  padding: 6px 14px;
-  border-radius: 30px;
-  font-weight: 600;
+  background: none;      /* เอาพื้นขาวออก */
+  padding: 0;            /* เอา padding ออก */
+  border-radius: 0;      /* เอาความโค้งออก */
 }
+
 
 .profile-trigger img {
   width: 34px;
