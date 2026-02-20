@@ -358,92 +358,112 @@
 .profile-menu{
   position:relative;
   margin-left:25px;
-  display:flex;
-  align-items:center;
 }
 
-
-.profile-trigger{
-  cursor:pointer;
-}
-
-.profile-dropdown{
-  position:absolute;
-  right:0;
-  top:70px;   /* แก้จาก 55px เป็น 70px */
-  width:260px;
-  background:#fff;
-  border-radius:10px;
-  box-shadow:0 10px 25px rgba(0,0,0,.25);
-  padding:15px;
-  display:none;
-  z-index:999;
-}
-
-
-.profile-dropdown.show{
-  display:block;
-}
-
-.profile-avatar-large{
-  width:60px;
-  height:60px;
-  border-radius:50%;
-  object-fit:cover;
-  margin-bottom:10px;
-}
+/* รูปเล็ก */
 .profile-avatar{
   width:42px;
   height:42px;
   border-radius:50%;
   object-fit:cover;
-  cursor:pointer;
   border:2px solid #fff;
+  cursor:pointer;
 }
-.profile-header{
+
+/* กล่อง dropdown */
+.profile-dropdown{
+  position:absolute;
+  right:0;
+  top:100%;
+  margin-top:12px;
+  width:280px;
+  background:#fff;
+  border-radius:20px;
+  box-shadow:0 20px 40px rgba(0,0,0,0.25);
+  overflow:hidden;
+  display:none;
+  animation:fadeSlide 0.25s ease;
+  z-index:999;
+}
+
+.profile-dropdown.show{
+  display:block;
+}
+
+/* ส่วนหัว */
+.profile-top{
+  background:#f5f5f5;
+  padding:20px;
   display:flex;
-  align-items:center;
-  gap:12px;
-  margin-bottom:15px;
+  justify-content:center;
 }
 
 .profile-avatar-large{
-  width:60px;
-  height:60px;
+  width:70px;
+  height:70px;
   border-radius:50%;
   object-fit:cover;
+}
+
+/* รายการเมนู */
+.profile-list{
+  padding:10px 0;
 }
 
 .profile-item{
   display:flex;
   align-items:center;
-  gap:8px;
-  padding:8px 10px;
+  gap:12px;
+  padding:14px 20px;
   text-decoration:none;
-  color:#333;
-  font-size:14px;
-  border-radius:6px;
+  color:#2c3e50;
+  font-size:15px;
   transition:0.2s;
+  cursor:pointer;
 }
 
 .profile-item:hover{
-  background:#f1f3f5;
+  background:#f3f6f9;
 }
 
-.profile-item.logout{
-  background:#f8d7da;
-  color:#c0392b;
-}
-
-.profile-item.logout:hover{
-  background:#f5c6cb;
-}
-
-.divider{
+/* เส้นแบ่ง */
+.profile-divider{
   height:1px;
-  background:#eee;
-  margin:10px 0;
+  background:#e0e0e0;
 }
+
+/* ปุ่ม logout */
+.profile-logout{
+  width:100%;
+  border:none;
+  background:#fff;
+  padding:15px 20px;
+  text-align:left;
+  font-size:15px;
+  color:#e74c3c;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  cursor:pointer;
+  transition:0.2s;
+}
+
+.profile-logout:hover{
+  background:#fdecea;
+}
+
+/* animation */
+@keyframes fadeSlide{
+  from{
+    opacity:0;
+    transform:translateY(-10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
 .upload-btn input{
   display:none;
 }
