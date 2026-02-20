@@ -359,6 +359,22 @@
 .accordion-item.active .accordion-icon {
   transform: rotate(180deg);
 }
+.profile-dropdown{
+  position:absolute;
+  right:0;
+  top:55px;
+  width:250px;
+  background:#fff;
+  border-radius:8px;
+  box-shadow:0 8px 25px rgba(0,0,0,.2);
+  padding:15px;
+  display:none;          /* ⭐ สำคัญ */
+  z-index:999;
+}
+
+.profile-dropdown.show{
+  display:block;
+}
 
   </style>
 
@@ -1024,6 +1040,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   await loadProfile();
   await fetchStock();
   await fetchJob();
+});
+
+function toggleProfile(){
+  document.getElementById("profileDropdown")
+          .classList.toggle("show");
+}
+
+document.addEventListener("click", function(e){
+  const menu = document.getElementById("profileMenu");
+  if(!menu.contains(e.target)){
+    document.getElementById("profileDropdown")
+            .classList.remove("show");
+  }
 });
 </script>
 </div>
