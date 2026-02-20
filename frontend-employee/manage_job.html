@@ -359,21 +359,41 @@
 .accordion-item.active .accordion-icon {
   transform: rotate(180deg);
 }
+
+/* ===== PROFILE ===== */
+
+.profile-menu{
+  position:relative;
+  margin-left:30px;
+}
+
+.profile-trigger{
+  cursor:pointer;
+}
+
 .profile-dropdown{
   position:absolute;
   right:0;
   top:55px;
-  width:250px;
+  width:260px;
   background:#fff;
-  border-radius:8px;
-  box-shadow:0 8px 25px rgba(0,0,0,.2);
+  border-radius:10px;
+  box-shadow:0 10px 25px rgba(0,0,0,.25);
   padding:15px;
-  display:none;          /* ⭐ สำคัญ */
+  display:none;            /* ⭐ สำคัญมาก */
   z-index:999;
 }
 
 .profile-dropdown.show{
   display:block;
+}
+
+.profile-avatar-large{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  object-fit:cover;
+  margin-bottom:10px;
 }
 
   </style>
