@@ -374,7 +374,6 @@
   width:260px;
   background:#fff;
   border-radius:10px;
-  box-shadow:0 10px 25px rgba(0,0,0,.25);
   padding:15px;
   display:none;
   z-index:999;
@@ -398,7 +397,6 @@
   border-radius:50%;
   object-fit:cover;
   cursor:pointer;
-  border:2px solid #fff;
 }
 .profile-header{
   display:flex;
@@ -431,7 +429,6 @@
 }
 
 .profile-item.logout{
-  background:#f8d7da;
   color:#c0392b;
 }
 
@@ -447,16 +444,6 @@
 .profile-menu{
   position:relative;
   margin-left:25px;
-}
-
-/* รูปเล็ก */
-.profile-avatar{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  object-fit:cover;
-  border:2px solid #fff;
-  cursor:pointer;
 }
 
 /* กล่อง dropdown */
@@ -526,7 +513,7 @@
   width:100%;
   border:none;
   background:#fff;
-  padding:15px 20px;
+  padding:16px 20px;
   text-align:left;
   font-size:15px;
   color:#e74c3c;
@@ -535,6 +522,7 @@
   gap:12px;
   cursor:pointer;
   transition:0.2s;
+  border-radius:0 0 20px 20px; /* โค้งเฉพาะล่าง */
 }
 
 .profile-logout:hover{
