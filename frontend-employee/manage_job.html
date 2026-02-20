@@ -400,6 +400,53 @@
   cursor:pointer;
   border:2px solid #fff;
 }
+.profile-header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:15px;
+}
+
+.profile-avatar-large{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  object-fit:cover;
+}
+
+.profile-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  text-decoration:none;
+  color:#333;
+  font-size:14px;
+  border-radius:6px;
+  transition:0.2s;
+}
+
+.profile-item:hover{
+  background:#f1f3f5;
+}
+
+.profile-item.logout{
+  background:#f8d7da;
+  color:#c0392b;
+}
+
+.profile-item.logout:hover{
+  background:#f5c6cb;
+}
+
+.divider{
+  height:1px;
+  background:#eee;
+  margin:10px 0;
+}
+.upload-btn input{
+  display:none;
+}
 
   </style>
 
@@ -464,9 +511,10 @@
       </div>
 
       <label class="profile-item upload-btn">
-        <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
-        <input type="file" accept="image/*" onchange="uploadAvatar(event)">
-      </label>
+  <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
+  <input type="file" accept="image/*" onchange="uploadAvatar(event)">
+</label>
+
 
       <a class="profile-item" href="profile.html">
         <i class="fas fa-user"></i> ข้อมูลส่วนตัว
