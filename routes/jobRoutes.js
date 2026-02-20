@@ -235,6 +235,13 @@ router.put("/:id", auth, async (req, res) => {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
 
+    // 🔒 ห้ามแก้ไขงานที่ปิดแล้ว
+    if (job.status === "ซ่อมเสร็จ" || job.status === "ยกเลิก") {
+      return res.status(400).json({
+        message: "ไม่สามารถแก้ไขงานที่ปิดแล้วได้"
+      });
+    }
+
     /* =========================
        🔐 CHECK PERMISSION
     ========================= */

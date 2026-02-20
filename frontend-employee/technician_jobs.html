@@ -534,6 +534,10 @@
     padding:8px 14px;
   }
 }
+.btn-view {
+  background: #9ca3af !important;
+  cursor: default;
+}
 
     </style>
 </head>
@@ -891,6 +895,11 @@ function renderJobsGrouped(jobs) {
       "ยกเลิก": "status-cancelled"
     }[job.status] || "";
 
+    // 🔒 งานที่ปิดแล้ว
+    const isLocked =
+      job.status === "ซ่อมเสร็จ" ||
+      job.status === "ยกเลิก";
+
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
@@ -908,8 +917,9 @@ function renderJobsGrouped(jobs) {
         </span>
       </td>
       <td>
-        <a class="action-btn" href="manage_job.html?id=${job._id}">
-          จัดการ
+        <a class="action-btn ${isLocked ? 'btn-view' : ''}"
+           href="manage_job.html?id=${job._id}">
+          ${isLocked ? "ดูข้อมูล" : "จัดการ"}
         </a>
       </td>
     `;
@@ -919,6 +929,7 @@ function renderJobsGrouped(jobs) {
 
   container.appendChild(table);
 }
+
 
 
 /* =====================

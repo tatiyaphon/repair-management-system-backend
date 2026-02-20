@@ -627,6 +627,10 @@
   padding: 30px;
   margin-bottom: 0;   /* ไม่ให้เกิด box ล่าง */
 }
+.btn-view {
+  background: #9ca3af !important;
+  cursor: default;
+}
 
 
     </style>
@@ -951,31 +955,38 @@ function renderTable() {
   tbody.innerHTML = "";
 
   filteredJobs.forEach(job => {
+
+    const isLocked = 
+      job.status === "ซ่อมเสร็จ" || 
+      job.status === "ยกเลิก";
+
     const tr = document.createElement("tr");
     tr.innerHTML = `
-  <td>${job.receiptNumber}</td>
-  <td>${job.jobType || "-"}</td>
-  <td>${job.customerName}</td>
-  <td>${job.deviceType} ${job.deviceModel}</td>
-  <td>${job.symptom}</td>
-  <td>
-    <span class="status-badge ${statusClass(job.status)}">
-      ${job.status}
-    </span>
-  </td>
-  <td>${formatDate(job.receivedDate)}</td>
-  <td>${formatDate(job.startDate)}</td>
-  <td>${formatDate(job.finishDate)}</td>
-  <td>
-    <a class="btn-manage" href="manage_job.html?id=${job._id}">
-      จัดการ
-    </a>
-  </td>
-`;
+      <td>${job.receiptNumber}</td>
+      <td>${job.jobType || "-"}</td>
+      <td>${job.customerName}</td>
+      <td>${job.deviceType} ${job.deviceModel}</td>
+      <td>${job.symptom}</td>
+      <td>
+        <span class="status-badge ${statusClass(job.status)}">
+          ${job.status}
+        </span>
+      </td>
+      <td>${formatDate(job.receivedDate)}</td>
+      <td>${formatDate(job.startDate)}</td>
+      <td>${formatDate(job.finishDate)}</td>
+      <td>
+        <a class="btn-manage ${isLocked ? 'btn-view' : ''}" 
+           href="manage_job.html?id=${job._id}">
+          ${isLocked ? "ดูข้อมูล" : "จัดการ"}
+        </a>
+      </td>
+    `;
 
     tbody.appendChild(tr);
   });
 }
+
 
 /* =============================
    UTILS
