@@ -357,8 +357,11 @@
 
 .profile-menu{
   position:relative;
-  margin-left:30px;
+  margin-left:25px;
+  display:flex;
+  align-items:center;
 }
+
 
 .profile-trigger{
   cursor:pointer;
@@ -367,15 +370,16 @@
 .profile-dropdown{
   position:absolute;
   right:0;
-  top:55px;
+  top:70px;   /* แก้จาก 55px เป็น 70px */
   width:260px;
   background:#fff;
   border-radius:10px;
   box-shadow:0 10px 25px rgba(0,0,0,.25);
   padding:15px;
-  display:none;            /* ⭐ สำคัญมาก */
+  display:none;
   z-index:999;
 }
+
 
 .profile-dropdown.show{
   display:block;
