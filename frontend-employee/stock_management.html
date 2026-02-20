@@ -48,52 +48,73 @@
         }
 
         /* === 2. Header & Navigation === */
-        header {
-            background-color: var(--primary-color);
-            color: #ffffff;
-            padding: 15px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: var(--box-shadow);
-        }
+        /* ===== UNIFIED NAVBAR ===== */
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
+.main-header{
+  background:#2c3e50;
+  padding:15px 40px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  color:#fff;
+  box-shadow:0 4px 15px rgba(0,0,0,.15);
+}
 
-        .nav-links {
-            display: flex;
-            gap: 25px;
-        }
+.logo{
+  font-size:1.4rem;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
 
-        .nav-link {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 0.95rem;
-            transition: color 0.3s ease, border-bottom 0.3s;
-            padding: 5px 0;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+.nav-links{
+  display:flex;
+  gap:25px;
+  align-items:center;
+  margin-left:auto;
+}
 
-        .nav-link:hover {
-            color: #ffffff;
-            border-bottom: 2px solid var(--accent-color);
-        }
-        
-        .nav-link.active {
-            color: #ffffff;
-            border-bottom: 3px solid var(--secondary-color);
-            font-weight: 600;
-        }
+.nav-link{
+  color:rgba(255,255,255,.75);
+  text-decoration:none;
+  font-weight:500;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 0;
+  transition:.3s;
+  position:relative;
+}
+
+.nav-link:hover{
+  color:#fff;
+}
+
+/* 🔥 Active ชัดมาก */
+.nav-link.active{
+  color:#fff;
+}
+
+.nav-link.active::after{
+  content:"";
+  position:absolute;
+  bottom:-6px;
+  left:0;
+  width:100%;
+  height:3px;
+  background:#1abc9c;
+  border-radius:2px;
+}
+
+.profile-avatar{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  object-fit:cover;
+  margin-left:20px;
+}
+
 
         /* === 3. Main Content Layout & Controls (FLexbox) === */
         .content-section {
@@ -532,32 +553,91 @@
     </style>
 </head>
 <body>
-    <header>
-        <h1 class="logo">
-            <i class="fas fa-tools"></i> ระบบจัดการงานซ่อม
-        </h1>
-        <nav class="nav-links">
-           <nav class="nav-links">
-      <a href="employee_dashboard.html" class="nav-link">
-        <i class="fas fa-home"></i> หน้าหลัก
+    <header class="main-header">
+
+  <!-- โลโก้ -->
+  <div class="logo">
+    <i class="fas fa-tools"></i>
+    ระบบจัดการงานซ่อม
+  </div>
+
+  <!-- เมนู -->
+  <nav class="nav-links">
+    <a href="employee_dashboard.html" class="nav-link">
+      <i class="fas fa-home"></i> หน้าหลัก
+    </a>
+
+    <a href="new_job.html" class="nav-link">
+      <i class="fas fa-plus-circle"></i> รับเครื่องซ่อม
+    </a>
+
+    <a href="stock_management.html" class="nav-link">
+      <i class="fas fa-box-open"></i> จัดการสต็อก
+    </a>
+
+    <a href="technician_jobs.html" class="nav-link">
+      <i class="fas fa-tools"></i> งานของฉัน
+    </a>
+
+    <a href="reports.html" class="nav-link">
+      <i class="fas fa-chart-line"></i> รายงาน
+    </a>
+
+    <a href="admin_dashboard.html" class="nav-link">
+      <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
+    </a>
+  </nav>
+
+  <!-- โปรไฟล์ (อยู่นอก nav) -->
+  <div class="profile-menu" id="profileMenu">
+
+    <div class="profile-trigger" onclick="toggleProfile()">
+      <img id="profileAvatar"
+           src=""
+           alt="avatar"
+           class="profile-avatar">
+    </div>
+
+    <div class="profile-dropdown" id="profileDropdown">
+      <div class="profile-header">
+        <img id="profileAvatarLarge"
+             src=""
+             alt="avatar-large"
+             class="profile-avatar-large">
+
+        <div>
+          <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
+          <small id="profileRole">—</small>
+        </div>
+      </div>
+
+      <label class="profile-item upload-btn">
+        <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
+        <input type="file" accept="image/*" onchange="uploadAvatar(event)">
+      </label>
+
+      <a class="profile-item" href="profile.html">
+        <i class="fas fa-user"></i> ข้อมูลส่วนตัว
       </a>
-      <a href="new_job.html" class="nav-link">
-        <i class="fas fa-plus-circle"></i> รับเครื่องซ่อม
+
+      <a class="profile-item" href="change_password.html">
+        <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
       </a>
-      <a href="stock_management.html" class="nav-link">
-        <i class="fas fa-box-open"></i> จัดการสต็อก
+
+      <a class="profile-item" href="repair_history.html">
+        <i class="fas fa-history"></i> ประวัติการซ่อม
       </a>
-      <a href="technician_jobs.html" class="nav-link">
-        <i class="fas fa-tools"></i> งานของฉัน
-      </a>
-      <a href="reports.html" class="nav-link">
-        <i class="fas fa-chart-line"></i> รายงาน
-      </a>
-      <a href="admin_dashboard.html" class="nav-link active">
-        <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
-      </a>
-        </nav>
-    </header>
+
+      <div class="divider"></div>
+
+      <button class="profile-item logout" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+      </button>
+    </div>
+  </div>
+
+</header>
+
     
     <main class="container">
         <div class="content-section">
