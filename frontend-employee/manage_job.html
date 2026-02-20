@@ -358,6 +358,95 @@
 .profile-menu{
   position:relative;
   margin-left:25px;
+  display:flex;
+  align-items:center;
+}
+
+
+.profile-trigger{
+  cursor:pointer;
+}
+
+.profile-dropdown{
+  position:absolute;
+  right:0;
+  top:70px;   /* แก้จาก 55px เป็น 70px */
+  width:260px;
+  background:#fff;
+  border-radius:10px;
+  box-shadow:0 10px 25px rgba(0,0,0,.25);
+  padding:15px;
+  display:none;
+  z-index:999;
+}
+
+
+.profile-dropdown.show{
+  display:block;
+}
+
+.profile-avatar-large{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  object-fit:cover;
+  margin-bottom:10px;
+}
+.profile-avatar{
+  width:42px;
+  height:42px;
+  border-radius:50%;
+  object-fit:cover;
+  cursor:pointer;
+  border:2px solid #fff;
+}
+.profile-header{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-bottom:15px;
+}
+
+.profile-avatar-large{
+  width:60px;
+  height:60px;
+  border-radius:50%;
+  object-fit:cover;
+}
+
+.profile-item{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  text-decoration:none;
+  color:#333;
+  font-size:14px;
+  border-radius:6px;
+  transition:0.2s;
+}
+
+.profile-item:hover{
+  background:#f1f3f5;
+}
+
+.profile-item.logout{
+  background:#f8d7da;
+  color:#c0392b;
+}
+
+.profile-item.logout:hover{
+  background:#f5c6cb;
+}
+
+.divider{
+  height:1px;
+  background:#eee;
+  margin:10px 0;
+}
+.profile-menu{
+  position:relative;
+  margin-left:25px;
 }
 
 /* รูปเล็ก */
