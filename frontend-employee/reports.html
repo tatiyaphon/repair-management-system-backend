@@ -245,6 +245,68 @@ select{
     margin-top: 0;
   }
 }
+/* =========================
+   UNIFIED NAVBAR STYLE
+========================= */
+
+header {
+  background: #334155;
+  padding: 16px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* โลโก้ */
+.logo {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+/* เมนู */
+.nav-links {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ปุ่มแท็บ */
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  color: rgba(255,255,255,.75);
+  transition: all .25s ease;
+  position: relative;
+}
+
+/* Hover */
+.nav-link:hover {
+  background: rgba(255,255,255,.08);
+  color: #fff;
+}
+
+/* ===== ACTIVE STATE ===== */
+.nav-link.active {
+  background: #22c55e;
+  color: #ffffff;
+  font-weight: 600;
+  box-shadow: 0 4px 14px rgba(0,0,0,.25);
+}
+
+/* ไอคอน */
+.nav-link i {
+  font-size: 14px;
+}
 
 </style>
 </head>
@@ -258,25 +320,32 @@ select{
   </div>
 
   <nav class="nav-links">
-    <nav class="nav-links">
-      <a href="employee_dashboard.html" class="nav-link">
-        <i class="fas fa-home"></i> หน้าหลัก
-      </a>
-      <a href="new_job.html" class="nav-link">
-        <i class="fas fa-plus-circle"></i> รับเครื่องซ่อม
-      </a>
-      <a href="stock_management.html" class="nav-link">
-        <i class="fas fa-box-open"></i> จัดการสต็อก
-      </a>
-      <a href="technician_jobs.html" class="nav-link">
-        <i class="fas fa-tools"></i> งานของฉัน
-      </a>
-      <a href="reports.html" class="nav-link">
-        <i class="fas fa-chart-line"></i> รายงาน
-      </a>
-      <a href="admin_dashboard.html" class="nav-link active">
-        <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
-      </a>
+   <nav class="nav-links">
+  <a href="employee_dashboard.html" class="nav-link active">
+    <i class="fas fa-home"></i> หน้าหลัก
+  </a>
+
+  <a href="new_job.html" class="nav-link">
+    <i class="fas fa-plus-circle"></i> รับเครื่องซ่อม
+  </a>
+
+  <a href="stock_management.html" class="nav-link">
+    <i class="fas fa-box-open"></i> จัดการสต็อก
+  </a>
+
+  <a href="technician_jobs.html" class="nav-link">
+    <i class="fas fa-tools"></i> งานของฉัน
+  </a>
+
+  <a href="reports.html" class="nav-link">
+    <i class="fas fa-chart-line"></i> รายงาน
+  </a>
+
+  <a href="admin_dashboard.html" class="nav-link">
+    <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
+  </a>
+</nav>
+
   </nav>
 </header>
 
