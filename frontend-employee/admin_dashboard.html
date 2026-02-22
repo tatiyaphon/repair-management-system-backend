@@ -16,7 +16,7 @@
   <link
     href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     rel="stylesheet">
-
+  <link rel="stylesheet" href="navbar.css">
   <style>
     :root {
       --primary-color: #2c3e50;
@@ -1622,19 +1622,16 @@ document.getElementById("btn-add-user")
 });
 
 
-function toggleProfile() {
-  const dropdown = document.getElementById("profileDropdown");
-  dropdown.classList.toggle("show");
+function toggleProfile(){
+  document.getElementById("profileDropdown")
+    .classList.toggle("show");
 }
 
-document.addEventListener("click", (e) => {
-  const trigger = document.querySelector(".profile-trigger");
-  const dropdown = document.getElementById("profileDropdown");
-
-  if (!trigger || !dropdown) return;
-
-  if (!trigger.contains(e.target) && !dropdown.contains(e.target)) {
-    dropdown.classList.remove("show");
+document.addEventListener("click", function(e){
+  const menu = document.getElementById("profileMenu");
+  if(!menu.contains(e.target)){
+    document.getElementById("profileDropdown")
+      .classList.remove("show");
   }
 });
 </script>

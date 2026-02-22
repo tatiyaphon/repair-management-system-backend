@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
-
+    <link rel="stylesheet" href="navbar.css">
 
     <style>
         /* === 1. Variables & Global Styles === */
@@ -843,15 +843,16 @@ async function loadProfile() {
 
 document.addEventListener("DOMContentLoaded", loadProfile);
 
-function toggleProfile() {
-  const dropdown = document.getElementById("profileDropdown");
-  dropdown.classList.toggle("show");
+function toggleProfile(){
+  document.getElementById("profileDropdown")
+    .classList.toggle("show");
 }
 
-document.addEventListener("click", function(e) {
+document.addEventListener("click", function(e){
   const menu = document.getElementById("profileMenu");
-  if (!menu.contains(e.target)) {
-    document.getElementById("profileDropdown").classList.remove("show");
+  if(!menu.contains(e.target)){
+    document.getElementById("profileDropdown")
+      .classList.remove("show");
   }
 });
 </script>

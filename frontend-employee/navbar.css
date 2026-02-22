@@ -1,0 +1,149 @@
+/* =========================
+   UNIVERSAL NAVBAR
+========================= */
+
+.main-header{
+  height:70px;
+  background:#2c3e50;
+  display:flex;
+  align-items:center;
+  padding:0 40px;
+  box-shadow:0 4px 15px rgba(0,0,0,.15);
+  position:sticky;
+  top:0;
+  z-index:1000;
+}
+
+.logo{
+  font-size:20px;
+  font-weight:700;
+  color:#fff;
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+/* เมนู */
+.nav-links{
+  display:flex;
+  align-items:center;
+  gap:28px;
+  margin-left:auto;
+}
+
+.nav-link{
+  color:rgba(255,255,255,.75);
+  text-decoration:none;
+  font-weight:500;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  position:relative;
+  padding:5px 0;
+  transition:.3s;
+}
+
+.nav-link:hover{
+  color:#fff;
+}
+
+.nav-link.active{
+  color:#fff;
+}
+
+.nav-link.active::after{
+  content:"";
+  position:absolute;
+  bottom:-10px;
+  left:0;
+  width:100%;
+  height:3px;
+  background:#1abc9c;
+  border-radius:3px;
+}
+
+/* ===== PROFILE ===== */
+
+.profile-menu{
+  position:relative;
+  margin-left:20px;
+}
+
+.profile-avatar{
+  width:44px;
+  height:44px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid #fff;
+  box-shadow:0 0 0 2px #1abc9c;
+  cursor:pointer;
+  transition:.2s;
+}
+
+.profile-avatar:hover{
+  transform:scale(1.05);
+}
+
+.profile-dropdown{
+  position:absolute;
+  top:70px;
+  right:0;
+  width:320px;
+  background:#f1f3f5;
+  border-radius:25px;
+  box-shadow:0 25px 60px rgba(0,0,0,.25);
+  overflow:hidden;
+  display:none;
+}
+
+.profile-dropdown.show{
+  display:block;
+}
+
+.profile-header{
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:25px;
+}
+
+.profile-header img{
+  width:55px;
+  height:55px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid #fff;
+  box-shadow:0 0 0 2px #1abc9c;
+}
+
+.profile-item{
+  padding:18px 30px;
+  display:flex;
+  align-items:center;
+  gap:15px;
+  font-size:16px;
+  text-decoration:none;
+  color:#2c3e50;
+  border:none;
+  background:transparent;
+  width:100%;
+  cursor:pointer;
+}
+
+.profile-item:hover{
+  background:#e6e9ed;
+}
+
+.profile-item.logout{
+  color:#e74c3c;
+  font-weight:600;
+}
+
+.profile-item.logout:hover{
+  background:#fcebea;
+}
+
+.divider{
+  height:1px;
+  background:#ddd;
+}
