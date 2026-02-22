@@ -58,23 +58,21 @@
     /* ===== UNIFIED NAVBAR ===== */
 
 .main-header{
-  background:#2c3e50;
-  padding:15px 40px;
   display:flex;
   align-items:center;
-  justify-content:space-between;
+  padding:15px 40px;
+  background:#2c3e50;
   color:#fff;
 }
 
-.logo{
-  font-size:1.4rem;
-  font-weight:700;
+/* 🔥 ตัวนี้คือกุญแจ */
+.header-right{
+  margin-left:auto;   /* ดันไปขวา */
   display:flex;
   align-items:center;
-  gap:8px;
+  gap:30px;
 }
 
-/* เอา margin-left:auto ออก */
 .nav-links{
   display:flex;
   gap:25px;
@@ -609,189 +607,82 @@
     border-collapse: separate;
     border-spacing: 0 10px;
   }
-  .profile-menu {
+/* ===== PROFILE MENU CLEAN VERSION ===== */
+
+.profile-menu {
   position: relative;
-  z-index: 99999;
+  margin-left: 20px;
+  z-index: 9999;
 }
 
 .profile-trigger {
   cursor: pointer;
   display: flex;
   align-items: center;
-  background: none;      /* เอาพื้นขาวออก */
-  padding: 0;            /* เอา padding ออก */
-  border-radius: 0;      /* เอาความโค้งออก */
+  background: transparent;
+  padding: 0;
+  border: none;
 }
 
-
+/* 🔥 Avatar แบบ production */
 .profile-trigger img {
-  width: 34px;
-  height: 34px;
+  width: 42px;
+  height: 42px;
   border-radius: 50%;
   object-fit: cover;
+
+  border: 3px solid #ffffff;       /* ขอบขาว */
+  box-shadow: 0 0 0 2px #1abc9c;   /* วงเขียวรอบขาว */
+  transition: .2s;
 }
+
+.profile-trigger img:hover {
+  transform: scale(1.05);
+}
+
+/* ===== DROPDOWN ===== */
 
 .profile-dropdown {
   position: absolute;
   right: 0;
-  top: 120%;
+  top: 60px;
   width: 260px;
-  background: #fff;
-  border-radius: 14px;
+  background: #ffffff;
+  border-radius: 16px;
   box-shadow: 0 15px 40px rgba(0,0,0,.15);
   display: none;
-  z-index: 999;
-}
-
-.profile-dropdown.show { display: block; }
-
-.profile-header {
-  display: flex;
-  gap: 12px;
-  padding: 16px;
-  border-bottom: 1px solid #eee;
-}
-
-.profile-header img {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-}
-
-.profile-item {
-  padding: 12px 16px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  background: none;
-  border: none;
-  width: 100%;
-  cursor: pointer;
-  text-decoration: none;
-  color: #2c3e50;
-  font-size: 14px;
-}
-
-.profile-item:hover { background: #f4f7f9; }
-
-.profile-item.logout {
-  color: #e74c3c;
-  font-weight: 600;
-}
-
-.upload-btn input { display: none; }
-
-.divider {
-  height: 1px;
-  background: #eee;
-  margin: 6px 0;
-}
-.avatar-wrapper {
-  position: relative;
-}
-
-.avatar-wrapper img {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  object-fit: cover;
-  cursor: pointer;
-  border: 2px solid #1abc9c;
-}
-
-/* dropdown */
-.avatar-menu {
-  position: absolute;
-  right: 0;
-  top: 120%;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.15);
-  display: none;
   overflow: hidden;
-  z-index: 1000;
-  min-width: 120px;
-}
-
-.avatar-menu.show {
-  display: block;
-}
-
-.avatar-item {
-  padding: 10px 14px;
-  font-size: 14px;
-  cursor: pointer;
-  white-space: nowrap;
-}
-
-.avatar-item:hover {
-  background: #f4f7f9;
-}
-
-.avatar-item.logout {
-  color: #e74c3c;
-  font-weight: 600;
-}
-.profile-menu {
-  position: relative;
-}
-
-.profile-trigger img {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  object-fit: cover;
-  cursor: pointer;
-  border: 2px solid #1abc9c;
-}
-
-/* dropdown */
-.profile-dropdown {
-  position: absolute;
-  right: 0;
-  top: 120%;
-  width: 260px;
-  background: #fff;
-  border-radius: 14px;
-  box-shadow: 0 12px 30px rgba(0,0,0,.15);
-  display: none;
-  z-index: 999;
 }
 
 .profile-dropdown.show {
   display: block;
 }
 
-/* header */
 .profile-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px;
-  border-bottom: 1px solid #e5e7eb;
+  padding: 18px;
+  text-align: center;
+  border-bottom: 1px solid #eee;
 }
 
 .profile-header img {
-  width: 48px;
-  height: 48px;
+  width: 70px;
+  height: 70px;
   border-radius: 50%;
   object-fit: cover;
+
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 0 2px #1abc9c;
+  margin-bottom: 8px;
 }
 
-/* menu item */
 .profile-item {
+  padding: 12px 18px;
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 16px;
-  font-size: 14px;
-  cursor: pointer;
-  color: #2c3e50;
   text-decoration: none;
-  background: none;
-  border: none;
-  width: 100%;
-  text-align: left;
+  color: #2c3e50;
+  font-size: 14px;
 }
 
 .profile-item:hover {
@@ -805,9 +696,10 @@
 
 .divider {
   height: 1px;
-  background: #e5e7eb;
+  background: #eee;
   margin: 6px 0;
 }
+
 .status-active {
   color: #16a34a;
   font-weight: 600;
