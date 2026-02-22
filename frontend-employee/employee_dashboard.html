@@ -592,10 +592,7 @@
 </head>
 
 <body>
-    <!-- ==========================================================
-         Header
-    ========================================================== -->
-    <header class="main-header">
+   <header class="main-header">
 
   <!-- โลโก้ -->
   <div class="logo">
@@ -605,7 +602,7 @@
 
   <!-- เมนู -->
   <nav class="nav-links">
-    <a href="employee_dashboard.html" class="nav-link">
+    <a href="employee_dashboard.html" class="nav-link active">
       <i class="fas fa-home"></i> หน้าหลัก
     </a>
 
@@ -630,17 +627,24 @@
     </a>
   </nav>
 
-  <!-- โปรไฟล์ (อยู่นอก nav) -->
+  <!-- PROFILE -->
   <div class="profile-menu" id="profileMenu">
 
-    <img id="profileAvatar"
-     src="/uploads/profile/default.jpg"
-     alt="avatar"
-     class="profile-avatar">
+    <!-- ปุ่มกด -->
+    <div class="profile-trigger" onclick="toggleProfile()">
+      <img id="profileAvatar"
+           src="/uploads/profile/default.jpg"
+           alt="avatar"
+           class="profile-avatar">
+    </div>
 
-<img id="profileAvatarLarge"
-     src="/uploads/profile/default.jpg"
-     alt="avatar-large">
+    <!-- DROPDOWN -->
+    <div class="profile-dropdown" id="profileDropdown">
+
+      <div class="profile-header">
+        <img id="profileAvatarLarge"
+             src="/uploads/profile/default.jpg"
+             alt="avatar-large">
 
         <div>
           <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
@@ -670,11 +674,11 @@
       <button class="profile-item logout" onclick="logout()">
         <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
       </button>
+
     </div>
   </div>
 
 </header>
-
     <!-- ==========================================================
          Main Content
     ========================================================== -->
