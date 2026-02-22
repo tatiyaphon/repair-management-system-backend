@@ -105,7 +105,85 @@
   object-fit:cover;
   margin-left:20px;
 }
+/* ===== PROFILE MENU ===== */
 
+.profile-menu{
+  position:relative;
+  margin-left:25px;
+  display:flex;
+  align-items:center;
+}
+
+.profile-trigger{
+  cursor:pointer;
+}
+
+.profile-trigger img{
+  width:40px;
+  height:40px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid #fff;      /* 🔥 ขอบขาว */
+  box-shadow:0 0 0 2px #1abc9c; /* วงเขียวรอบขาว */
+}
+
+.profile-dropdown{
+  position:absolute;
+  right:0;
+  top:120%;
+  width:280px;
+  background:#fff;
+  border-radius:18px;
+  box-shadow:0 20px 50px rgba(0,0,0,.2);
+  display:none;
+  overflow:hidden;
+  z-index:999;
+}
+
+.profile-dropdown.show{
+  display:block;
+}
+
+.profile-header{
+  padding:20px;
+  text-align:center;
+  border-bottom:1px solid #eee;  /* เส้นใต้รูป */
+}
+
+.profile-header img{
+  width:70px;
+  height:70px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid #fff;
+  box-shadow:0 0 0 2px #1abc9c;
+  margin-bottom:10px;
+}
+
+.profile-item{
+  padding:14px 20px;
+  display:flex;
+  gap:12px;
+  align-items:center;
+  text-decoration:none;
+  color:#2c3e50;
+  font-size:15px;
+}
+
+.profile-item:hover{
+  background:#f4f7f9;
+}
+
+.profile-item.logout{
+  color:#e74c3c;
+  font-weight:600;
+}
+
+.divider{
+  height:1px;
+  background:#eee;
+  margin:10px 0;
+}
         /* === 3. Form Container & Sections === */
         .form-container {
             background-color: var(--card-background);
