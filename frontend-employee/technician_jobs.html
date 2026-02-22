@@ -274,24 +274,6 @@
 }
 .profile-menu { position: relative; }
 
-.profile-trigger {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  background: #fff;
-  color: #2c3e50;
-  padding: 6px 14px;
-  border-radius: 30px;
-  font-weight: 600;
-}
-
-.profile-trigger img {
-  width: 34px;
-  height: 34px;
-  border-radius: 50%;
-  object-fit: cover;
-}
 
 .profile-dropdown {
   position: absolute;
@@ -439,6 +421,21 @@
   height:1px;
   background:#eee;
   margin:10px 0;
+}
+.profile-trigger {
+  cursor: pointer;
+  background: transparent;   /* 🔥 เอาพื้นขาวออก */
+  padding: 0;                /* 🔥 เอา padding ออก */
+  border-radius: 0;          /* 🔥 ไม่ต้องทำวงรี */
+}
+.profile-trigger img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+
+  border: 3px solid #fff;          /* ขอบขาว */
+  box-shadow: 0 0 0 2px #1abc9c;   /* เส้นเขียวรอบนอก */
 }
 /* ===== MOBILE FIX : PROFILE DROPDOWN ===== */
 @media (max-width: 768px) {
