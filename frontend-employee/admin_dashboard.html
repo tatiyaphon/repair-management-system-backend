@@ -65,9 +65,9 @@
   color:#fff;
 }
 
-/* 🔥 ตัวนี้คือกุญแจ */
+/* 🔥 ตัวดันไปขวา */
 .header-right{
-  margin-left:auto;   /* ดันไปขวา */
+  margin-left:auto;
   display:flex;
   align-items:center;
   gap:30px;
@@ -78,6 +78,7 @@
   gap:25px;
   align-items:center;
 }
+
 
 /* สร้างกล่องขวาใหม่ */
 .header-right{
@@ -1005,14 +1006,13 @@
 <body>
   <header class="main-header">
 
-  <!-- โลโก้ -->
   <div class="logo">
     <i class="fas fa-tools"></i>
     ระบบจัดการงานซ่อม
   </div>
 
-  <!-- เมนู -->
-  <nav class="nav-links">
+  <div class="header-right">
+    <nav class="nav-links">
     <a href="employee_dashboard.html" class="nav-link">
       <i class="fas fa-home"></i> หน้าหลัก
     </a>
