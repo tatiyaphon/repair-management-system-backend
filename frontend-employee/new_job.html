@@ -719,9 +719,44 @@ function generateReceiptNumber() {
   const random = Math.floor(100 + Math.random() * 900); // 3 หลัก
   return `IN${y}${m}${d}-${random}`;
 }
-const avatar = user.avatar || "/uploads/profile/default.jpg";
-document.getElementById("profileAvatar").src = avatar;
-document.getElementById("profileAvatarLarge").src = avatar;
+/* =========================
+   LOAD PROFILE
+========================= */
+async function loadProfile() {
+  try {
+    const res = await fetch(`${API_BASE}/employees/me`, {
+      headers
+    });
+
+    if (!res.ok) return;
+
+    const user = await res.json();
+
+    const avatar = user.avatar || "/uploads/profile/default.jpg";
+
+    document.getElementById("profileAvatar").src = avatar;
+    document.getElementById("profileAvatarLarge").src = avatar;
+    document.getElementById("profileNameLarge").textContent =
+      `${user.firstName} ${user.lastName}`;
+    document.getElementById("profileRole").textContent = user.role;
+
+  } catch (err) {
+    console.error("LOAD PROFILE ERROR:", err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadProfile);
+function toggleProfile() {
+  const dropdown = document.getElementById("profileDropdown");
+  dropdown.classList.toggle("show");
+}
+
+document.addEventListener("click", function(e) {
+  const menu = document.getElementById("profileMenu");
+  if (!menu.contains(e.target)) {
+    document.getElementById("profileDropdown").classList.remove("show");
+  }
+});
 </script>
 
 </body>
