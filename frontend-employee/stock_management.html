@@ -138,56 +138,76 @@
   box-shadow:0 0 0 2px #1abc9c; /* วงเขียวรอบขาว */
 }
 
+/* ===== PROFILE CARD CLEAN STYLE ===== */
+
 .profile-dropdown{
   position:absolute;
+  top:70px;
   right:0;
-  top:120%;
-  width:280px;
-  background:#fff;
-  border-radius:18px;
-  box-shadow:0 20px 50px rgba(0,0,0,.2);
-  display:none;
+  width:340px;
+  background:#f1f3f5;
+  border-radius:30px;
+  box-shadow:0 30px 60px rgba(0,0,0,.25);
   overflow:hidden;
-  z-index:999;
+  display:none;
+  z-index:9999;
 }
 
 .profile-dropdown.show{
   display:block;
 }
 
+/* HEADER */
 .profile-header{
-  padding:20px;
-  text-align:center;
-  border-bottom:1px solid #eee;  /* เส้นใต้รูป */
+  display:flex;
+  align-items:center;
+  gap:15px;
+  padding:25px;
 }
 
 .profile-header img{
-  width:70px;
-  height:70px;
+  width:55px;     /* ลดขนาด */
+  height:55px;
   border-radius:50%;
   object-fit:cover;
   border:3px solid #fff;
   box-shadow:0 0 0 2px #1abc9c;
-  margin-bottom:10px;
 }
 
+/* เส้นแบ่ง */
+.divider{
+  height:1px;
+  background:#ddd;
+}
+
+/* เมนู */
 .profile-item{
-  padding:14px 20px;
+  padding:20px 30px;
   display:flex;
-  gap:12px;
   align-items:center;
-  text-decoration:none;
+  gap:18px;
+  font-size:17px;
   color:#2c3e50;
-  font-size:15px;
+  text-decoration:none;
+  border:none;
+  background:transparent;
+  width:100%;
+  text-align:left;
+  cursor:pointer;
 }
 
 .profile-item:hover{
-  background:#f4f7f9;
+  background:#e6e9ed;
 }
 
+/* Logout */
 .profile-item.logout{
   color:#e74c3c;
   font-weight:600;
+}
+
+.profile-item.logout:hover{
+  background:#fcebea;
 }
 
 .divider{
@@ -691,10 +711,11 @@
         </div>
       </div>
 
-      <label class="profile-item upload-btn">
-        <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
-        <input type="file" accept="image/*" onchange="uploadAvatar(event)">
-      </label>
+      <label class="profile-item">
+  <i class="fas fa-camera"></i>
+  เปลี่ยนรูปโปรไฟล์
+  <input type="file" hidden accept="image/*" onchange="uploadAvatar(event)">
+</label>
 
       <a class="profile-item" href="profile.html">
         <i class="fas fa-user"></i> ข้อมูลส่วนตัว
