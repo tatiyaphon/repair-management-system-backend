@@ -348,42 +348,9 @@
   background: #eee;
   margin: 6px 0;
 }
-.avatar-wrapper {
-  position: relative;
-}
-
-.avatar-wrapper img {
-  width: 42px;
-  height: 42px;
-  border-radius: 50%;
-  object-fit: cover;
-  cursor: pointer;
-  border: 2px solid #1abc9c;
-}
-
-/* dropdown */
-.avatar-menu {
-  position: absolute;
-  right: 0;
-  top: 120%;
-  background: #fff;
-  border-radius: 10px;
-  box-shadow: 0 10px 30px rgba(0,0,0,.15);
-  display: none;
-  overflow: hidden;
-  z-index: 1000;
-  min-width: 120px;
-}
 
 .avatar-menu.show {
   display: block;
-}
-
-.avatar-item {
-  padding: 10px 14px;
-  font-size: 14px;
-  cursor: pointer;
-  white-space: nowrap;
 }
 
 .avatar-item:hover {
@@ -894,8 +861,8 @@ async function loadProfile() {
     ? avatar
     : `${location.origin}${avatar}`;
 
-  document.getElementById("profileAvatarSmall").src = avatarUrl;
-  document.getElementById("profileAvatarLarge").src = avatarUrl;
+  document.getElementById("profileAvatar").src = avatarUrl;
+document.getElementById("profileAvatarLarge").src = avatarUrl;
 }
 
 /* =====================
