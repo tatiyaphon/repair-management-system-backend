@@ -649,7 +649,24 @@
   background-repeat: no-repeat;
   background-position: right 10px center;
 }
+.profile-dropdown {
+  display: none;
+}
 
+.profile-dropdown.show {
+  display: block;
+}
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 25px;
+}
+
+.profile-header img {
+  width: 55px;
+  height: 55px;
+}
     </style>
 </head>
 <body>
@@ -711,10 +728,11 @@
         </div>
       </div>
 
-      <label class="profile-item upload-btn">
-        <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
-        <input type="file" accept="image/*" onchange="uploadAvatar(event)">
-      </label>
+      <label class="profile-item">
+  <i class="fas fa-camera"></i>
+  เปลี่ยนรูปโปรไฟล์
+  <input type="file" hidden accept="image/*" onchange="uploadAvatar(event)">
+</label>
 
       <a class="profile-item" href="profile.html">
         <i class="fas fa-user"></i> ข้อมูลส่วนตัว
