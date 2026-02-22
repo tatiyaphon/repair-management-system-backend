@@ -1351,9 +1351,17 @@ async function withdrawFromJob(stockId, quantity) {
   window.location.href =
   `/employee/stock_management.html?jobRef=${currentJob.receiptNumber}`;
 }
-const avatar = user.avatar || "/uploads/profile/default.jpg";
-document.getElementById("profileAvatar").src = avatar;
-document.getElementById("profileAvatarLarge").src = avatar;
+function toggleProfile() {
+  const dropdown = document.getElementById("profileDropdown");
+  dropdown.classList.toggle("show");
+}
+
+document.addEventListener("click", function(e) {
+  const menu = document.getElementById("profileMenu");
+  if (!menu.contains(e.target)) {
+    document.getElementById("profileDropdown").classList.remove("show");
+  }
+});
 </script>
 
 </body>
