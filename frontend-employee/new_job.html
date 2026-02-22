@@ -334,7 +334,94 @@
             .form-section h3 { font-size: 1.2rem; }
             .btn-submit { width: 100%; padding: 15px 0; font-size: 1.1rem; }
         }
-        
+        /* ===============================
+   PROFILE DROPDOWN MODERN CARD
+=============================== */
+
+.profile-menu {
+  position: relative;
+  margin-left: 25px;
+}
+
+.profile-trigger img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  cursor: pointer;
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px #1abc9c;
+}
+
+/* การ์ดหลัก */
+.profile-dropdown {
+  position: absolute;
+  top: 70px;
+  right: 0;
+  width: 320px;
+  background: #f4f6f8;
+  border-radius: 24px;
+  box-shadow: 0 25px 60px rgba(0,0,0,.25);
+  overflow: hidden;
+  display: none;
+  z-index: 9999;
+  animation: slideDown .25s ease;
+}
+
+.profile-dropdown.show {
+  display: block;
+}
+
+/* Header ส่วนบน */
+.profile-header {
+  padding: 30px 20px 20px;
+  text-align: center;
+  background: #f4f6f8;
+}
+
+.profile-header img {
+  width: 75px;
+  height: 75px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 4px solid #fff;
+  box-shadow: 0 0 0 3px #1abc9c;
+  margin-bottom: 10px;
+}
+
+/* เส้นแบ่ง */
+.profile-divider {
+  height: 1px;
+  background: #ddd;
+  margin: 10px 0;
+}
+
+/* รายการเมนู */
+.profile-item {
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 16px;
+  text-decoration: none;
+  color: #2c3e50;
+  transition: background .2s;
+}
+
+.profile-item:hover {
+  background: #e9edf1;
+}
+
+/* ปุ่ม logout */
+.profile-item.logout {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+/* animation */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
     </style>
 </head>
 
@@ -385,43 +472,38 @@
     </div>
 
     <div class="profile-dropdown" id="profileDropdown">
-      <div class="profile-header">
-        <img id="profileAvatarLarge"
-             src="/uploads/profile/default.jpg"
-             alt="avatar-large"
-             class="profile-avatar-large">
 
-        <div>
-          <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
-          <small id="profileRole">—</small>
-        </div>
-      </div>
-
-      <label class="profile-item upload-btn">
-        <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
-        <input type="file" accept="image/*" onchange="uploadAvatar(event)">
-      </label>
-
-      <a class="profile-item" href="profile.html">
-        <i class="fas fa-user"></i> ข้อมูลส่วนตัว
-      </a>
-
-      <a class="profile-item" href="change_password.html">
-        <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
-      </a>
-
-      <a class="profile-item" href="repair_history.html">
-        <i class="fas fa-history"></i> ประวัติการซ่อม
-      </a>
-
-      <div class="divider"></div>
-
-      <button class="profile-item logout" onclick="logout()">
-        <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
-      </button>
-    </div>
+  <div class="profile-header">
+    <img id="profileAvatarLarge"
+         src="/uploads/profile/default.jpg">
   </div>
 
+  <div class="profile-divider"></div>
+
+  <label class="profile-item">
+    <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
+    <input type="file" hidden onchange="uploadAvatar(event)">
+  </label>
+
+  <a class="profile-item" href="/employee/profile.html">
+    <i class="fas fa-user"></i> ข้อมูลส่วนตัว
+  </a>
+
+  <a class="profile-item" href="/employee/change_password.html">
+    <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
+  </a>
+
+  <a class="profile-item" href="/employee/repair_history.html">
+    <i class="fas fa-history"></i> ประวัติการซ่อม
+  </a>
+
+  <div class="profile-divider"></div>
+
+  <button class="profile-item logout" onclick="logout()">
+    <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+  </button>
+
+</div>
 </header>
 
 
@@ -746,6 +828,7 @@ async function loadProfile() {
 }
 
 document.addEventListener("DOMContentLoaded", loadProfile);
+
 function toggleProfile() {
   const dropdown = document.getElementById("profileDropdown");
   dropdown.classList.toggle("show");
