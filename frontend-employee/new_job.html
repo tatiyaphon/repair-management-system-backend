@@ -377,7 +377,7 @@
 
     <div class="profile-trigger" onclick="toggleProfile()">
       <img id="profileAvatar"
-           src=""
+           src="/uploads/profile/default.jpg"
            alt="avatar"
            class="profile-avatar">
     </div>
@@ -385,7 +385,7 @@
     <div class="profile-dropdown" id="profileDropdown">
       <div class="profile-header">
         <img id="profileAvatarLarge"
-             src=""
+             src="/uploads/profile/default.jpg"
              alt="avatar-large"
              class="profile-avatar-large">
 
@@ -717,7 +717,9 @@ function generateReceiptNumber() {
   const random = Math.floor(100 + Math.random() * 900); // 3 หลัก
   return `IN${y}${m}${d}-${random}`;
 }
-
+const avatar = user.avatar || "/uploads/profile/default.jpg";
+document.getElementById("profileAvatar").src = avatar;
+document.getElementById("profileAvatarLarge").src = avatar;
 </script>
 
 </body>
