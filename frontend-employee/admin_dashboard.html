@@ -1418,10 +1418,7 @@ document.getElementById("btn-add-user")
     document.getElementById("new-user-firstname").value = "";
     document.getElementById("new-user-lastname").value = "";
     document.getElementById("new-user-email").value = "";
-    document.getElementById("new-user-phone")
-  .addEventListener("input", function() {
-    this.value = this.value.replace(/[^0-9]/g, "");
-  });
+    document.getElementById("new-user-phone").value = "";
     document.getElementById("new-user-password").value = "";
 
   } catch (err) {
@@ -1438,13 +1435,17 @@ function toggleProfile(){
 
 document.addEventListener("click", function(e){
   const menu = document.getElementById("profileMenu");
-  if(!menu.contains(e.target)){
-    document.getElementById("profileDropdown")
-      .classList.remove("show");
+  const dropdown = document.getElementById("profileDropdown");
+
+  if(menu && !menu.contains(e.target)){
+    dropdown?.classList.remove("show");
   }
 });
+document.getElementById("new-user-phone")
+?.addEventListener("input", function(){
+  this.value = this.value.replace(/[^0-9]/g, "");
+});
 </script>
-
 
 </body>
 </html>
