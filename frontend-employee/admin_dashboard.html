@@ -417,26 +417,6 @@
       font-size: .85rem;
     }
 
-   @media (max-width: 992px){
-
-  .main-header{
-    flex-direction: row; /* ไม่ให้เรียงลง */
-    flex-wrap: wrap;
-  }
-
-  .header-right{
-    width: 100%;
-    margin-left: 0;
-    justify-content: space-between;
-    margin-top: 10px;
-  }
-
-  .nav-links{
-    flex-wrap: wrap;
-    gap: 15px;
-  }
-}
-
    @media (max-width: 576px) {
   .profile-dropdown {
     position: fixed;
@@ -832,7 +812,7 @@
   </style>
 </head>
 <body>
-  <header class="main-header">
+<header class="main-header">
 
   <div class="logo">
     <i class="fas fa-tools"></i>
@@ -840,41 +820,43 @@
   </div>
 
   <div class="header-right">
+
     <nav class="nav-links">
-    <a href="employee_dashboard.html" class="nav-link">
-      <i class="fas fa-home"></i> หน้าหลัก
-    </a>
+      <a href="employee_dashboard.html" class="nav-link">
+        <i class="fas fa-home"></i> หน้าหลัก
+      </a>
 
-    <a href="new_job.html" class="nav-link">
-      <i class="fas fa-plus-circle"></i> รับเครื่องซ่อม
-    </a>
+      <a href="new_job.html" class="nav-link">
+        <i class="fas fa-plus-circle"></i> รับเครื่องซ่อม
+      </a>
 
-    <a href="stock_management.html" class="nav-link">
-      <i class="fas fa-box-open"></i> จัดการสต็อก
-    </a>
+      <a href="stock_management.html" class="nav-link">
+        <i class="fas fa-box-open"></i> จัดการสต็อก
+      </a>
 
-    <a href="technician_jobs.html" class="nav-link">
-      <i class="fas fa-tools"></i> งานของฉัน
-    </a>
+      <a href="technician_jobs.html" class="nav-link">
+        <i class="fas fa-tools"></i> งานของฉัน
+      </a>
 
-    <a href="reports.html" class="nav-link">
-      <i class="fas fa-chart-line"></i> รายงาน
-    </a>
+      <a href="reports.html" class="nav-link">
+        <i class="fas fa-chart-line"></i> รายงาน
+      </a>
 
-    <a href="admin_dashboard.html" class="nav-link">
-      <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
-    </a>
-  </nav>
+      <a href="admin_dashboard.html" class="nav-link">
+        <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
+      </a>
+    </nav>
 
-  <!-- โปรไฟล์ (อยู่นอก nav) -->
-  <div class="profile-menu" id="profileMenu">
+    <!-- โปรไฟล์ -->
+    <div class="profile-menu" id="profileMenu">
 
-    <div class="profile-trigger" onclick="toggleProfile()">
-      <img id="profileAvatar"
-           src=""
-           alt="avatar"
-           class="profile-avatar">
-    </div>
+      <div class="profile-trigger" onclick="toggleProfile()">
+        <img id="profileAvatar"
+             src=""
+             alt="avatar"
+             class="profile-avatar">
+      </div>
+
 
     <div class="profile-dropdown" id="profileDropdown">
       <div class="profile-header">
