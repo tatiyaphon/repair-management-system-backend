@@ -756,9 +756,9 @@
 </div>
 
       <label class="profile-item upload-btn">
-        <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
-        <input type="file" accept="image/*" onchange="uploadAvatar(event)">
-      </label>
+  <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
+  <input type="file" accept="image/*" onchange="uploadAvatar(event)">
+</label>
 
       <a class="profile-item" href="profile.html">
         <i class="fas fa-user"></i> ข้อมูลส่วนตัว
@@ -1010,15 +1010,16 @@ async function loadProfile() {
 
   const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-  const img1 = document.getElementById("profileAvatar");
-  const img2 = document.getElementById("profileAvatarLarge");
+  document.getElementById("profileAvatar").src = avatar;
+  document.getElementById("profileAvatarLarge").src = avatar;
 
-  if (img1) img1.src = avatar;
-  if (img2) img2.src = avatar;
+  document.getElementById("profileNameLarge").textContent =
+    user.firstName + " " + user.lastName;
+
+  document.getElementById("profileRole").textContent = user.role;
 
   localStorage.setItem("avatar", avatar);
 }
-
 /* ==================================================
    LOAD DATA
 ================================================== */
