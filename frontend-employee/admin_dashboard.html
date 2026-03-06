@@ -699,7 +699,7 @@
   </style>
 </head>
 <body>
-<header class="main-header">
+ <header class="main-header">
 
   <div class="logo">
     <i class="fas fa-tools"></i>
@@ -739,46 +739,46 @@
     </div>
 
 
-  <div class="profile-dropdown" id="profileDropdown">
+    <!-- DROPDOWN -->
+    <div class="profile-dropdown" id="profileDropdown">
 
-    <div class="profile-header">
-      <img id="profileAvatarLarge"
-           src=""
-           alt="avatar-large"
-           class="profile-avatar-large">
+      <div class="profile-header">
+        <img id="profileAvatarLarge"
+             src="/uploads/profile/default.jpg"
+             alt="avatar-large">
 
-      <div>
-        <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
-        <small id="profileRole">—</small>
+        <div>
+          <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
+          <small id="profileRole">—</small>
+        </div>
       </div>
+
+      <label class="profile-item upload-btn">
+        <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
+        <input type="file" accept="image/*" onchange="uploadAvatar(event)">
+      </label>
+
+      <a class="profile-item" href="profile.html">
+        <i class="fas fa-user"></i> ข้อมูลส่วนตัว
+      </a>
+
+      <a class="profile-item" href="change_password.html">
+        <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
+      </a>
+
+      <a class="profile-item" href="repair_history.html">
+        <i class="fas fa-history"></i> ประวัติการซ่อม
+      </a>
+
+      <div class="divider"></div>
+
+      <button class="profile-item logout" onclick="logout()">
+        <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+      </button>
+
     </div>
-
-    <label class="profile-item upload-btn">
-      <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
-      <input type="file" accept="image/*" onchange="uploadAvatar(event)">
-    </label>
-
-    <a class="profile-item" href="profile.html">
-      <i class="fas fa-user"></i> ข้อมูลส่วนตัว
-    </a>
-
-    <a class="profile-item" href="change_password.html">
-      <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
-    </a>
-
-    <a class="profile-item" href="repair_history.html">
-      <i class="fas fa-history"></i> ประวัติการซ่อม
-    </a>
-
-    <div class="divider"></div>
-
-    <button class="profile-item logout" onclick="logout()">
-      <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
-    </button>
-
   </div>
 
-</div>
 </header>
 
   <main class="container">
