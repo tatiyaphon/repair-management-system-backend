@@ -337,5 +337,41 @@ router.post("/forgot-password", async (req, res) => {
     res.status(500).json({ message: "ส่งลิงก์ไม่สำเร็จ" });
   }
 });
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "public/uploads/profile"); // ต้องเป็น public/uploads
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname);
+    cb(null, Date.now() + ext);
+  }
+});
 
+const upload = multer({ storage });
+
+router.post(
+  "/profile/avatar",
+  verifyToken,
+  upload.single("avatar"),
+  async (req, res) => {
+
+    if (!req.file) {
+      return res.status(400).json({
+        message: "ไม่ได้เลือกไฟล์"
+      });
+    }
+
+    const avatarPath = `/uploads/profile/${req.file.filename}`;
+
+    await Employee.findByIdAndUpdate(
+      req.user.userId,
+      { avatar: avatarPath }
+    );
+
+    res.json({
+      avatar: avatarPath
+    });
+
+  }
+);
 module.exports = router;

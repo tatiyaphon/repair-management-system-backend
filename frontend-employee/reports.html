@@ -471,6 +471,50 @@ document.addEventListener("click", function(e){
       .classList.remove("show");
   }
 });
+async function uploadAvatar(event){
+
+  const file = event.target.files[0];
+  if(!file) return;
+
+  const token = localStorage.getItem("token");
+
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  try{
+
+    const res = await fetch("/api/employees/profile/avatar",{
+      method:"POST",
+      headers:{
+        Authorization:`Bearer ${token}`
+      },
+      body:formData
+    });
+
+    const data = await res.json();
+
+    if(!res.ok){
+      alert(data.message || "อัปโหลดไม่สำเร็จ");
+      return;
+    }
+
+    // เปลี่ยนรูปทันที
+    const avatarSmall = document.getElementById("profileAvatar");
+    const avatarLarge = document.getElementById("profileAvatarLarge");
+
+    if(avatarSmall) avatarSmall.src = data.avatar;
+    if(avatarLarge) avatarLarge.src = data.avatar;
+
+    localStorage.setItem("avatar", data.avatar);
+
+    alert("เปลี่ยนรูปโปรไฟล์เรียบร้อย");
+
+  }catch(err){
+    console.error(err);
+    alert("เกิดข้อผิดพลาด");
+  }
+
+}
 </script>
 </div>
 </body>
