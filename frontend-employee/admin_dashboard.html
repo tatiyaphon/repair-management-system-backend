@@ -412,25 +412,6 @@
       font-size: .85rem;
     }
 
-   @media (max-width: 576px) {
-  .profile-dropdown {
-    position: fixed;
-    top: 64px;          /* ใต้ header */
-    left: 12px;
-    right: 12px;
-    width: auto;
-    max-width: none;
-    max-height: calc(100vh - 80px);
-    overflow-y: auto;
-    border-radius: 14px;
-    z-index: 10000;
-  }
-
-      .panel {
-        padding: 18px;
-      }
-    }
-    /* ===== User Management UX ===== */
 
 .add-user-card {
   background: #f9fbfc;
@@ -606,53 +587,6 @@
   background:#dc2626;
 }
 
-.profile-trigger img{
-  width:42px;
-  height:42px;
-  border-radius:50%;
-  border:2px solid #1abc9c;
-  cursor:pointer;
-  object-fit:cover;
-}
-
-.profile-dropdown{
-  position:absolute;
-  right:0;
-  top:55px;
-  width:220px;
-  background:#fff;
-  border-radius:12px;
-  box-shadow:0 10px 30px rgba(0,0,0,.15);
-
-  opacity:0;
-  transform:translateY(-10px);
-  pointer-events:none;
-  transition:.25s;
-}
-
-.profile-dropdown.show{
-  opacity:1;
-  transform:translateY(0);
-  pointer-events:auto;
-}
-.profile-menu{
-  position: relative;
-  z-index: 99999; /* กันโดน element อื่นทับ */
-}
-
-.profile-trigger{
-  cursor:pointer;
-  background:transparent;   /* เอาพื้นหลังออก */
-  padding:0;                /* เอา padding ออก */
-  border:none;
-  display:flex;
-  align-items:center;
-}
-
-
-.profile-trigger img{
-  pointer-events: auto;
-}
 /* ===== ตารางผู้ใช้ ===== */
 #admin-users-table td.cell-center {
   text-align: center;
@@ -772,42 +706,38 @@
     ระบบจัดการงานซ่อม
   </div>
 
-  <div class="header-right">
+  <nav class="nav-links">
+    <a href="employee_dashboard.html" class="nav-link">
+      <i class="fas fa-home"></i> หน้าหลัก
+    </a>
 
-    <nav class="nav-links">
-      <a href="employee_dashboard.html" class="nav-link">
-        <i class="fas fa-home"></i> หน้าหลัก
-      </a>
+    <a href="new_job.html" class="nav-link">
+      <i class="fas fa-plus-circle"></i> รับเครื่องซ่อม
+    </a>
 
-      <a href="new_job.html" class="nav-link">
-        <i class="fas fa-plus-circle"></i> รับเครื่องซ่อม
-      </a>
+    <a href="stock_management.html" class="nav-link">
+      <i class="fas fa-box-open"></i> จัดการสต็อก
+    </a>
 
-      <a href="stock_management.html" class="nav-link">
-        <i class="fas fa-box-open"></i> จัดการสต็อก
-      </a>
+    <a href="technician_jobs.html" class="nav-link">
+      <i class="fas fa-tools"></i> งานของฉัน
+    </a>
 
-      <a href="technician_jobs.html" class="nav-link">
-        <i class="fas fa-tools"></i> งานของฉัน
-      </a>
+    <a href="reports.html" class="nav-link">
+      <i class="fas fa-chart-line"></i> รายงาน
+    </a>
 
-      <a href="reports.html" class="nav-link">
-        <i class="fas fa-chart-line"></i> รายงาน
-      </a>
+    <a href="admin_dashboard.html" class="nav-link">
+      <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
+    </a>
+  </nav>
 
-      <a href="admin_dashboard.html" class="nav-link">
-        <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
-      </a>
-    </nav>
+  <!-- profile -->
+  <div class="profile-menu" id="profileMenu">
+    <div class="profile-trigger" onclick="toggleProfile()">
+      <img id="profileAvatar" src="/uploads/profile/default.jpg">
+    </div>
 
-    <div class="profile-menu" id="profileMenu">
-
-  <div class="profile-trigger" onclick="toggleProfile()">
-    <img id="profileAvatar"
-         src=""
-         alt="avatar"
-         class="profile-avatar">
-  </div>
 
   <div class="profile-dropdown" id="profileDropdown">
 

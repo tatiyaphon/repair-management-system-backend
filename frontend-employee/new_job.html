@@ -179,7 +179,6 @@
         /* === 6. Responsive === */
         @media (max-width: 768px) {
             header { flex-direction: column; padding: 15px; }
-            .nav-links { flex-wrap: wrap; justify-content: center; margin-top: 15px; }
             .form-container { padding: 20px; margin: 20px auto; }
             .form-grid { grid-template-columns: 1fr; }
             .form-section h3 { font-size: 1.2rem; }
@@ -194,15 +193,13 @@
 </head>
 
 <body>
-    <header class="main-header">
+   <header class="main-header">
 
-  <!-- โลโก้ -->
   <div class="logo">
     <i class="fas fa-tools"></i>
     ระบบจัดการงานซ่อม
   </div>
 
-  <!-- เมนู -->
   <nav class="nav-links">
     <a href="employee_dashboard.html" class="nav-link">
       <i class="fas fa-home"></i> หน้าหลัก
@@ -229,15 +226,12 @@
     </a>
   </nav>
 
-  <!-- โปรไฟล์ (อยู่นอก nav) -->
+  <!-- profile -->
   <div class="profile-menu" id="profileMenu">
-
     <div class="profile-trigger" onclick="toggleProfile()">
-      <img id="profileAvatar"
-           src="/uploads/profile/default.jpg"
-           alt="avatar"
-           class="profile-avatar">
+      <img id="profileAvatar" src="/uploads/profile/default.jpg">
     </div>
+
 
     <div class="profile-dropdown" id="profileDropdown">
 

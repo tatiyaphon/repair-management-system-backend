@@ -6,6 +6,7 @@
   <title>จัดการงานซ่อม | ระบบจัดการงานซ่อม</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="navbar.css">
   <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
@@ -310,27 +311,6 @@
 .upload-btn input{
   display:none;
 }
-@media (max-width: 600px){
-
-  .main-header{
-    flex-direction:column;
-    align-items:center;
-  }
-
-  .profile-menu{
-    margin-top:10px;
-  }
-
-  .profile-dropdown{
-    position:fixed;      /* เปลี่ยนจาก absolute */
-    top:90px;
-    left:50%;
-    transform:translateX(-50%);
-    width:90%;
-    max-width:320px;
-  }
-
-}
 
   </style>
 
@@ -338,13 +318,11 @@
 <body>
   <header class="main-header">
 
-  <!-- โลโก้ -->
   <div class="logo">
     <i class="fas fa-tools"></i>
     ระบบจัดการงานซ่อม
   </div>
 
-  <!-- เมนู -->
   <nav class="nav-links">
     <a href="employee_dashboard.html" class="nav-link">
       <i class="fas fa-home"></i> หน้าหลัก
@@ -371,15 +349,12 @@
     </a>
   </nav>
 
-  <!-- โปรไฟล์ (อยู่นอก nav) -->
+  <!-- profile -->
   <div class="profile-menu" id="profileMenu">
-
     <div class="profile-trigger" onclick="toggleProfile()">
-      <img id="profileAvatar"
-           src="/uploads/profile/default.jpg"
-           alt="avatar"
-           class="profile-avatar">
+      <img id="profileAvatar" src="/uploads/profile/default.jpg">
     </div>
+
 
     <div class="profile-dropdown" id="profileDropdown">
       <div class="profile-header">
