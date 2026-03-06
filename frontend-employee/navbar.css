@@ -96,6 +96,8 @@
   padding:15px;
   border-bottom:1px solid #eee;
   background:#f8fafc;
+
+  overflow:hidden; /* ป้องกันภาพล้น */
 }
 
 .profile-avatar-large{
@@ -103,10 +105,13 @@
   height:45px;
   border-radius:50%;
   object-fit:cover;
+  flex-shrink:0;
 }
-
 /* ===== MENU ITEM ===== */
-
+.profile-header img{
+  max-width:45px;
+  max-height:45px;
+}
 .profile-item{
   display:flex;
   align-items:center;
@@ -151,7 +156,19 @@
 .profile-logout:hover{
   background:#fff5f5;
 }
+.profile-info{
+  display:flex;
+  flex-direction:column;
+}
 
+.profile-info strong{
+  font-size:14px;
+}
+
+.profile-info small{
+  color:#6b7280;
+  font-size:12px;
+}
 /* ===== MOBILE ===== */
 
 @media(max-width:768px){
