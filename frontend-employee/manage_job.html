@@ -811,9 +811,9 @@ document.getElementById("date-form")?.addEventListener("submit", async e => {
   e.preventDefault();
 
   await updateJob({
-    receivedDate: document.getElementById("received-date").value,
-    startDate: document.getElementById("start-date").value,
-    finishDate: document.getElementById("finish-date").value
+   receivedDate: document.getElementById("received-date").value || null,
+  startDate: document.getElementById("start-date").value || null,
+  finishDate: document.getElementById("finish-date").value || null
   }, "บันทึกวันที่เรียบร้อยแล้ว");
 });
 

@@ -255,7 +255,29 @@ router.put("/:id", auth, async (req, res) => {
 
     const oldStatus = job.status;
 
-    Object.assign(job, req.body);
+    if (req.body.receivedDate !== undefined) {
+  job.receivedDate = req.body.receivedDate || null;
+}
+
+if (req.body.startDate !== undefined) {
+  job.startDate = req.body.startDate || null;
+}
+
+if (req.body.finishDate !== undefined) {
+  job.finishDate = req.body.finishDate || null;
+}
+
+if (req.body.status) {
+  job.status = req.body.status;
+}
+
+if (req.body.priceQuoted !== undefined) {
+  job.priceQuoted = req.body.priceQuoted;
+}
+
+if (req.body.jobType) {
+  job.jobType = req.body.jobType;
+}
     await job.save();
 
     /* =========================
