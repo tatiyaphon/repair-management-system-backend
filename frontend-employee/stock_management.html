@@ -1242,7 +1242,7 @@ async function uploadAvatar(event){
     if(avatarSmall) avatarSmall.src = data.avatar;
     if(avatarLarge) avatarLarge.src = data.avatar;
 
-    localStorage.setItem("avatar", data.avatar);
+    
 
     alert("เปลี่ยนรูปโปรไฟล์เรียบร้อย");
 
@@ -1250,7 +1250,29 @@ async function uploadAvatar(event){
     console.error(err);
     alert("เกิดข้อผิดพลาด");
   }
+async function loadProfile(){
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
 
+  const res = await fetch(`/api/employees/${userId}/profile`,{
+    headers:{
+      Authorization:`Bearer ${token}`
+    }
+  });
+
+  const user = await res.json();
+
+  const avatar = user.avatar || "/uploads/profile/default.jpg";
+
+  // ใส่ทุกที่ที่มีรูป
+  if(document.getElementById("profileAvatar")){
+    document.getElementById("profileAvatar").src = avatar;
+  }
+
+  if(document.getElementById("profileAvatarLarge")){
+    document.getElementById("profileAvatarLarge").src = avatar;
+  }
+}
 }
 </script>
 
