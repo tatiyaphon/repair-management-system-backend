@@ -785,6 +785,9 @@ function applyFilter() {
   const year  = document.getElementById("yearFilter").value;
 
   filteredJobs = jobs.filter(j => {
+   if (j.status === "ซ่อมเสร็จ" || j.status === "ยกเลิก") {
+      return false;
+    }
 
     const d = new Date(j.receivedDate);
     if (isNaN(d)) return false;
