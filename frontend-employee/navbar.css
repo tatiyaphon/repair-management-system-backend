@@ -10,6 +10,11 @@
 
   color:#fff;
   box-shadow:0 4px 15px rgba(0,0,0,.15);
+
+  /* ✅ FIX ปัญหาซ้อน */
+  position: sticky;
+  top: 0;
+  z-index: 9999;
 }
 
 /* ===== LOGO ===== */
@@ -29,7 +34,7 @@
   gap:28px;
   align-items:center;
 
-  margin-left:auto;   /* ดันเมนูไปทางขวา */
+  margin-left:auto;
 }
 
 .nav-link{
@@ -80,6 +85,9 @@
 
   display:none;
   overflow:hidden;
+
+  /* ✅ FIX ไม่ให้โดนทับ */
+  z-index:10000;
 }
 
 .profile-dropdown.show{
@@ -97,7 +105,7 @@
   border-bottom:1px solid #eee;
   background:#f8fafc;
 
-  overflow:hidden; /* ป้องกันภาพล้น */
+  overflow:hidden;
 }
 
 .profile-avatar-large{
@@ -107,11 +115,14 @@
   object-fit:cover;
   flex-shrink:0;
 }
+
 /* ===== MENU ITEM ===== */
+
 .profile-header img{
   max-width:45px;
   max-height:45px;
 }
+
 .profile-item{
   display:flex;
   align-items:center;
@@ -156,6 +167,7 @@
 .profile-logout:hover{
   background:#fff5f5;
 }
+
 .profile-info{
   display:flex;
   flex-direction:column;
@@ -169,6 +181,7 @@
   color:#6b7280;
   font-size:12px;
 }
+
 /* ===== MOBILE ===== */
 
 @media(max-width:768px){
