@@ -184,9 +184,8 @@ router.post("/", auth, async (req, res) => {
     ========================= */
     const job = await Job.create({
       customerName: customerName.trim(),
-      customerPhone: customerPhone?.trim() || "-",
-      customerAddress: customerAddress?.trim() || "-",
-      accessory: accessory?.trim() || null,
+      customerPhone: customerPhone || "-",
+      customerAddress: customerAddress || "-",
       receiptNumber,
       deviceType,
       deviceModel,
