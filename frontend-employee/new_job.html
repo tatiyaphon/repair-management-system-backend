@@ -478,12 +478,12 @@ document.getElementById("new-job-form")?.addEventListener("submit", async e => {
     receiptNumber: document.getElementById("employee-id")?.value.trim(),
     customerName: document.getElementById("customer-name")?.value.trim(),
     customerPhone: document.getElementById("customer-phone")?.value.trim(),
-    customerAddress: document.getElementById("customer-address")?.value.trim(),
+    customerAddress: document.getElementById("customer-address")?.value.trim() || null,
 
     deviceType: document.getElementById("device-type")?.value,
     deviceModel: document.getElementById("device-model")?.value.trim(),
     symptom: document.getElementById("symptom")?.value.trim(),
-    accessory: document.getElementById("accessory")?.value.trim(),
+    accessory: document.getElementById("accessory")?.value.trim() || null,
 
     priceQuoted: Number(
       document.getElementById("price-quoted")?.value || 0
