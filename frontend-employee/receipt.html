@@ -17,13 +17,14 @@ body{
 }
 
 .container{
-  width: 100%;
-  min-height: calc(297mm - 30mm); /* A4 - margin บนล่าง */
-  box-sizing: border-box;
-  margin: 0 auto;
-  padding: 20mm;
+  max-width: 1200px;   /* จำกัดความกว้าง */
+  margin: 30px auto;   /* จัดกลาง */
+  padding: 30px;
+
   background:#fff;
-  /* แถบสีซ้าย */
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.08);
+
   border-left: 8px solid #facc15;
 }
 
@@ -187,11 +188,16 @@ tbody td{
   }
 
   .container{
-    box-shadow: none;
-    border-radius: 0;
+    max-width:100%;
+    margin:0;
+    border-radius:0;
+    box-shadow:none;
+
+    /* ✔ ใช้ A4 เฉพาะตอน print */
+    min-height: calc(297mm - 30mm);
   }
 
-  .btn-print{
+  .print-btn{
     display:none;
   }
 }
