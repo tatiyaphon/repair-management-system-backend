@@ -812,7 +812,7 @@ function updateCards() {
   const count = s => filteredJobs.filter(j => j.status === s).length;
 
   document.getElementById("monthly-total").textContent = filteredJobs.length;
-  document.getElementById("new-jobs-count").textContent = count("รับเครื่อง");
+  document.getElementById("new-jobs-count").textContent = count("คิวงานใหม่");
   document.getElementById("in-progress-count").textContent = count("กำลังซ่อม");
   document.getElementById("waiting-parts-count").textContent = count("รออะไหล่");
   document.getElementById("completed-count").textContent = count("ซ่อมเสร็จ");
