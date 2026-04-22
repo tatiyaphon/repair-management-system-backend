@@ -534,10 +534,10 @@ document.getElementById("new-job-form")?.addEventListener("submit", async e => {
        OPEN RECEIPT (PDF)
     ========================= */
     if (data.job?._id) {
-      window.open(
-        `/api/jobs/${data.job._id}/receipt`,
-        "_blank"
-      );
+     window.open(
+  `/employee/receipt.html?id=${data.job._id}`,
+  "_blank"
+);
     }
 
     /* =========================

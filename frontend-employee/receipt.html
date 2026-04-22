@@ -287,12 +287,17 @@ tbody td{
 const API_BASE = "/api";
 const token = localStorage.getItem("token");
 
+
 if (!token) {
   alert("กรุณาเข้าสู่ระบบ");
   location.href = "/employee/login.html";
 }
 
 const jobId = new URLSearchParams(location.search).get("id");
+if (!jobId) {
+  alert("ไม่พบรหัสงาน");
+  location.href = "/employee/employee_dashboard.html";
+}
 
 fetch(`${API_BASE}/jobs/${jobId}`, {
   headers: {
@@ -305,15 +310,19 @@ fetch(`${API_BASE}/jobs/${jobId}`, {
 })
 .then(job => {
   // Header
-  document.getElementById("receiptNumber").textContent = `No. ${job.receiptNumber}`;
+  document.getElementById("receiptNumber").textContent =
+  `No. ${job.receiptNumber || "-"}`;
   document.getElementById("receivedDate").textContent =
-    `วันที่ ${new Date(job.receivedDate).toLocaleDateString("th-TH")}`;
+  job.receivedDate
+    ? `วันที่ ${new Date(job.receivedDate).toLocaleDateString("th-TH")}`
+    : "-";
 
   // Customer
   document.getElementById("customerName").textContent = job.customerName || "-";
   document.getElementById("customerPhone").textContent = job.customerPhone || "-";
   document.getElementById("customerAddress").textContent = job.customerAddress || "-";
   document.getElementById("accessory").textContent = job.accessory || "-";
+  document.getElementById("jobType").textContent = job.jobType || "-";
 
 
 
