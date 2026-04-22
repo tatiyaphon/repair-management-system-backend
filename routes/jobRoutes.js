@@ -228,77 +228,87 @@ router.post("/", auth, async (req, res) => {
    PUT /api/jobs/:id
    อัปเดตข้อมูลงานซ่อม (สถานะ / วันที่ / ราคา)
 ================================================== */
-router.get("/:id", auth, async (req, res) => {
+router.put("/:id", auth, async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
+
     if (!job) {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
 
-    // 🔒 ห้ามแก้ไขงานที่ปิดแล้ว
-    if (job.status === "ซ่อมเสร็จ" || job.status === "ยกเลิก") {
-      return res.status(400).json({
-        message: "ไม่สามารถแก้ไขงานที่ปิดแล้วได้"
-      });
-    }
-
-    /* =========================
-       🔐 CHECK PERMISSION
-    ========================= */
+    // 🔒 กันสิทธิ์ (admin หรือคนที่รับงาน)
     if (
       req.user.role !== "admin" &&
-      job.assignedTo?.toString() !== req.user.userId &&
-      job.createdBy?.toString() !== req.user.userId
+      job.assignedTo?.toString() !== req.user.userId
     ) {
       return res.status(403).json({ message: "ไม่มีสิทธิ์แก้ไขงานนี้" });
     }
 
     const oldStatus = job.status;
 
+    // 🔧 helper แปลงค่า
+    const cleanDate = (v) => (v === "" ? null : v);
+    const cleanNumber = (v) => {
+      const n = Number(v);
+      return isNaN(n) ? 0 : n;
+    };
+
+    /* =========================
+       UPDATE DATA (กันพังหมด)
+    ========================= */
+
     if (req.body.receivedDate !== undefined) {
-  job.receivedDate = req.body.receivedDate || null;
-}
+      job.receivedDate = cleanDate(req.body.receivedDate);
+    }
 
-if (req.body.startDate !== undefined) {
-  job.startDate = req.body.startDate || null;
-}
+    if (req.body.startDate !== undefined) {
+      job.startDate = cleanDate(req.body.startDate);
+    }
 
-if (req.body.finishDate !== undefined) {
-  job.finishDate = req.body.finishDate || null;
-}
+    if (req.body.finishDate !== undefined) {
+      job.finishDate = cleanDate(req.body.finishDate);
+    }
 
-if (req.body.status) {
-  job.status = req.body.status;
-}
+    if (req.body.status !== undefined) {
+      job.status = req.body.status;
+    }
 
-if (req.body.priceQuoted !== undefined) {
-  job.priceQuoted = isNaN(req.body.priceQuoted)
-    ? 0
-    : req.body.priceQuoted;
-}
+    if (req.body.priceQuoted !== undefined) {
+      job.priceQuoted = cleanNumber(req.body.priceQuoted);
+    }
 
-if (req.body.jobType) {
-  job.jobType = req.body.jobType;
-}
+    if (req.body.jobType !== undefined) {
+      job.jobType = req.body.jobType || null;
+    }
+
     await job.save();
 
     /* =========================
        🔥 ACTIVITY LOG
     ========================= */
-    await Activity.create({
-      userId: req.user.userId,
-      userName: req.user.userName || "Unknown",
-      action: "UPDATE_JOB",
-      detail: `แก้ไขงาน ${job.receiptNumber} (สถานะ: ${oldStatus} → ${job.status})`,
-      jobId: job._id,
-      ipAddress: req.ip
-    });
+    try {
+      await Activity.create({
+        userId: req.user.userId,
+        userName: req.user.userName || "Unknown",
+        action: "UPDATE_JOB",
+        detail: `แก้ไขงาน ${job.receiptNumber} (สถานะ: ${oldStatus} → ${job.status})`,
+        jobId: job._id,
+        ipAddress: req.ip
+      });
+    } catch (logErr) {
+      console.error("ACTIVITY LOG ERROR:", logErr);
+    }
 
-    res.json({ message: "อัปเดตงานซ่อมสำเร็จ", job });
+    res.json({
+      message: "อัปเดตงานซ่อมสำเร็จ",
+      job
+    });
 
   } catch (err) {
     console.error("UPDATE JOB ERROR:", err);
-    res.status(500).json({ message: "อัปเดตงานซ่อมไม่สำเร็จ" });
+    res.status(500).json({
+      message: "อัปเดตงานซ่อมไม่สำเร็จ"
+    });
   }
 });
 
