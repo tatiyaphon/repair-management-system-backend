@@ -822,7 +822,11 @@ document.getElementById("price-form")?.addEventListener("submit", async e => {
   e.preventDefault();
 
   await updateJob(
-    { priceQuoted: Number(document.getElementById("new-price").value) },
+    { 
+  priceQuoted: document.getElementById("new-price").value
+    ? Number(document.getElementById("new-price").value)
+    : 0
+} ,
     "บันทึกราคาเรียบร้อยแล้ว"
   );
 });
@@ -988,6 +992,9 @@ document.addEventListener("click", function(e){
             .classList.remove("show");
   }
 });
+// =============================
+// UPLOAD AVATAR
+// =============================
 async function uploadAvatar(event){
 
   const file = event.target.files[0];
@@ -1022,15 +1029,20 @@ async function uploadAvatar(event){
     if(avatarSmall) avatarSmall.src = data.avatar;
     if(avatarLarge) avatarLarge.src = data.avatar;
 
-
-
     alert("เปลี่ยนรูปโปรไฟล์เรียบร้อย");
 
   }catch(err){
     console.error(err);
     alert("เกิดข้อผิดพลาด");
   }
+}
+
+
+// =============================
+// LOAD PROFILE
+// =============================
 async function loadProfile(){
+
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
 
@@ -1044,7 +1056,6 @@ async function loadProfile(){
 
   const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-  // ใส่ทุกที่ที่มีรูป
   if(document.getElementById("profileAvatar")){
     document.getElementById("profileAvatar").src = avatar;
   }
@@ -1052,8 +1063,9 @@ async function loadProfile(){
   if(document.getElementById("profileAvatarLarge")){
     document.getElementById("profileAvatarLarge").src = avatar;
   }
+
 }
-}
+document.addEventListener("DOMContentLoaded", loadProfile);
 </script>
 </div>
 </body>

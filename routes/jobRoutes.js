@@ -228,7 +228,7 @@ router.post("/", auth, async (req, res) => {
    PUT /api/jobs/:id
    อัปเดตข้อมูลงานซ่อม (สถานะ / วันที่ / ราคา)
 ================================================== */
-router.put("/:id", auth, async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
     if (!job) {
@@ -272,7 +272,9 @@ if (req.body.status) {
 }
 
 if (req.body.priceQuoted !== undefined) {
-  job.priceQuoted = req.body.priceQuoted;
+  job.priceQuoted = isNaN(req.body.priceQuoted)
+    ? 0
+    : req.body.priceQuoted;
 }
 
 if (req.body.jobType) {
@@ -704,7 +706,7 @@ tbody td{
 });
 
 // 🔹 ดึงข้อมูลงานซ่อมตาม ID
-router.get("/:id", async (req, res) => {
+router.get("/:id", auth, async (req, res) => {
   try {
     const job = await Job.findById(req.params.id)
        .populate("assignedTo", "firstName lastName")
