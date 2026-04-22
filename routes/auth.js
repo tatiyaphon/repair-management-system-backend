@@ -221,13 +221,25 @@ router.post("/reset-password/:token", async (req, res) => {
     const { password } = req.body;
     const { token } = req.params;
 
+    if (!password) {
+      return res.status(400).json({ message: "กรุณากรอกรหัสผ่านใหม่" });
+    }
+
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "รหัสผ่านต้องอย่างน้อย 6 ตัว"
+      });
+    }
+
     const user = await Employee.findOne({
       resetToken: token,
       resetTokenExpire: { $gt: Date.now() }
     });
 
     if (!user) {
-      return res.status(400).json({ message: "ลิงก์หมดอายุหรือไม่ถูกต้อง" });
+      return res.status(400).json({
+        message: "ลิงก์หมดอายุหรือไม่ถูกต้อง"
+      });
     }
 
     const hash = await bcrypt.hash(password, 10);
@@ -242,19 +254,25 @@ router.post("/reset-password/:token", async (req, res) => {
     res.json({ message: "เปลี่ยนรหัสผ่านสำเร็จ" });
 
   } catch (err) {
+    console.error("RESET PASSWORD ERROR:", err);
     res.status(500).json({ message: "ไม่สามารถรีเซ็ตได้" });
   }
 });
 
 router.post("/forgot-password", async (req, res) => {
   try {
-    const { email } = req.body;
+    let { email } = req.body;
 
     if (!email) {
       return res.status(400).json({ message: "กรุณากรอกอีเมล" });
     }
 
-    const user = await Employee.findOne({ email });
+    // ✅ normalize email
+    email = email.trim().toLowerCase();
+
+    const user = await Employee.findOne({
+      email: { $regex: new RegExp(`^${email}$`, "i") }
+    });
 
     if (!user) {
       return res.status(404).json({ message: "ไม่พบผู้ใช้นี้" });
@@ -268,28 +286,32 @@ router.post("/forgot-password", async (req, res) => {
     await user.save();
 
     const resetLink =
-  `${process.env.BASE_URL}/employee/reset_password.html?token=${resetToken}`;
+      `${process.env.BASE_URL}/employee/reset_password.html?token=${resetToken}`;
 
-
-    await sgMail.send({
-      to: user.email,
-      from: process.env.EMAIL_USER, // ต้อง verified ใน SendGrid
-      subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
-      html: `
-        <h2>รีเซ็ตรหัสผ่าน</h2>
-        <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
-        <a href="${resetLink}"
-           style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
-           ตั้งรหัสผ่านใหม่
-        </a>
-        <p>ลิงก์จะหมดอายุใน 30 นาที</p>
-      `
-    });
+    // ✅ กันพัง email
+    try {
+      await sgMail.send({
+        to: user.email,
+        from: process.env.EMAIL_USER,
+        subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
+        html: `
+          <h2>รีเซ็ตรหัสผ่าน</h2>
+          <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
+          <a href="${resetLink}"
+             style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
+             ตั้งรหัสผ่านใหม่
+          </a>
+          <p>ลิงก์จะหมดอายุใน 30 นาที</p>
+        `
+      });
+    } catch (mailErr) {
+      console.error("EMAIL ERROR:", mailErr.response?.body || mailErr);
+    }
 
     res.json({ message: "ส่งลิงก์รีเซ็ตแล้ว" });
 
   } catch (err) {
-    console.error("FORGOT PASSWORD ERROR:", err.response?.body || err);
+    console.error("FORGOT PASSWORD ERROR:", err);
     res.status(500).json({ message: "เกิดข้อผิดพลาด" });
   }
 });

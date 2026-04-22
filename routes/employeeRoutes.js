@@ -282,7 +282,7 @@ router.post(
         `
       };
 
-      await sgMail.send(msg);
+      await transporter.sendMail(msg);
 
       res.json({ message: "ส่งลิงก์รีเซ็ตแล้ว" });
 
@@ -294,10 +294,18 @@ router.post(
 );
 router.post("/forgot-password", async (req, res) => {
   try {
-
     const { email } = req.body;
 
-    const user = await Employee.findOne({ email });
+    if (!email) {
+      return res.status(400).json({ message: "กรุณากรอกอีเมล" });
+    }
+
+    const emailLower = email.trim().toLowerCase();
+
+const user = await Employee.findOne({
+  email: { $regex: new RegExp(`^${emailLower}$`, "i") }
+});
+
     if (!user) {
       return res.status(404).json({ message: "ไม่พบอีเมลนี้" });
     }
@@ -315,18 +323,17 @@ router.post("/forgot-password", async (req, res) => {
     const resetLink =
       `${process.env.BASE_URL}/employee/reset_password.html?token=${resetToken}`;
 
-    await sgMail.send({
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
       to: user.email,
-      from: process.env.EMAIL_USER, // ต้องเป็นอีเมลที่ Verify แล้วใน SendGrid
-      subject: "รีเซ็ตรหัสผ่านระบบร้านตุ้ยไอที",
+      subject: "รีเซ็ตรหัสผ่าน",
       html: `
         <h2>รีเซ็ตรหัสผ่าน</h2>
-        <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสใหม่</p>
+        <p>คลิกด้านล่างเพื่อตั้งรหัสใหม่</p>
         <a href="${resetLink}"
-           style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
+           style="padding:10px 20px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;">
            ตั้งรหัสผ่านใหม่
         </a>
-        <p>ลิงก์หมดอายุใน 15 นาที</p>
       `
     });
 
@@ -339,14 +346,13 @@ router.post("/forgot-password", async (req, res) => {
 });
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "public/uploads/profile"); // ต้องเป็น public/uploads
+    cb(null, "public/uploads/profile");
   },
   filename: (req, file, cb) => {
     const ext = path.extname(file.originalname);
     cb(null, Date.now() + ext);
   }
 });
-
 const upload = multer({ storage });
 
 router.post(
