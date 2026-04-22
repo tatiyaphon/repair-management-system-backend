@@ -1025,17 +1025,21 @@ async function loadProfile() {
 
   const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-  const small = document.getElementById("profileAvatar");
-  if (small) small.src = avatar;
+  const avatarSmall = document.getElementById("profileAvatar");
+  const avatarLarge = document.getElementById("profileAvatarLarge");
 
-  const large = document.getElementById("profileAvatarLarge");
-  if (large) large.src = avatar;
+  if (avatarSmall) avatarSmall.src = avatar;
+  if (avatarLarge) avatarLarge.src = avatar;
 
-  const name = document.getElementById("profileNameLarge");
-  if (name) name.textContent = user.firstName + " " + user.lastName;
+  const nameEl = document.getElementById("profileNameLarge");
+  if (nameEl) {
+    nameEl.textContent = user.firstName + " " + user.lastName;
+  }
 
-  const role = document.getElementById("profileRole");
-  if (role) role.textContent = user.role;
+  const roleEl = document.getElementById("profileRole");
+  if (roleEl) {
+    roleEl.textContent = user.role;
+  }
 }
 /* ==================================================
    LOAD DATA

@@ -879,23 +879,35 @@ function formatDate(date) {
    PROFILE
 ============================= */
 async function loadProfile() {
-  const user = await apiFetch(`/employees/me`);
-  if (!user) return;
+  try{
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
 
-  const avatar = user.avatar || "/uploads/profile/default.jpg";
+    const user = await apiFetch(`/api/employees/${userId}/profile`);
 
-  const small = document.getElementById("profileAvatar");
-  if (small) small.src = avatar;
+    const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-  const large = document.getElementById("profileAvatarLarge");
-  if (large) large.src = avatar;
+    const avatarSmall = document.getElementById("profileAvatar");
+    const avatarLarge = document.getElementById("profileAvatarLarge");
 
-  const name = document.getElementById("profileNameLarge");
-  if (name) name.textContent = user.firstName + " " + user.lastName;
+    if (avatarSmall) avatarSmall.src = avatar;
+    if (avatarLarge) avatarLarge.src = avatar;
 
-  const role = document.getElementById("profileRole");
-  if (role) role.textContent = user.role;
+    const nameEl = document.getElementById("profileNameLarge");
+    if (nameEl) {
+      nameEl.textContent = `${user.firstName} ${user.lastName}`;
+    }
+
+    const roleEl = document.getElementById("profileRole");
+    if (roleEl) {
+      roleEl.textContent = user.role;
+    }
+
+  }catch(err){
+    console.error("PROFILE ERROR:", err);
+  }
 }
+
 /* =============================
    PROFILE TOGGLE ✅ (ตัวที่ขาด)
 ============================= */

@@ -612,22 +612,32 @@ document.addEventListener("DOMContentLoaded", () => {
    LOAD PROFILE
 ===================== */
 async function loadProfile() {
-  const user = await apiFetch(`/employees/me`);
+  const user = await apiFetch(`/employees/${userId}/profile`);
   if (!user) return;
 
   const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-  const small = document.getElementById("profileAvatar");
-  if (small) small.src = avatar;
+  const avatarUrl = avatar.startsWith("http")
+    ? avatar
+    : `${location.origin}${avatar}`;
 
-  const large = document.getElementById("profileAvatarLarge");
-  if (large) large.src = avatar;
+  if (document.getElementById("profileAvatar")) {
+    document.getElementById("profileAvatar").src = avatarUrl;
+  }
 
-  const name = document.getElementById("profileNameLarge");
-  if (name) name.textContent = user.firstName + " " + user.lastName;
+  if (document.getElementById("profileAvatarLarge")) {
+    document.getElementById("profileAvatarLarge").src = avatarUrl;
+  }
 
-  const role = document.getElementById("profileRole");
-  if (role) role.textContent = user.role;
+  const nameEl = document.getElementById("profileNameLarge");
+  if (nameEl) {
+    nameEl.textContent = `${user.firstName} ${user.lastName}`;
+  }
+
+  const roleEl = document.getElementById("profileRole");
+  if (roleEl) {
+    roleEl.textContent = user.role;
+  }
 }
 
 async function uploadAvatar(event){

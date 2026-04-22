@@ -589,22 +589,29 @@ const headers = {
    PROFILE
 ========================= */
 async function loadProfile() {
-  const user = await apiFetch(`/employees/me`);
-  if (!user) return;
+  const userId = localStorage.getItem("userId");
+  if (!userId) return;
 
-  const avatar = user.avatar || "/uploads/profile/default.jpg";
+  const res = await fetch(`${API_BASE}/employees/${userId}/profile`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) return;
 
-  const small = document.getElementById("profileAvatar");
-  if (small) small.src = avatar;
+  const user = await res.json();
 
-  const large = document.getElementById("profileAvatarLarge");
-  if (large) large.src = avatar;
+  if (document.getElementById("profileAvatar")) {
+    document.getElementById("profileAvatar").src =
+      user.avatar || "/uploads/profile/default.jpg";
+  }
 
-  const name = document.getElementById("profileNameLarge");
-  if (name) name.textContent = user.firstName + " " + user.lastName;
+  if (document.getElementById("profileNameLarge")) {
+    document.getElementById("profileNameLarge").textContent =
+      `${user.firstName} ${user.lastName}`;
+  }
 
-  const role = document.getElementById("profileRole");
-  if (role) role.textContent = user.role;
+  if (document.getElementById("profileRole")) {
+    document.getElementById("profileRole").textContent = user.role;
+  }
 }
 
 /* =========================

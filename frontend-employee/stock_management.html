@@ -1254,24 +1254,39 @@ async function uploadAvatar(event){
 } // ✅ ปิดตรงนี้ให้ถูก
 
 // ✅ ต้องอยู่นอก function
-async function loadProfile() {
-  const user = await apiFetch(`/employees/me`);
-  if (!user) return;
+async function loadProfile(){
+  const userId = localStorage.getItem("userId");
+  const token = localStorage.getItem("token");
+
+  const res = await fetch(`/api/employees/${userId}/profile`,{
+    headers:{
+      Authorization:`Bearer ${token}`
+    }
+  });
+
+  const user = await res.json();
 
   const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-  const small = document.getElementById("profileAvatar");
-  if (small) small.src = avatar;
+  if(document.getElementById("profileAvatar")){
+    document.getElementById("profileAvatar").src = avatar;
+  }
 
-  const large = document.getElementById("profileAvatarLarge");
-  if (large) large.src = avatar;
+  if(document.getElementById("profileAvatarLarge")){
+    document.getElementById("profileAvatarLarge").src = avatar;
+  }
 
-  const name = document.getElementById("profileNameLarge");
-  if (name) name.textContent = user.firstName + " " + user.lastName;
+  const nameEl = document.getElementById("profileNameLarge");
+  if(nameEl){
+    nameEl.textContent = `${user.firstName} ${user.lastName}`;
+  }
 
-  const role = document.getElementById("profileRole");
-  if (role) role.textContent = user.role;
+  const roleEl = document.getElementById("profileRole");
+  if(roleEl){
+    roleEl.textContent = user.role;
+  }
 }
+document.addEventListener("DOMContentLoaded", loadProfile);
 </script>
 
 </body>
