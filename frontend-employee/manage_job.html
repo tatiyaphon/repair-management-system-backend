@@ -617,7 +617,7 @@ function formatTH(d) {
 }
 function statusBadgeClass(status) {
   return {
-    "รับเครื่อง": "new",
+    "คิวงานใหม่": "new",
     "กำลังซ่อม": "in_progress",
     "รออะไหล่": "waiting_parts",
     "ซ่อมเสร็จ": "completed",
@@ -639,26 +639,19 @@ function getJobId() {
 }
 
 async function fetchJob() {
-  const id = getJobId();
-  if (!id) {
+  const jobId = getJobId();
+
+  if (!jobId) {
     alert("ไม่พบ Job ID");
+    location.replace("employee_dashboard.html");
     return;
   }
 
-  const res = await fetch(`${API_BASE}/jobs/${id}`, {
+  const res = await fetch(`${API_BASE}/jobs/${jobId}`, {
     headers: {
       Authorization: `Bearer ${localStorage.getItem("token")}`
     }
   });
-
-  const jobId = getJobId();
-
-// ✅ ตรวจ Job ID ตั้งแต่ต้น
-  if (!jobId) {
-  alert("ไม่พบ Job ID");
-  location.replace("employee_dashboard.html");
-  return;
-}
 
   if (!res.ok) {
     alert("ไม่พบงานซ่อม");
@@ -667,18 +660,10 @@ async function fetchJob() {
   }
 
   currentJob = await res.json();
+
   renderJob();
   renderParts();
-
-  // ✅ ตั้งลิงก์ใบรับเครื่องหลังโหลดงาน
-  const receiptLink = document.getElementById("receipt-link");
-  if (receiptLink) {
-    receiptLink.href = `/employee/receipt.html?id=${currentJob._id}`;
-  }
 }
-
-
-
 /* =========================
    FETCH STOCK
 ========================= */
@@ -744,14 +729,6 @@ function renderJob() {
   </a>
 </div>
 `;
-
-
-  // ===== ✅ ส่วนที่ต้องเพิ่ม =====
-  const receiptLink = document.getElementById("receipt-link");
-  if (receiptLink && currentJob._id) {
-    receiptLink.href = `/api/jobs/${currentJob._id}/receipt`;
-  }
-  // =============================
 
   document.getElementById("received-date").value =
     formatInputDate(currentJob.receivedDate);
