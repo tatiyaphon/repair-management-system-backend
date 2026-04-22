@@ -248,50 +248,49 @@ select{
       <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
     </a>
   </nav>
+<div class="profile-menu" id="profileMenu">
 
-  <!-- profile -->
-  <div class="profile-menu" id="profileMenu">
-    <div class="profile-trigger" onclick="toggleProfile()">
-      <img id="profileAvatar" src="/uploads/profile/default.jpg">
-    </div>
-    <div class="profile-dropdown" id="profileDropdown">
-      <div class="profile-header">
-        <img id="profileAvatarLarge"
-             src=""
-             alt="avatar-large"
-             class="profile-avatar-large">
-
-        <div>
-          <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
-          <small id="profileRole">—</small>
-        </div>
-      </div>
-
-      <label class="profile-item upload-btn">
-        <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
-        <input type="file" accept="image/*" onchange="uploadAvatar(event)">
-      </label>
-
-      <a class="profile-item" href="profile.html">
-        <i class="fas fa-user"></i> ข้อมูลส่วนตัว
-      </a>
-
-      <a class="profile-item" href="change_password.html">
-        <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
-      </a>
-
-      <a class="profile-item" href="repair_history.html">
-        <i class="fas fa-history"></i> ประวัติการซ่อม
-      </a>
-
-      <div class="divider"></div>
-
-      <button class="profile-item logout" onclick="logout()">
-        <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
-      </button>
-    </div>
+  <!-- 🔹 รูปเล็ก -->
+  <div class="profile-trigger" onclick="toggleProfile()">
+    <img id="profileAvatar"
+         src="/uploads/profile/default.jpg"
+         class="profile-avatar">
   </div>
 
+  <!-- 🔹 dropdown -->
+  <div class="profile-dropdown" id="profileDropdown">
+    <div class="profile-header">
+
+      <img id="profileAvatarLarge"
+           src="/uploads/profile/default.jpg"
+           class="profile-avatar-large">
+
+      <div>
+        <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
+        <small id="profileRole">—</small>
+      </div>
+
+    </div>
+
+    <!-- 🔽 เมนูต้องอยู่ข้างใน -->
+    <label class="profile-item upload-btn">
+      <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
+      <input type="file" accept="image/*" onchange="uploadAvatar(event)">
+    </label>
+
+    <a class="profile-item" href="profile.html">ข้อมูลส่วนตัว</a>
+    <a class="profile-item" href="change_password.html">เปลี่ยนรหัสผ่าน</a>
+    <a class="profile-item" href="repair_history.html">ประวัติการซ่อม</a>
+
+    <div class="divider"></div>
+
+    <button class="profile-item logout" onclick="logout()">
+      ออกจากระบบ
+    </button>
+
+  </div>
+
+</div>
 </header>
 
 <!-- ===== CONTENT ===== -->
@@ -411,38 +410,6 @@ async function loadReport() {
 
 
 /* =========================
-   PROFILE (TOP BAR)
-========================= */
-async function loadProfile() {
-  const userId = localStorage.getItem("userId");
-  if (!userId) return;
-
-  const res = await fetch(`${API_BASE}/employees/${userId}/profile`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-
-  if (!res.ok) return;
-
-  const user = await res.json();
-
-  const avatar = user.avatar || "/uploads/profile/default.jpg";
-  const avatarUrl = avatar.startsWith("http") ? avatar : avatar;
-
-  if (document.getElementById("profileAvatar"))
-    document.getElementById("profileAvatar").src = avatarUrl;
-
-  if (document.getElementById("profileNameLarge"))
-    document.getElementById("profileNameLarge").textContent =
-      `${user.firstName} ${user.lastName}`;
-
-
-  if (document.getElementById("profileRole"))
-    document.getElementById("profileRole").textContent = user.role;
-}
-
-/* =========================
    UTIL
 ========================= */
 function formatDate(date) {
@@ -510,32 +477,44 @@ async function uploadAvatar(event){
     alert("เปลี่ยนรูปโปรไฟล์เรียบร้อย");
 
   }catch(err){
-    console.error(err);
-    alert("เกิดข้อผิดพลาด");
-  }
-async function loadProfile(){
-  const userId = localStorage.getItem("userId");
-  const token = localStorage.getItem("token");
+  console.error(err);
+  alert("เกิดข้อผิดพลาด");
+}
 
-  const res = await fetch(`/api/employees/${userId}/profile`,{
-    headers:{
-      Authorization:`Bearer ${token}`
+}
+async function loadProfile() {
+  const userId = localStorage.getItem("userId");
+  if (!userId) return;
+
+  const res = await fetch(`/api/employees/${userId}/profile`, {
+    headers: {
+      Authorization: `Bearer ${token}`
     }
   });
+
+  if (!res.ok) return;
 
   const user = await res.json();
 
   const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-  // ใส่ทุกที่ที่มีรูป
-  if(document.getElementById("profileAvatar")){
-    document.getElementById("profileAvatar").src = avatar;
-  }
+  const avatarUrl = avatar.startsWith("http")
+    ? avatar
+    : `${location.origin}${avatar}`;
 
-  if(document.getElementById("profileAvatarLarge")){
-    document.getElementById("profileAvatarLarge").src = avatar;
-  }
-}
+  if (document.getElementById("profileAvatar"))
+    document.getElementById("profileAvatar").src = avatarUrl;
+
+  if (document.getElementById("profileAvatarLarge"))
+    document.getElementById("profileAvatarLarge").src = avatarUrl;
+
+  const nameEl = document.getElementById("profileNameLarge");
+  if (nameEl)
+    nameEl.textContent = `${user.firstName} ${user.lastName}`;
+
+  const roleEl = document.getElementById("profileRole");
+  if (roleEl)
+    roleEl.textContent = user.role;
 }
 </script>
 </div>

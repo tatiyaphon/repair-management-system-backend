@@ -1209,7 +1209,6 @@ document.addEventListener("click", function(e){
   }
 });
 async function uploadAvatar(event){
-
   const file = event.target.files[0];
   if(!file) return;
 
@@ -1219,7 +1218,6 @@ async function uploadAvatar(event){
   formData.append("avatar", file);
 
   try{
-
     const res = await fetch("/api/employees/profile/avatar",{
       method:"POST",
       headers:{
@@ -1235,14 +1233,11 @@ async function uploadAvatar(event){
       return;
     }
 
-    // เปลี่ยนรูปทันที
     const avatarSmall = document.getElementById("profileAvatar");
     const avatarLarge = document.getElementById("profileAvatarLarge");
 
     if(avatarSmall) avatarSmall.src = data.avatar;
     if(avatarLarge) avatarLarge.src = data.avatar;
-
-    
 
     alert("เปลี่ยนรูปโปรไฟล์เรียบร้อย");
 
@@ -1250,6 +1245,9 @@ async function uploadAvatar(event){
     console.error(err);
     alert("เกิดข้อผิดพลาด");
   }
+} // ✅ ปิดตรงนี้ให้ถูก
+
+// ✅ ต้องอยู่นอก function
 async function loadProfile(){
   const userId = localStorage.getItem("userId");
   const token = localStorage.getItem("token");
@@ -1264,7 +1262,6 @@ async function loadProfile(){
 
   const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-  // ใส่ทุกที่ที่มีรูป
   if(document.getElementById("profileAvatar")){
     document.getElementById("profileAvatar").src = avatar;
   }
@@ -1272,8 +1269,18 @@ async function loadProfile(){
   if(document.getElementById("profileAvatarLarge")){
     document.getElementById("profileAvatarLarge").src = avatar;
   }
+
+  const nameEl = document.getElementById("profileNameLarge");
+  if(nameEl){
+    nameEl.textContent = `${user.firstName} ${user.lastName}`;
+  }
+
+  const roleEl = document.getElementById("profileRole");
+  if(roleEl){
+    roleEl.textContent = user.role;
+  }
 }
-}
+document.addEventListener("DOMContentLoaded", loadProfile);
 </script>
 
 </body>

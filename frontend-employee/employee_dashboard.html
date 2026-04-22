@@ -874,14 +874,33 @@ function formatDate(date) {
    PROFILE
 ============================= */
 async function loadProfile() {
-  const userId = localStorage.getItem("userId");
-  if (!userId) return;
+  try{
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
 
-  const user = await apiFetch(`/api/employees/${userId}/profile`);
-  const avatar = user.avatar || "/uploads/profile/default.jpg";
+    const user = await apiFetch(`/api/employees/${userId}/profile`);
 
-  document.getElementById("profileAvatar").src = avatar;
-  document.getElementById("profileAvatarLarge").src = avatar;
+    const avatar = user.avatar || "/uploads/profile/default.jpg";
+
+    const avatarSmall = document.getElementById("profileAvatar");
+    const avatarLarge = document.getElementById("profileAvatarLarge");
+
+    if (avatarSmall) avatarSmall.src = avatar;
+    if (avatarLarge) avatarLarge.src = avatar;
+
+    const nameEl = document.getElementById("profileNameLarge");
+    if (nameEl) {
+      nameEl.textContent = `${user.firstName} ${user.lastName}`;
+    }
+
+    const roleEl = document.getElementById("profileRole");
+    if (roleEl) {
+      roleEl.textContent = user.role;
+    }
+
+  }catch(err){
+    console.error("PROFILE ERROR:", err);
+  }
 }
 
 /* =============================
@@ -923,8 +942,6 @@ async function logout() {
 document.addEventListener("DOMContentLoaded", async () => {
   requireAuth();
 
-  document.getElementById("profileNameLarge").textContent =
-    localStorage.getItem("userName") || "-";
   document.getElementById("profileRole").textContent =
     localStorage.getItem("role") || "-";
 
@@ -974,29 +991,7 @@ async function uploadAvatar(event){
   }
 
 }
-async function loadProfile(){
-  const userId = localStorage.getItem("userId");
-  const token = localStorage.getItem("token");
 
-  const res = await fetch(`/api/employees/${userId}/profile`,{
-    headers:{
-      Authorization:`Bearer ${token}`
-    }
-  });
-
-  const user = await res.json();
-
-  const avatar = user.avatar || "/uploads/profile/default.jpg";
-
-  // ใส่ทุกที่ที่มีรูป
-  if(document.getElementById("profileAvatar")){
-    document.getElementById("profileAvatar").src = avatar;
-  }
-
-  if(document.getElementById("profileAvatarLarge")){
-    document.getElementById("profileAvatarLarge").src = avatar;
-  }
-}
 </script>
 
 </body>

@@ -1010,15 +1010,21 @@ async function loadProfile() {
 
   const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-  document.getElementById("profileAvatar").src = avatar;
-  document.getElementById("profileAvatarLarge").src = avatar;
+  const avatarSmall = document.getElementById("profileAvatar");
+  const avatarLarge = document.getElementById("profileAvatarLarge");
 
-  document.getElementById("profileNameLarge").textContent =
-    user.firstName + " " + user.lastName;
+  if (avatarSmall) avatarSmall.src = avatar;
+  if (avatarLarge) avatarLarge.src = avatar;
 
-  document.getElementById("profileRole").textContent = user.role;
+  const nameEl = document.getElementById("profileNameLarge");
+  if (nameEl) {
+    nameEl.textContent = user.firstName + " " + user.lastName;
+  }
 
-  localStorage.setItem("avatar", avatar);
+  const roleEl = document.getElementById("profileRole");
+  if (roleEl) {
+    roleEl.textContent = user.role;
+  }
 }
 /* ==================================================
    LOAD DATA
@@ -1330,29 +1336,7 @@ document.getElementById("new-user-phone")
 ?.addEventListener("input", function(){
   this.value = this.value.replace(/[^0-9]/g, "");
 });
-async function loadProfile(){
-  const userId = localStorage.getItem("userId");
-  const token = localStorage.getItem("token");
 
-  const res = await fetch(`/api/employees/${userId}/profile`,{
-    headers:{
-      Authorization:`Bearer ${token}`
-    }
-  });
-
-  const user = await res.json();
-
-  const avatar = user.avatar || "/uploads/profile/default.jpg";
-
-  // ใส่ทุกที่ที่มีรูป
-  if(document.getElementById("profileAvatar")){
-    document.getElementById("profileAvatar").src = avatar;
-  }
-
-  if(document.getElementById("profileAvatarLarge")){
-    document.getElementById("profileAvatarLarge").src = avatar;
-  }
-}
 </script>
 
 </body>

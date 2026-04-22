@@ -1014,34 +1014,6 @@ async function uploadAvatar(event){
 }
 
 
-// =============================
-// LOAD PROFILE
-// =============================
-async function loadProfile(){
-
-  const userId = localStorage.getItem("userId");
-  const token = localStorage.getItem("token");
-
-  const res = await fetch(`/api/employees/${userId}/profile`,{
-    headers:{
-      Authorization:`Bearer ${token}`
-    }
-  });
-
-  const user = await res.json();
-
-  const avatar = user.avatar || "/uploads/profile/default.jpg";
-
-  if(document.getElementById("profileAvatar")){
-    document.getElementById("profileAvatar").src = avatar;
-  }
-
-  if(document.getElementById("profileAvatarLarge")){
-    document.getElementById("profileAvatarLarge").src = avatar;
-  }
-
-}
-document.addEventListener("DOMContentLoaded", loadProfile);
 </script>
 </div>
 </body>

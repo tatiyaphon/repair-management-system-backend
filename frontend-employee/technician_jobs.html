@@ -585,12 +585,7 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 
-/* =====================
-   TOGGLE PROFILE
-===================== */
-function toggleProfile() {
-  document.getElementById("profileDropdown")?.classList.toggle("show");
-}
+
 
 /* =====================
    LOAD PROFILE
@@ -600,12 +595,28 @@ async function loadProfile() {
   if (!user) return;
 
   const avatar = user.avatar || "/uploads/profile/default.jpg";
+
   const avatarUrl = avatar.startsWith("http")
     ? avatar
     : `${location.origin}${avatar}`;
 
-  document.getElementById("profileAvatar").src = avatarUrl;
-document.getElementById("profileAvatarLarge").src = avatarUrl;
+  if (document.getElementById("profileAvatar")) {
+    document.getElementById("profileAvatar").src = avatarUrl;
+  }
+
+  if (document.getElementById("profileAvatarLarge")) {
+    document.getElementById("profileAvatarLarge").src = avatarUrl;
+  }
+
+  const nameEl = document.getElementById("profileNameLarge");
+  if (nameEl) {
+    nameEl.textContent = `${user.firstName} ${user.lastName}`;
+  }
+
+  const roleEl = document.getElementById("profileRole");
+  if (roleEl) {
+    roleEl.textContent = user.role;
+  }
 }
 
 async function uploadAvatar(event){
@@ -898,29 +909,7 @@ document.addEventListener("click", function(e){
       .classList.remove("show");
   }
 });
-async function loadProfile(){
-  const userId = localStorage.getItem("userId");
-  const token = localStorage.getItem("token");
 
-  const res = await fetch(`/api/employees/${userId}/profile`,{
-    headers:{
-      Authorization:`Bearer ${token}`
-    }
-  });
-
-  const user = await res.json();
-
-  const avatar = user.avatar || "/uploads/profile/default.jpg";
-
-  // ใส่ทุกที่ที่มีรูป
-  if(document.getElementById("profileAvatar")){
-    document.getElementById("profileAvatar").src = avatar;
-  }
-
-  if(document.getElementById("profileAvatarLarge")){
-    document.getElementById("profileAvatarLarge").src = avatar;
-  }
-}
 </script>
 
 
