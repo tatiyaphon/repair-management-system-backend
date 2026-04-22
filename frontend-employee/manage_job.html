@@ -654,11 +654,11 @@ async function fetchJob() {
   const jobId = getJobId();
 
 // ✅ ตรวจ Job ID ตั้งแต่ต้น
-  if (!id) {
-    alert("ไม่พบ Job ID\nกรุณาเข้าหน้านี้จากปุ่ม 'จัดการ'");
-    location.replace("employee_dashboard.html");
-    return;
-  }
+  if (!jobId) {
+  alert("ไม่พบ Job ID");
+  location.replace("employee_dashboard.html");
+  return;
+}
 
   if (!res.ok) {
     alert("ไม่พบงานซ่อม");
@@ -760,7 +760,8 @@ function renderJob() {
   document.getElementById("finish-date").value =
     formatInputDate(currentJob.finishDate);
   document.getElementById("new-status").value = currentJob.status;
-  document.getElementById("new-price").value = currentJob.priceQuoted || "";
+  document.getElementById("new-price").value =
+  currentJob.priceQuoted ?? "";
   document.getElementById("new-job-type").value = currentJob.jobType || "";
 }
 
@@ -821,14 +822,12 @@ document.getElementById("date-form")?.addEventListener("submit", async e => {
 document.getElementById("price-form")?.addEventListener("submit", async e => {
   e.preventDefault();
 
-  await updateJob(
-    { 
-  priceQuoted: document.getElementById("new-price").value
-    ? Number(document.getElementById("new-price").value)
-    : 0
-} ,
-    "บันทึกราคาเรียบร้อยแล้ว"
-  );
+  const priceInput = document.getElementById("new-price").value;
+  const price = Number(priceInput);
+
+  await updateJob({
+    priceQuoted: isNaN(price) ? 0 : price
+  }, "บันทึกราคาเรียบร้อยแล้ว");
 });
 
 // ✅ ปิดงาน
