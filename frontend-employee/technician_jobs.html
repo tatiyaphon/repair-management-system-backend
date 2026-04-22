@@ -396,23 +396,31 @@
     </a>
   </nav>
 
-  <!-- profile -->
   <div class="profile-menu" id="profileMenu">
-    <div class="profile-trigger" onclick="toggleProfile()">
-      <img id="profileAvatar" src="/uploads/profile/default.jpg">
-    </div>
-    <div class="profile-dropdown" id="profileDropdown">
-      <div class="profile-header">
-        <img id="profileAvatarLarge"
-              src="/uploads/profile/default.jpg"
-             alt="avatar-large"
-             class="profile-avatar-large">
 
-        <div>
-          <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
-          <small id="profileRole">—</small>
-        </div>
+  <!-- รูปเล็ก -->
+  <div class="profile-trigger" onclick="toggleProfile()">
+    <img id="profileAvatar"
+         src="/uploads/profile/default.jpg"
+         class="profile-avatar">
+  </div>
+
+  <!-- dropdown -->
+  <div class="profile-dropdown" id="profileDropdown">
+
+    <div class="profile-header">
+      <img id="profileAvatarLarge"
+           src="/uploads/profile/default.jpg"
+           class="profile-avatar-large">
+
+      <div>
+        <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
+        <small id="profileRole">—</small>
       </div>
+    </div>
+
+  </div>
+</div>
 
       <label class="profile-item upload-btn">
   <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
@@ -604,32 +612,22 @@ document.addEventListener("DOMContentLoaded", () => {
    LOAD PROFILE
 ===================== */
 async function loadProfile() {
-  const user = await apiFetch(`/employees/${userId}/profile`);
+  const user = await apiFetch(`/employees/me`);
   if (!user) return;
 
   const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-  const avatarUrl = avatar.startsWith("http")
-    ? avatar
-    : `${location.origin}${avatar}`;
+  const small = document.getElementById("profileAvatar");
+  if (small) small.src = avatar;
 
-  if (document.getElementById("profileAvatar")) {
-    document.getElementById("profileAvatar").src = avatarUrl;
-  }
+  const large = document.getElementById("profileAvatarLarge");
+  if (large) large.src = avatar;
 
-  if (document.getElementById("profileAvatarLarge")) {
-    document.getElementById("profileAvatarLarge").src = avatarUrl;
-  }
+  const name = document.getElementById("profileNameLarge");
+  if (name) name.textContent = user.firstName + " " + user.lastName;
 
-  const nameEl = document.getElementById("profileNameLarge");
-  if (nameEl) {
-    nameEl.textContent = `${user.firstName} ${user.lastName}`;
-  }
-
-  const roleEl = document.getElementById("profileRole");
-  if (roleEl) {
-    roleEl.textContent = user.role;
-  }
+  const role = document.getElementById("profileRole");
+  if (role) role.textContent = user.role;
 }
 
 async function uploadAvatar(event){

@@ -741,27 +741,30 @@
     </a>
   </nav>
 
-  <!-- profile -->
   <div class="profile-menu" id="profileMenu">
-    <div class="profile-trigger" onclick="toggleProfile()">
-      <img id="profileAvatar" src="/uploads/profile/default.jpg">
-    </div>
 
-
-    <div class="profile-dropdown" id="profileDropdown">
-
-      <div class="profile-header">
-
-  <img id="profileAvatarLarge"
-       src="/uploads/profile/default.jpg"
-       alt="avatar-large"
-       class="profile-avatar-large">
-
-  <div class="profile-info">
-    <strong id="profileNameLarge">ผู้ใช้งาน</strong>
-    <small id="profileRole">—</small>
+  <!-- รูปเล็ก -->
+  <div class="profile-trigger" onclick="toggleProfile()">
+    <img id="profileAvatar"
+         src="/uploads/profile/default.jpg"
+         class="profile-avatar">
   </div>
 
+  <!-- dropdown -->
+  <div class="profile-dropdown" id="profileDropdown">
+
+    <div class="profile-header">
+      <img id="profileAvatarLarge"
+           src="/uploads/profile/default.jpg"
+           class="profile-avatar-large">
+
+      <div>
+        <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
+        <small id="profileRole">—</small>
+      </div>
+    </div>
+
+  </div>
 </div>
 
       <label class="profile-item upload-btn">
@@ -1022,21 +1025,17 @@ async function loadProfile() {
 
   const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-  const avatarSmall = document.getElementById("profileAvatar");
-  const avatarLarge = document.getElementById("profileAvatarLarge");
+  const small = document.getElementById("profileAvatar");
+  if (small) small.src = avatar;
 
-  if (avatarSmall) avatarSmall.src = avatar;
-  if (avatarLarge) avatarLarge.src = avatar;
+  const large = document.getElementById("profileAvatarLarge");
+  if (large) large.src = avatar;
 
-  const nameEl = document.getElementById("profileNameLarge");
-  if (nameEl) {
-    nameEl.textContent = user.firstName + " " + user.lastName;
-  }
+  const name = document.getElementById("profileNameLarge");
+  if (name) name.textContent = user.firstName + " " + user.lastName;
 
-  const roleEl = document.getElementById("profileRole");
-  if (roleEl) {
-    roleEl.textContent = user.role;
-  }
+  const role = document.getElementById("profileRole");
+  if (role) role.textContent = user.role;
 }
 /* ==================================================
    LOAD DATA

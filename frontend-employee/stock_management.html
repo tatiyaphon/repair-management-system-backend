@@ -516,25 +516,31 @@
     </a>
   </nav>
 
-  <!-- profile -->
   <div class="profile-menu" id="profileMenu">
-    <div class="profile-trigger" onclick="toggleProfile()">
-      <img id="profileAvatar" src="/uploads/profile/default.jpg">
+
+  <!-- รูปเล็ก -->
+  <div class="profile-trigger" onclick="toggleProfile()">
+    <img id="profileAvatar"
+         src="/uploads/profile/default.jpg"
+         class="profile-avatar">
+  </div>
+
+  <!-- dropdown -->
+  <div class="profile-dropdown" id="profileDropdown">
+
+    <div class="profile-header">
+      <img id="profileAvatarLarge"
+           src="/uploads/profile/default.jpg"
+           class="profile-avatar-large">
+
+      <div>
+        <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
+        <small id="profileRole">—</small>
+      </div>
     </div>
 
-    <div class="profile-dropdown" id="profileDropdown">
-      <div class="profile-header">
-        <img id="profileAvatarLarge"
-              src="/uploads/profile/default.jpg"
-             alt="avatar-large"
-             class="profile-avatar-large">
-
-        <div>
-          <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
-          <small id="profileRole">—</small>
-        </div>
-      </div>
-
+  </div>
+</div>
       <label class="profile-item">
   <i class="fas fa-camera"></i>
   เปลี่ยนรูปโปรไฟล์
@@ -1248,39 +1254,24 @@ async function uploadAvatar(event){
 } // ✅ ปิดตรงนี้ให้ถูก
 
 // ✅ ต้องอยู่นอก function
-async function loadProfile(){
-  const userId = localStorage.getItem("userId");
-  const token = localStorage.getItem("token");
-
-  const res = await fetch(`/api/employees/${userId}/profile`,{
-    headers:{
-      Authorization:`Bearer ${token}`
-    }
-  });
-
-  const user = await res.json();
+async function loadProfile() {
+  const user = await apiFetch(`/employees/me`);
+  if (!user) return;
 
   const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-  if(document.getElementById("profileAvatar")){
-    document.getElementById("profileAvatar").src = avatar;
-  }
+  const small = document.getElementById("profileAvatar");
+  if (small) small.src = avatar;
 
-  if(document.getElementById("profileAvatarLarge")){
-    document.getElementById("profileAvatarLarge").src = avatar;
-  }
+  const large = document.getElementById("profileAvatarLarge");
+  if (large) large.src = avatar;
 
-  const nameEl = document.getElementById("profileNameLarge");
-  if(nameEl){
-    nameEl.textContent = `${user.firstName} ${user.lastName}`;
-  }
+  const name = document.getElementById("profileNameLarge");
+  if (name) name.textContent = user.firstName + " " + user.lastName;
 
-  const roleEl = document.getElementById("profileRole");
-  if(roleEl){
-    roleEl.textContent = user.role;
-  }
+  const role = document.getElementById("profileRole");
+  if (role) role.textContent = user.role;
 }
-document.addEventListener("DOMContentLoaded", loadProfile);
 </script>
 
 </body>

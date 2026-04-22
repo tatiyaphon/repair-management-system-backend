@@ -259,17 +259,17 @@ select{
   </nav>
 <div class="profile-menu" id="profileMenu">
 
-  <!-- 🔹 รูปเล็ก -->
+  <!-- รูปเล็ก -->
   <div class="profile-trigger" onclick="toggleProfile()">
     <img id="profileAvatar"
          src="/uploads/profile/default.jpg"
          class="profile-avatar">
   </div>
 
-  <!-- 🔹 dropdown -->
+  <!-- dropdown -->
   <div class="profile-dropdown" id="profileDropdown">
-    <div class="profile-header">
 
+    <div class="profile-header">
       <img id="profileAvatarLarge"
            src="/uploads/profile/default.jpg"
            class="profile-avatar-large">
@@ -278,8 +278,10 @@ select{
         <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
         <small id="profileRole">—</small>
       </div>
-
     </div>
+
+  </div>
+</div>
 
     <!-- 🔽 เมนูต้องอยู่ข้างใน -->
     <label class="profile-item upload-btn">
@@ -496,38 +498,22 @@ async function uploadAvatar(event){
 
 }
 async function loadProfile() {
-  const userId = localStorage.getItem("userId");
-  if (!userId) return;
-
-  const res = await fetch(`/api/employees/${userId}/profile`, {
-    headers: {
-      Authorization: `Bearer ${token}`
-    }
-  });
-
-  if (!res.ok) return;
-
-  const user = await res.json();
+  const user = await apiFetch(`/employees/me`);
+  if (!user) return;
 
   const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-  const avatarUrl = avatar.startsWith("http")
-    ? avatar
-    : `${location.origin}${avatar}`;
+  const small = document.getElementById("profileAvatar");
+  if (small) small.src = avatar;
 
-  if (document.getElementById("profileAvatar"))
-    document.getElementById("profileAvatar").src = avatarUrl;
+  const large = document.getElementById("profileAvatarLarge");
+  if (large) large.src = avatar;
 
-  if (document.getElementById("profileAvatarLarge"))
-    document.getElementById("profileAvatarLarge").src = avatarUrl;
+  const name = document.getElementById("profileNameLarge");
+  if (name) name.textContent = user.firstName + " " + user.lastName;
 
-  const nameEl = document.getElementById("profileNameLarge");
-  if (nameEl)
-    nameEl.textContent = `${user.firstName} ${user.lastName}`;
-
-  const roleEl = document.getElementById("profileRole");
-  if (roleEl)
-    roleEl.textContent = user.role;
+  const role = document.getElementById("profileRole");
+  if (role) role.textContent = user.role;
 }
 </script>
 </div>

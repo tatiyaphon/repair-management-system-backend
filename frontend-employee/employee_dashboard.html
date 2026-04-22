@@ -542,26 +542,31 @@
     </a>
   </nav>
 
-  <!-- profile -->
   <div class="profile-menu" id="profileMenu">
-    <div class="profile-trigger" onclick="toggleProfile()">
-      <img id="profileAvatar" src="/uploads/profile/default.jpg">
+
+  <!-- รูปเล็ก -->
+  <div class="profile-trigger" onclick="toggleProfile()">
+    <img id="profileAvatar"
+         src="/uploads/profile/default.jpg"
+         class="profile-avatar">
+  </div>
+
+  <!-- dropdown -->
+  <div class="profile-dropdown" id="profileDropdown">
+
+    <div class="profile-header">
+      <img id="profileAvatarLarge"
+           src="/uploads/profile/default.jpg"
+           class="profile-avatar-large">
+
+      <div>
+        <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
+        <small id="profileRole">—</small>
+      </div>
     </div>
 
-
-    <!-- DROPDOWN -->
-    <div class="profile-dropdown" id="profileDropdown">
-
-      <div class="profile-header">
-        <img id="profileAvatarLarge"
-             src="/uploads/profile/default.jpg"
-             alt="avatar-large">
-
-        <div>
-          <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
-          <small id="profileRole">—</small>
-        </div>
-      </div>
+  </div>
+</div>
 
       <label class="profile-item upload-btn">
         <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
@@ -874,35 +879,23 @@ function formatDate(date) {
    PROFILE
 ============================= */
 async function loadProfile() {
-  try{
-    const userId = localStorage.getItem("userId");
-    if (!userId) return;
+  const user = await apiFetch(`/employees/me`);
+  if (!user) return;
 
-    const user = await apiFetch(`/api/employees/${userId}/profile`);
+  const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-    const avatar = user.avatar || "/uploads/profile/default.jpg";
+  const small = document.getElementById("profileAvatar");
+  if (small) small.src = avatar;
 
-    const avatarSmall = document.getElementById("profileAvatar");
-    const avatarLarge = document.getElementById("profileAvatarLarge");
+  const large = document.getElementById("profileAvatarLarge");
+  if (large) large.src = avatar;
 
-    if (avatarSmall) avatarSmall.src = avatar;
-    if (avatarLarge) avatarLarge.src = avatar;
+  const name = document.getElementById("profileNameLarge");
+  if (name) name.textContent = user.firstName + " " + user.lastName;
 
-    const nameEl = document.getElementById("profileNameLarge");
-    if (nameEl) {
-      nameEl.textContent = `${user.firstName} ${user.lastName}`;
-    }
-
-    const roleEl = document.getElementById("profileRole");
-    if (roleEl) {
-      roleEl.textContent = user.role;
-    }
-
-  }catch(err){
-    console.error("PROFILE ERROR:", err);
-  }
+  const role = document.getElementById("profileRole");
+  if (role) role.textContent = user.role;
 }
-
 /* =============================
    PROFILE TOGGLE ✅ (ตัวที่ขาด)
 ============================= */

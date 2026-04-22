@@ -226,26 +226,31 @@
     </a>
   </nav>
 
-  <!-- profile -->
-  <div class="profile-menu" id="profileMenu">
-    <div class="profile-trigger" onclick="toggleProfile()">
-      <img id="profileAvatar" src="/uploads/profile/default.jpg">
+ <div class="profile-menu" id="profileMenu">
+
+  <!-- รูปเล็ก -->
+  <div class="profile-trigger" onclick="toggleProfile()">
+    <img id="profileAvatar"
+         src="/uploads/profile/default.jpg"
+         class="profile-avatar">
+  </div>
+
+  <!-- dropdown -->
+  <div class="profile-dropdown" id="profileDropdown">
+
+    <div class="profile-header">
+      <img id="profileAvatarLarge"
+           src="/uploads/profile/default.jpg"
+           class="profile-avatar-large">
+
+      <div>
+        <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
+        <small id="profileRole">—</small>
+      </div>
     </div>
 
-
-    <div class="profile-dropdown" id="profileDropdown">
-
-  <div class="profile-header">
-  <img id="profileAvatarLarge"
-       src="/uploads/profile/default.jpg"
-       class="profile-avatar-large">
-
-  <div>
-    <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
-    <small id="profileRole">—</small>
   </div>
 </div>
-
   <div class="profile-divider"></div>
 
   <label class="profile-item">
@@ -577,26 +582,22 @@ function generateReceiptNumber() {
    LOAD PROFILE
 ========================= */
 async function loadProfile() {
-  try {
-    const res = await fetch(`${API_BASE}/employees/me`, {
-      headers
-    });
+  const user = await apiFetch(`/employees/me`);
+  if (!user) return;
 
-    if (!res.ok) return;
+  const avatar = user.avatar || "/uploads/profile/default.jpg";
 
-    const user = await res.json();
+  const small = document.getElementById("profileAvatar");
+  if (small) small.src = avatar;
 
-    const avatar = user.avatar || "/uploads/profile/default.jpg";
+  const large = document.getElementById("profileAvatarLarge");
+  if (large) large.src = avatar;
 
-    document.getElementById("profileAvatar").src = avatar;
-    document.getElementById("profileAvatarLarge").src = avatar;
-    document.getElementById("profileNameLarge").textContent =
-      `${user.firstName} ${user.lastName}`;
-    document.getElementById("profileRole").textContent = user.role;
+  const name = document.getElementById("profileNameLarge");
+  if (name) name.textContent = user.firstName + " " + user.lastName;
 
-  } catch (err) {
-    console.error("LOAD PROFILE ERROR:", err);
-  }
+  const role = document.getElementById("profileRole");
+  if (role) role.textContent = user.role;
 }
 
 document.addEventListener("DOMContentLoaded", loadProfile);
