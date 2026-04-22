@@ -209,7 +209,16 @@ select{
     margin-top: 0;
   }
 }
+.upload-btn {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
+.upload-btn input {
+  display: none;
+}
 </style>
 </head>
 
@@ -274,9 +283,12 @@ select{
 
     <!-- 🔽 เมนูต้องอยู่ข้างใน -->
     <label class="profile-item upload-btn">
-      <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
-      <input type="file" accept="image/*" onchange="uploadAvatar(event)">
-    </label>
+  <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
+  <input type="file"
+         accept="image/*"
+         onchange="uploadAvatar(event)"
+         hidden>
+</label>
 
     <a class="profile-item" href="profile.html">ข้อมูลส่วนตัว</a>
     <a class="profile-item" href="change_password.html">เปลี่ยนรหัสผ่าน</a>

@@ -695,7 +695,16 @@
   color: #dc2626;
   font-weight: 600;
 }
+.upload-btn {
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
 
+.upload-btn input {
+  display: none;
+}
   </style>
 </head>
 <body>
@@ -757,7 +766,10 @@
 
       <label class="profile-item upload-btn">
   <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
-  <input type="file" accept="image/*" onchange="uploadAvatar(event)">
+  <input type="file"
+         accept="image/*"
+         onchange="uploadAvatar(event)"
+         hidden>
 </label>
 
       <a class="profile-item" href="profile.html">
