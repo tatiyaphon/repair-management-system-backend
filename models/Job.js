@@ -76,8 +76,8 @@ const jobSchema = new mongoose.Schema(
     // ===============================
     status: {
       type: String,
-      enum: ["รับเครื่อง", "กำลังซ่อม", "รออะไหล่", "ซ่อมเสร็จ", "ยกเลิก"],
-      default: "รับเครื่อง"
+      enum: ["คิวงานใหม่", "กำลังซ่อม", "รออะไหล่", "ซ่อมเสร็จ", "ยกเลิก"],
+      default: "คิวงานใหม่"
     },
      deviceStatus: {
     type: String,
