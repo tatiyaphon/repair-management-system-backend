@@ -97,7 +97,7 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
       role,
       active: true,
       mustChangePassword: true,
-      isVerified: false
+      isVerified: true
     });
 
     /* ==========================
@@ -243,8 +243,7 @@ router.get("/me", verifyToken, async (req, res) => {
 /* =====================================
    SEND RESET LINK (admin)
 ===================================== */
-router.post(
-  "/:id/send-reset-link",
+router.post("/:id/send-reset-link",
   verifyToken,
   requireRole("admin"),
   async (req, res) => {
