@@ -308,7 +308,22 @@ footer{
         font-size:0.9rem;
     }
 }
+.spinner{
+  width:40px;
+  height:40px;
+  border:4px solid #eee;
+  border-top:4px solid #2563eb;
+  border-radius:50%;
+  margin:auto;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
 
+.error-box{
+  text-align:center;
+  padding:20px;
+  color:#e11d48;
+}
 </style>
 </head>
 
@@ -419,30 +434,41 @@ function showError(msg) {
     alert(msg);
 }
 
-async function checkStatus() {
+async function checkStatus(){
     const receiptNumber = receiptInput.value.trim().toUpperCase();
 
     if (receiptNumber.length < 3) {
-        showError("กรุณากรอกเลขที่ใบเสร็จให้ถูกต้อง");
+        showError("กรุณากรอกเลขให้ถูกต้อง");
         return;
     }
+
+    // 🔥 loading
+    button.disabled = true;
+    button.innerHTML = `<div class="spinner"></div>`;
 
     try {
         const res = await fetch(`${API_BASE}/${encodeURIComponent(receiptNumber)}`);
 
         if (!res.ok) {
-            showError("ไม่พบข้อมูลงานซ่อมในระบบ");
+            button.disabled = false;
+            button.innerHTML = "ตรวจสอบสถานะ";
+
+            document.body.insertAdjacentHTML("beforeend", `
+              <div class="error-box">❌ ไม่พบข้อมูลงานซ่อม</div>
+            `);
             return;
         }
 
-        // ✅ redirect ไปหน้าสถานะ
         window.location.href =
-  `/customer/status_page.html?receipt_number=${encodeURIComponent(receiptNumber)}`;
-
+          `/customer/status_page.html?receipt_number=${encodeURIComponent(receiptNumber)}`;
 
     } catch (err) {
-        console.error(err);
-        showError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่");
+        button.disabled = false;
+        button.innerHTML = "ตรวจสอบสถานะ";
+
+        document.body.insertAdjacentHTML("beforeend", `
+          <div class="error-box">❌ เชื่อมต่อเซิร์ฟเวอร์ไม่ได้</div>
+        `);
     }
 }
 
