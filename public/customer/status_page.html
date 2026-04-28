@@ -310,40 +310,7 @@
 }
 
 }
-.cta{
-  margin-top:20px;
-  text-align:center;
-}
 
-.cta a{
-  display:inline-block;
-  margin:8px;
-  padding:12px 20px;
-  border-radius:10px;
-  color:#fff;
-  text-decoration:none;
-  font-weight:500;
-}
-
-.cta .call{
-  background:#2563eb;
-}
-
-.cta .line{
-  background:#00b900;
-}
-
-/* 📱 mobile */
-@media(max-width:600px){
-  .detail-item{
-    flex-direction:column;
-    gap:4px;
-  }
-
-  .detail-item strong{
-    width:100%;
-  }
-}
     </style>
 </head>
 <body>
@@ -397,101 +364,64 @@ if (j.status === "ซ่อมเสร็จ") {
 }
 
 box.innerHTML = `
-  <!-- 🔥 สถานะ -->
+  <!-- สถานะปัจจุบัน -->
   <div class="status-box">
     <h2><i class="fas fa-sync-alt"></i> สถานะปัจจุบัน</h2>
     <div class="status-display ${statusClass}">
-      ${statusText || "-"}
+      ${statusText}
     </div>
   </div>
 
-  <!-- 👤 ลูกค้า -->
-  <div class="status-box">
-    <h2><i class="fas fa-user"></i> ข้อมูลลูกค้า</h2>
+  <!-- ข้อมูลลูกค้า -->
 
-    <div class="detail-item">
-      <strong>เลขใบเสร็จ:</strong> ${j.receiptNumber || "-"}
-    </div>
+    <div class="status-box">
+  <h2><i class="fas fa-user"></i> ข้อมูลลูกค้า</h2>
+  <div class="detail-item"><strong>เลขใบเสร็จ:</strong> ${j.receiptNumber}</div>
+  <div class="detail-item"><strong>ชื่อ:</strong> ${j.customerName}</div>
+  <div class="detail-item"><strong>เบอร์:</strong> ${j.customerPhone || "-"}</div>
+  <div class="detail-item"><strong>ที่อยู่:</strong> ${j.customerAddress || "-"}</div>
+  <div class="detail-item"><strong>อุปกรณ์ที่มาด้วย:</strong> ${j.accessory || "-"}</div>
 
-    <div class="detail-item">
-      <strong>ชื่อ:</strong> ${j.customerName || "-"}
-    </div>
-
-    <div class="detail-item">
-      <strong>เบอร์:</strong> ${j.customerPhone || "-"}
-    </div>
-
-    <div class="detail-item">
-      <strong>ที่อยู่:</strong> ${j.customerAddress || "-"}
-    </div>
-
-    <div class="detail-item">
-      <strong>อุปกรณ์:</strong> ${j.accessory || "-"}
-    </div>
-
-    <div class="detail-item">
-      <strong>ประเภท:</strong>
-      ${
-        j.jobType === "เคลม"
-        ? `<span style="color:#f59e0b;font-weight:600;">🔁 เคลมสินค้า</span>`
-        : `<span style="color:#2563eb;font-weight:600;">🛠 รับเครื่องใหม่</span>`
-      }
-    </div>
+  <div class="detail-item">
+    <strong>ประเภทการรับเครื่อง:</strong> 
+    ${j.jobType === "เคลม" 
+      ? '<span style="color:#e67e22;font-weight:600;">🔁 เคลมสินค้า</span>' 
+      : '<span style="color:#2980b9;font-weight:600;">🛠 รับเครื่องใหม่</span>'
+    }
+  </div>
   </div>
 
-  <!-- 💻 เครื่อง -->
+  <!-- ข้อมูลเครื่อง -->
   <div class="status-box">
     <h2><i class="fas fa-laptop"></i> รายละเอียดเครื่อง</h2>
-
-    <div class="detail-item">
-      <strong>ประเภท:</strong> ${j.deviceType || "-"}
-    </div>
-
-    <div class="detail-item">
-      <strong>รุ่น:</strong> ${j.deviceModel || "-"}
-    </div>
-
-    <div class="detail-item">
-      <strong>อาการ:</strong> ${j.symptom || "-"}
-    </div>
+    <div class="detail-item"><strong>ประเภท:</strong> ${j.deviceType}</div>
+    <div class="detail-item"><strong>รุ่น:</strong> ${j.deviceModel}</div>
+    <div class="detail-item"><strong>อาการ:</strong> ${j.symptom}</div>
   </div>
 
-  <!-- 💰 ราคา -->
+  <!-- ราคา -->
   <div class="status-box">
     <h2><i class="fas fa-baht-sign"></i> ราคาและกำหนดการ</h2>
-
-    <span class="price-display">
-      ${j.priceQuoted ? j.priceQuoted.toLocaleString() : "-"} บาท
-    </span>
-
+    <span class="price-display">${j.priceQuoted.toLocaleString()} บาท</span>
     <div class="detail-item">
-      <strong>รับเครื่อง:</strong>
-      ${j.receivedDate ? new Date(j.receivedDate).toLocaleDateString("th-TH") : "-"}
+      <strong>วันที่รับเครื่อง:</strong>
+      ${new Date(j.receivedDate).toLocaleDateString("th-TH")}
     </div>
-
     <div class="detail-item">
-      <strong>เริ่มซ่อม:</strong>
+      <strong>วันที่เริ่มซ่อม:</strong>
       ${j.startDate ? new Date(j.startDate).toLocaleDateString("th-TH") : "-"}
     </div>
-
+    
     <div class="detail-item">
-      <strong>เสร็จ:</strong>
+      <strong>วันที่ซ่อมเสร็จ:</strong>
       ${j.finishDate ? new Date(j.finishDate).toLocaleDateString("th-TH") : "-"}
     </div>
   </div>
 
-  <!-- 🚀 CTA -->
-  <div class="cta">
-    <a href="tel:0804641677" class="call">📞 โทรสอบถาม</a>
-    <a href="https://line.me/ti/p/1Qfte4iYro" class="line">💬 แชท LINE</a>
-  </div>
-
-  <!-- 🔙 กลับ -->
   <a href="/customer/check_status.html" class="back-link">
     ← กลับไปตรวจสอบงานอื่น
   </a>
 `;
-
 });
 </script>
 </body>
