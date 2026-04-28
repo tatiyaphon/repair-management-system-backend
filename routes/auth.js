@@ -6,9 +6,8 @@ const Employee = require("../models/Employee");
 const verifyToken = require("../middleware/auth");
 const crypto = require("crypto");
 const requireRole = require("../middleware/requireRole");
+const nodemailer = require("nodemailer");
 
-const sgMail = require("@sendgrid/mail");
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 
 /* =========================
@@ -258,7 +257,17 @@ router.post("/reset-password/:token", async (req, res) => {
     res.status(500).json({ message: "ไม่สามารถรีเซ็ตได้" });
   }
 });
-console.log("🔥 FORGOT PASSWORD HIT");
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  }
+});
+
+// =======================
+// 🔐 Forgot Password
+// =======================
 router.post("/forgot-password", async (req, res) => {
   try {
     console.log("🔥 API CALLED /forgot-password");
@@ -271,7 +280,6 @@ router.post("/forgot-password", async (req, res) => {
     }
 
     email = email.trim().toLowerCase();
-
     console.log("📥 INPUT EMAIL:", email);
 
     const user = await Employee.findOne({
@@ -284,10 +292,13 @@ router.post("/forgot-password", async (req, res) => {
       return res.status(404).json({ message: "ไม่พบผู้ใช้นี้" });
     }
 
+    // =======================
+    // 🔑 สร้าง Token
+    // =======================
     const resetToken = crypto.randomBytes(32).toString("hex");
 
     user.resetToken = resetToken;
-    user.resetTokenExpire = Date.now() + 1000 * 60 * 30;
+    user.resetTokenExpire = Date.now() + 1000 * 60 * 30; // 30 นาที
 
     await user.save();
 
@@ -295,24 +306,22 @@ router.post("/forgot-password", async (req, res) => {
       `${process.env.BASE_URL}/employee/reset_password.html?token=${resetToken}`;
 
     console.log("🔗 RESET LINK:", resetLink);
-    console.log("📤 FROM:", process.env.EMAIL_USER);
-    console.log("📥 TO:", user.email);
-    console.log("🔑 API KEY:", process.env.SENDGRID_API_KEY ? "OK" : "MISSING");
 
+    // =======================
+    // 📧 ส่งอีเมล
+    // =======================
     try {
       console.log("📨 SENDING EMAIL...");
 
-      await sgMail.send({
+      await transporter.sendMail({
+        from: `"ระบบซ่อม" <${process.env.EMAIL_USER}>`,
         to: user.email,
-        from: process.env.EMAIL_USER,
         subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
-
-        text: `รีเซ็ตรหัสผ่าน: ${resetLink}`,
 
         html: `
           <div style="font-family:sans-serif">
             <h2>รีเซ็ตรหัสผ่าน</h2>
-            <p>คลิกด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
+            <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
 
             <a href="${resetLink}"
               style="display:inline-block;padding:10px 20px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;">
@@ -321,6 +330,10 @@ router.post("/forgot-password", async (req, res) => {
 
             <p style="margin-top:15px;">หรือใช้ลิงก์นี้:</p>
             <p>${resetLink}</p>
+
+            <p style="color:#888;font-size:12px;margin-top:20px;">
+              ลิงก์นี้จะหมดอายุใน 30 นาที
+            </p>
           </div>
         `
       });
@@ -328,13 +341,12 @@ router.post("/forgot-password", async (req, res) => {
       console.log("✅ EMAIL SENT SUCCESS");
 
     } catch (mailErr) {
-  console.error("❌ EMAIL ERROR:", mailErr.response?.body || mailErr);
-
-  return res.status(500).json({
-    message: "ส่งอีเมลไม่สำเร็จ",
-    error: mailErr.response?.body || mailErr.message
-  });
-}
+      console.error("❌ EMAIL ERROR:", mailErr);
+      return res.status(500).json({
+        message: "ส่งอีเมลไม่สำเร็จ",
+        error: mailErr.message
+      });
+    }
 
     res.json({ message: "ส่งลิงก์รีเซ็ตแล้ว" });
 
