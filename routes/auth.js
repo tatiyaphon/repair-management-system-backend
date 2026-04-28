@@ -258,21 +258,27 @@ router.post("/reset-password/:token", async (req, res) => {
     res.status(500).json({ message: "ไม่สามารถรีเซ็ตได้" });
   }
 });
-
+console.log("🔥 FORGOT PASSWORD HIT");
 router.post("/forgot-password", async (req, res) => {
   try {
+    console.log("🔥 API CALLED /forgot-password");
+
     let { email } = req.body;
 
     if (!email) {
+      console.log("❌ ไม่มี email");
       return res.status(400).json({ message: "กรุณากรอกอีเมล" });
     }
 
-    // ✅ normalize email
     email = email.trim().toLowerCase();
+
+    console.log("📥 INPUT EMAIL:", email);
 
     const user = await Employee.findOne({
       email: { $regex: new RegExp(`^${email}$`, "i") }
     });
+
+    console.log("👤 USER FOUND:", user ? user.email : "NOT FOUND");
 
     if (!user) {
       return res.status(404).json({ message: "ไม่พบผู้ใช้นี้" });
@@ -288,8 +294,14 @@ router.post("/forgot-password", async (req, res) => {
     const resetLink =
       `${process.env.BASE_URL}/employee/reset_password.html?token=${resetToken}`;
 
-    // ✅ กันพัง email
+    console.log("🔗 RESET LINK:", resetLink);
+    console.log("📤 FROM:", process.env.EMAIL_USER);
+    console.log("📥 TO:", user.email);
+    console.log("🔑 API KEY:", process.env.SENDGRID_API_KEY ? "OK" : "MISSING");
+
     try {
+      console.log("📨 SENDING EMAIL...");
+
       await sgMail.send({
         to: user.email,
         from: process.env.EMAIL_USER,
@@ -298,27 +310,36 @@ router.post("/forgot-password", async (req, res) => {
         text: `รีเซ็ตรหัสผ่าน: ${resetLink}`,
 
         html: `
-          <h2>รีเซ็ตรหัสผ่าน</h2>
-          <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
-          <a href="${resetLink}"
-             style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
-             ตั้งรหัสผ่านใหม่
-          </a>
-          <p>ลิงก์จะหมดอายุใน 30 นาที</p>
+          <div style="font-family:sans-serif">
+            <h2>รีเซ็ตรหัสผ่าน</h2>
+            <p>คลิกด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
+
+            <a href="${resetLink}"
+              style="display:inline-block;padding:10px 20px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;">
+              ตั้งรหัสผ่านใหม่
+            </a>
+
+            <p style="margin-top:15px;">หรือใช้ลิงก์นี้:</p>
+            <p>${resetLink}</p>
+          </div>
         `
       });
+
+      console.log("✅ EMAIL SENT SUCCESS");
+
     } catch (mailErr) {
-  console.error("EMAIL ERROR:", mailErr.response?.body || mailErr);
+  console.error("❌ EMAIL ERROR:", mailErr.response?.body || mailErr);
 
   return res.status(500).json({
-    message: "ส่งอีเมลไม่สำเร็จ"
+    message: "ส่งอีเมลไม่สำเร็จ",
+    error: mailErr.response?.body || mailErr.message
   });
 }
 
     res.json({ message: "ส่งลิงก์รีเซ็ตแล้ว" });
 
   } catch (err) {
-    console.error("FORGOT PASSWORD ERROR:", err);
+    console.error("🔥 FORGOT PASSWORD ERROR:", err);
     res.status(500).json({ message: "เกิดข้อผิดพลาด" });
   }
 });
