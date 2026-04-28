@@ -294,6 +294,9 @@ router.post("/forgot-password", async (req, res) => {
         to: user.email,
         from: process.env.EMAIL_USER,
         subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
+
+        text: `รีเซ็ตรหัสผ่าน: ${resetLink}`,
+
         html: `
           <h2>รีเซ็ตรหัสผ่าน</h2>
           <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
@@ -305,8 +308,12 @@ router.post("/forgot-password", async (req, res) => {
         `
       });
     } catch (mailErr) {
-      console.error("EMAIL ERROR:", mailErr.response?.body || mailErr);
-    }
+  console.error("EMAIL ERROR:", mailErr.response?.body || mailErr);
+
+  return res.status(500).json({
+    message: "ส่งอีเมลไม่สำเร็จ"
+  });
+}
 
     res.json({ message: "ส่งลิงก์รีเซ็ตแล้ว" });
 
