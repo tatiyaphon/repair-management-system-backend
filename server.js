@@ -49,10 +49,8 @@ app.use("/api/auth/login", rateLimit({
 
 // 🌍 CORS
 app.use(cors({
-  origin: [
-    "https://tui-it.org",
-    "https://www.tui-it.org"
-  ]
+  origin: true,
+  credentials: true
 }));
 
 app.use(express.json());
