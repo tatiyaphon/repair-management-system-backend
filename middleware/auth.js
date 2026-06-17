@@ -23,14 +23,20 @@ module.exports = async (req, res, next) => {
       role: decoded.role
     };
 
-    // อัปเดตสถานะการใช้งานล่าสุด
-    await Employee.findByIdAndUpdate(
-      req.user.userId,
-      {
-        lastSeen: new Date(),
-        online: true
-      }
-    );
+    console.log(
+  "LASTSEEN UPDATE:",
+  req.user.userId,
+  req.user.role,
+  new Date()
+);
+
+await Employee.findByIdAndUpdate(
+  req.user.userId,
+  {
+    lastSeen: new Date(),
+    online: true
+  }
+);
 
     next();
 
