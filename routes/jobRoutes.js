@@ -190,7 +190,7 @@ router.post("/", auth, async (req, res) => {
       symptom,
       accessory,
       priceQuoted: Number(priceQuoted) || 0,
-      status: "คิวงานใหม่",
+      status: "รับเครื่อง",
       receivedDate: new Date(),
       createdBy: req.user.userId,
       assignedTo: assignedTo || null
@@ -200,15 +200,12 @@ router.post("/", auth, async (req, res) => {
        🔥 ACTIVITY LOG
     ========================= */
 
-    await Activity.create({
-      userId: req.user.userId,
-      userName: req.user.userName || "Unknown",
-      action: "CREATE_JOB",
-      detail: `สร้างงานใหม่ ${receiptNumber}`,
-      jobId: job._id,
-      ipAddress: req.ip
-    });
-
+   await Activity.create({
+  action: "COMPLETE_JOB",
+  user: req.user.userId,
+  job: job._id,
+  description: `ปิดงาน ${job.receiptNumber}`
+});
     res.status(201).json({
       message: "รับเครื่องสำเร็จ",
       job
@@ -254,12 +251,12 @@ router.put("/:id", auth, async (req, res) => {
     };
 
     const validStatus = [
-      "คิวงานใหม่",
+      "รับเครื่อง",
       "กำลังซ่อม",
       "รออะไหล่",
       "ซ่อมเสร็จ",
       "ยกเลิก"
-    ];
+   ];
 
     /* =========================
        🔥 DEBUG (ดูค่าจริง)
