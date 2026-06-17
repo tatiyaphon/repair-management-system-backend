@@ -192,7 +192,7 @@ router.post("/", auth, async (req, res) => {
       symptom,
       accessory,
       priceQuoted: Number(priceQuoted) || 0,
-      status: "รับเครื่อง",
+      status: "คิวงานใหม่",
       receivedDate: new Date(),
       createdBy: req.user.userId,
       assignedTo: assignedTo || null
