@@ -23,7 +23,7 @@ module.exports = async (req, res, next) => {
       role: decoded.role
     };
 
-    console.log(
+   console.log(
   "LASTSEEN UPDATE:",
   req.user.userId,
   req.user.role,
