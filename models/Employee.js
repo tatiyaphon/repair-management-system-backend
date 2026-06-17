@@ -36,10 +36,15 @@ const employeeSchema = new mongoose.Schema({
   mustChangePassword: { type: Boolean, default: true },
   active: { type: Boolean, default: true },
 
-  online: { 
-    type: Boolean, 
-    default: false 
-  },
+  online: {
+  type: Boolean,
+  default: false
+},
+
+lastSeen: {
+  type: Date,
+  default: Date.now
+},
 
   /* ===============================
      🔐 RESET PASSWORD SYSTEM

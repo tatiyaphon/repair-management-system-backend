@@ -1129,10 +1129,7 @@ function renderJobsTable(jobs) {
 function renderUsersTable(users) {
   const tbody = document.querySelector("#admin-users-table tbody");
 
-
-
   tbody.innerHTML = "";
-
 
   if (!users.length) {
     tbody.innerHTML = `
@@ -1144,34 +1141,47 @@ function renderUsersTable(users) {
     `;
     return;
   }
-  
 
   users.forEach(u => {
-    const statusHtml = u.online
+
+    const isOnline =
+      u.lastSeen &&
+      (Date.now() - new Date(u.lastSeen).getTime()) < 5 * 60 * 1000;
+
+    const statusHtml = isOnline
       ? `<span class="status-online">● ออนไลน์</span>`
       : `<span class="status-offline">● ออฟไลน์</span>`;
 
     const tr = document.createElement("tr");
+
     tr.innerHTML = `
       <td>${u.firstName} ${u.lastName}</td>
+
       <td>${u.email}</td>
+
       <td>${u.phone || "-"}</td>
 
       <td>
         <select onchange="updateUserRole('${u._id}', this.value)">
           <option value="admin" ${u.role==="admin"?"selected":""}>ผู้ดูแลระบบ</option>
           <option value="staff" ${u.role==="staff"?"selected":""}>พนักงาน</option>
-          <option value="tech"  ${u.role==="tech" ?"selected":""}>ช่าง</option>
+          <option value="tech" ${u.role==="tech"?"selected":""}>ช่าง</option>
         </select>
       </td>
 
       <td>${statusHtml}</td>
 
       <td>
-        <button class="btn-edit" onclick="editUser('${u._id}')">แก้ไข</button>
-        <button class="btn-delete" onclick="deleteUser('${u._id}')">ลบ</button>
+        <button class="btn-edit" onclick="editUser('${u._id}')">
+          แก้ไข
+        </button>
+
+        <button class="btn-delete" onclick="deleteUser('${u._id}')">
+          ลบ
+        </button>
       </td>
     `;
+
     tbody.appendChild(tr);
   });
 }
@@ -1275,6 +1285,8 @@ async function logout() {
 document.addEventListener("DOMContentLoaded", () => {
   loadProfile();
   init();
+
+  setInterval(init, 30000);
 });
 document.getElementById("btn-add-user")
   ?.addEventListener("click", async () => {
