@@ -35,7 +35,7 @@ const transporter = nodemailer.createTransport({
 ===================================== */
 router.get("/", verifyToken, requireRole("admin"), async (req, res) => {
   const employees = await Employee.find()
-    .select("_id firstName lastName email role phone active avatar online");
+    .select("_id firstName lastName email role phone active avatar online lastSeen");
 
   res.json(employees);
 });
