@@ -201,10 +201,10 @@ router.post("/", auth, async (req, res) => {
     ========================= */
 
    await Activity.create({
-  action: "COMPLETE_JOB",
+  action: "CREATE_JOB",
   user: req.user.userId,
   job: job._id,
-  description: `ปิดงาน ${job.receiptNumber}`
+  description: `สร้างงานใหม่ ${job.receiptNumber}`
 });
     res.status(201).json({
       message: "รับเครื่องสำเร็จ",
