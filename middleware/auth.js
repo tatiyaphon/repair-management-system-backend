@@ -33,8 +33,7 @@ module.exports = async (req, res, next) => {
 await Employee.findByIdAndUpdate(
   req.user.userId,
   {
-    lastSeen: new Date(),
-    online: true
+    lastSeen: new Date()
   }
 );
 

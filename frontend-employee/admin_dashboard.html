@@ -1144,13 +1144,9 @@ function renderUsersTable(users) {
 
   users.forEach(u => {
 
-    const isOnline =
-      u.lastSeen &&
-      (Date.now() - new Date(u.lastSeen).getTime()) < 5 * 60 * 1000;
-
-    const statusHtml = isOnline
-      ? `<span class="status-online">● ออนไลน์</span>`
-      : `<span class="status-offline">● ออฟไลน์</span>`;
+    const statusHtml = u.isOnline
+  ? `<span class="status-online">● ออนไลน์</span>`
+  : `<span class="status-offline">● ออฟไลน์</span>`;
 
     const tr = document.createElement("tr");
 
