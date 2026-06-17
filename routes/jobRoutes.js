@@ -100,13 +100,11 @@ router.put("/:id/complete", auth, async (req, res) => {
        🔥 ACTIVITY LOG
     ========================= */
     await Activity.create({
-      userId: req.user.userId,
-      userName: req.user.userName || "Unknown",
-      action: "COMPLETE_JOB",
-      detail: `ปิดงาน ${job.receiptNumber} (${oldStatus} → ซ่อมเสร็จ)`,
-      jobId: job._id,
-      ipAddress: req.ip
-    });
+  action: "CREATE_JOB",
+  user: req.user.userId,
+  job: job._id,
+  description: `สร้างงานใหม่ ${receiptNumber}`
+});
 
     res.json({
       message: "ปิดงานเรียบร้อย",
