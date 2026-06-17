@@ -200,11 +200,11 @@ router.post("/", auth, async (req, res) => {
        🔥 ACTIVITY LOG
     ========================= */
 
-   await Activity.create({
-  action: "CREATE_JOB",
+  await Activity.create({
+  action: "COMPLETE_JOB",
   user: req.user.userId,
   job: job._id,
-  description: `สร้างงานใหม่ ${job.receiptNumber}`
+  description: `ปิดงาน ${job.receiptNumber}`
 });
     res.status(201).json({
       message: "รับเครื่องสำเร็จ",
