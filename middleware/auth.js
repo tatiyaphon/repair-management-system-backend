@@ -23,19 +23,23 @@ module.exports = async (req, res, next) => {
       role: decoded.role
     };
 
-   console.log(
-  "LASTSEEN UPDATE:",
-  req.user.userId,
-  req.user.role,
-  new Date()
-);
+    // FIX: อัปเดต lastSeen + ดึงชื่อผู้ใช้มาแนบใน req.user
+    // (แยก try-catch ออกมาเอง ป้องกัน DB ช้า/ล่ม แล้วทำให้ request ทั้งหมดพังตามไปด้วย)
+    try {
+      const emp = await Employee.findByIdAndUpdate(
+        req.user.userId,
+        { lastSeen: new Date() },
+        { new: true, select: "firstName lastName" }
+      );
 
-await Employee.findByIdAndUpdate(
-  req.user.userId,
-  {
-    lastSeen: new Date()
-  }
-);
+      // FIX: เดิม activity log ทุกที่อ้าง req.user.userName แต่ไม่เคยถูกเซ็ตค่า
+      // ทำให้ log บันทึกเป็น "Unknown" เสมอ ตอนนี้เซ็ตให้ใช้งานได้จริง
+      if (emp) {
+        req.user.userName = `${emp.firstName || ""} ${emp.lastName || ""}`.trim();
+      }
+    } catch (lastSeenErr) {
+      console.error("LASTSEEN UPDATE FAILED (ไม่กระทบ request หลัก):", lastSeenErr.message);
+    }
 
     next();
 
