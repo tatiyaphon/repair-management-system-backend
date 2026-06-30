@@ -1,8 +1,6 @@
 const express = require("express");
 const bcrypt = require("bcryptjs");
-const path = require("path");
 const Employee = require("../models/Employee");
-const multer = require("multer");
 const verifyToken = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 const jwt = require("jsonwebtoken");
@@ -16,7 +14,7 @@ const router = express.Router();
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
   port: 587,
-  secure: false, // สำคัญมาก
+  secure: false,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
@@ -24,11 +22,8 @@ const transporter = nodemailer.createTransport({
   tls: {
     rejectUnauthorized: false
   },
-  family: 4 // 👈 บังคับใช้ IPv4
+  family: 4
 });
-
-
-
 
 /* =====================================
    GET /api/employees (admin)
@@ -76,6 +71,13 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
       return res.status(400).json({ message: "ข้อมูลไม่ครบ" });
     }
 
+    // FIX: เดิมไม่มีการเช็คความยาวรหัสผ่านตอนแอดมินสร้าง user ใหม่เลย
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"
+      });
+    }
+
     email = email.trim().toLowerCase();
 
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -109,9 +111,6 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
       isVerified: true
     });
 
-    /* ==========================
-       ส่งเมลแบบไม่ทำให้ระบบล้ม
-    ========================== */
     try {
       const verifyToken = jwt.sign(
         { id: user._id },
@@ -137,7 +136,6 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
       })
       .then(() => console.log("✅ Email sent successfully"))
       .catch(err => console.error("❌ Email send failed:", err.message));
-
 
     } catch (mailErr) {
       console.error("❌ Email send failed:", mailErr.message);
@@ -249,6 +247,7 @@ router.get("/me", verifyToken, async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
 /* =====================================
    SEND RESET LINK (admin)
 ===================================== */
@@ -277,7 +276,7 @@ router.post("/:id/send-reset-link",
 
       const msg = {
         to: user.email,
-        from: process.env.EMAIL_USER, // ต้องเป็นเมลที่ verify ใน SendGrid
+        from: process.env.EMAIL_USER,
         subject: "รีเซ็ตรหัสผ่านระบบร้านตุ้ยไอที",
         html: `
           <h2>รีเซ็ตรหัสผ่าน</h2>
@@ -300,6 +299,7 @@ router.post("/:id/send-reset-link",
     }
   }
 );
+
 router.post("/forgot-password", async (req, res) => {
   try {
     const { email } = req.body;
@@ -310,9 +310,9 @@ router.post("/forgot-password", async (req, res) => {
 
     const emailLower = email.trim().toLowerCase();
 
-const user = await Employee.findOne({
-  email: { $regex: new RegExp(`^${emailLower}$`, "i") }
-});
+    const user = await Employee.findOne({
+      email: { $regex: new RegExp(`^${emailLower}$`, "i") }
+    });
 
     if (!user) {
       return res.status(404).json({ message: "ไม่พบอีเมลนี้" });
@@ -352,40 +352,39 @@ const user = await Employee.findOne({
     res.status(500).json({ message: "ส่งลิงก์ไม่สำเร็จ" });
   }
 });
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, "public/uploads/profile");
-  },
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + ext);
-  }
-});
-const upload = multer({ storage });
+
+// FIX: เดิมสร้าง multer storage ของตัวเองที่นี่ ซ้ำซ้อนกับ middleware/uploadAvatar.js
+// ที่มีอยู่แล้ว (และตั้งชื่อไฟล์เป็น Date.now() ทำให้ไฟล์เก่าค้างสะสมไม่ถูกลบ)
+// เปลี่ยนมาใช้ uploadAvatar.js แทน เหลือระบบอัปโหลด avatar ทางเดียว
+const uploadAvatar = require("../middleware/uploadAvatar");
 
 router.post(
   "/profile/avatar",
   verifyToken,
-  upload.single("avatar"),
+  uploadAvatar.single("avatar"),
   async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          message: "ไม่ได้เลือกไฟล์"
+        });
+      }
 
-    if (!req.file) {
-      return res.status(400).json({
-        message: "ไม่ได้เลือกไฟล์"
+      const avatarPath = `/uploads/profile/${req.file.filename}`;
+
+      await Employee.findByIdAndUpdate(
+        req.user.userId,
+        { avatar: avatarPath }
+      );
+
+      res.json({
+        avatar: avatarPath
       });
+
+    } catch (err) {
+      console.error("UPLOAD AVATAR ERROR:", err);
+      res.status(500).json({ message: "อัปโหลดรูปไม่สำเร็จ" });
     }
-
-    const avatarPath = `/uploads/profile/${req.file.filename}`;
-
-    await Employee.findByIdAndUpdate(
-      req.user.userId,
-      { avatar: avatarPath }
-    );
-
-    res.json({
-      avatar: avatarPath
-    });
-
   }
 );
 module.exports = router;
