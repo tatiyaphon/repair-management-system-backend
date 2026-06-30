@@ -22,11 +22,6 @@ app.set("trust proxy", 1);
    MIDDLEWARE
 ========================= */
 
-// 🔐 Security Headers
-/* =========================
-   MIDDLEWARE
-========================= */
-
 // 🔐 Security Headers (ปิด CSP เพราะเว็บใช้ inline script)
 app.use(
   helmet({
@@ -64,7 +59,6 @@ app.use(express.static(path.join(__dirname, "public")));
 app.use("/employee", express.static(path.join(__dirname, "frontend-employee")));
 app.use("/customer", express.static(path.join(__dirname, "public/customer")));
 app.use("/uploads",  express.static(path.join(__dirname, "public/uploads")));
-app.use("/customer", express.static(path.join(__dirname, "public")));
 /* =========================
    ROOT
 ========================= */
@@ -81,6 +75,10 @@ app.use("/api/customers", require("./routes/customers"));
 app.use("/api/stocks",    require("./routes/stock"));
 app.use("/api/jobs",      require("./routes/jobRoutes"));
 app.use("/api/activity", require("./routes/activityRoutes"));
+
+// FIX: เดิมมี errorHandler.js เขียนไว้แต่ไม่เคยถูก app.use() จริง
+// ทำให้ error ที่หลุดจาก middleware/route แบบ sync ไม่มี fallback ที่ดี
+app.use(require("./middleware/errorHandler"));
 
 
 
@@ -125,6 +123,10 @@ async function ensureAdmin() {
     password:  hash,
     role:      "admin",
     active:    true,
+    // FIX: เดิมไม่ได้ตั้งค่านี้ ทำให้ login route เช็ค isVerified แล้วบล็อก
+    // admin คนแรกที่ระบบ seed ให้ ไม่สามารถเข้าระบบได้เลยตั้งแต่ deploy ครั้งแรก
+    isVerified: true,
+    mustChangePassword: false,
   });
 
   console.log("👑 Admin account created");
