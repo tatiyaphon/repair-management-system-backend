@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Job = require("../models/Job");
 const auth = require("../middleware/auth");
-const puppeteer = require("puppeteer");
+// FIX: เดิม import puppeteer ไว้แต่ route ด้านล่างไม่เคยเรียกใช้จริง
+// (แค่ res.send HTML ไม่ได้ render เป็น PDF) จึงเอาออกเพื่อลด dependency ที่ไม่จำเป็น
 const Stock = require("../models/Stock");
 const Activity = require("../models/ActivityLog");
 
@@ -28,7 +29,6 @@ router.get("/my", auth, async (req, res) => {
     let query = {};
 
     if (req.user.role === "tech") {
-      // ✅ จุดชี้ชะตา
       query = { assignedTo: req.user.userId };
     } else if (req.user.role === "staff") {
       query = { createdBy: req.user.userId };
@@ -53,9 +53,16 @@ router.get("/my", auth, async (req, res) => {
 ================================================== */
 router.get("/receipt/:receiptNumber", async (req, res) => {
   try {
+    // FIX: เดิม res.json(job) ส่งทั้ง document กลับไปดิบๆ
+    // รวมถึง createdBy/assignedTo (ข้อมูลพนักงาน) และ usedParts
+    // เป็น route public ไม่ต้อง login จึงเลือกเฉพาะ field ที่ลูกค้าควรเห็น
     const job = await Job.findOne({
       receiptNumber: req.params.receiptNumber
-    });
+    }).select(
+      "receiptNumber customerName customerPhone customerAddress " +
+      "deviceType deviceModel symptom accessory jobType status " +
+      "priceQuoted receivedDate startDate finishDate"
+    );
 
     if (!job) {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
@@ -77,7 +84,6 @@ router.put("/:id/complete", auth, async (req, res) => {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
 
-    // 🔒 กันสิทธิ์ (เฉพาะ admin หรือ tech ที่รับผิดชอบงาน)
     if (
       req.user.role !== "admin" &&
       job.assignedTo?.toString() !== req.user.userId
@@ -85,7 +91,6 @@ router.put("/:id/complete", auth, async (req, res) => {
       return res.status(403).json({ message: "ไม่มีสิทธิ์ปิดงานนี้" });
     }
 
-    // กันปิดซ้ำ
     if (job.status === "ซ่อมเสร็จ") {
       return res.status(400).json({ message: "งานนี้ถูกปิดแล้ว" });
     }
@@ -96,15 +101,14 @@ router.put("/:id/complete", auth, async (req, res) => {
     job.finishDate = new Date();
     await job.save();
 
-    /* =========================
-       🔥 ACTIVITY LOG
-    ========================= */
     await Activity.create({
-  action: "CREATE_JOB",
-  user: req.user.userId,
-  job: job._id,
-  description: `สร้างงานใหม่ ${receiptNumber}`
-});
+      userId: req.user.userId,
+      userName: req.user.userName || "Unknown",
+      action: "COMPLETE_JOB",
+      detail: `ปิดงาน ${job.receiptNumber} (สถานะ: ${oldStatus} → ซ่อมเสร็จ)`,
+      jobId: job._id,
+      ipAddress: req.ip
+    });
 
     res.json({
       message: "ปิดงานเรียบร้อย",
@@ -118,16 +122,6 @@ router.put("/:id/complete", auth, async (req, res) => {
     });
   }
 });
-
-/* ==================================================
-   GET /api/jobs (พนักงาน / แอดมิน)
-================================================== */
-
-
-/* ==================================================
-   GET /api/jobs/my
-================================================== */
-
 
 /* ==================================================
    POST /api/jobs
@@ -158,9 +152,6 @@ router.post("/", auth, async (req, res) => {
       });
     }
 
-    /* =========================
-       GENERATE RECEIPT NUMBER (กันชน)
-    ========================= */
     const now = new Date();
     const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
 
@@ -177,9 +168,6 @@ router.post("/", auth, async (req, res) => {
     const receiptNumber =
       `IN${dateStr}-${String(countToday + 1).padStart(3, "0")}`;
 
-    /* =========================
-       CREATE JOB
-    ========================= */
     const job = await Job.create({
       customerName: customerName.trim(),
       customerPhone: customerPhone || "-",
@@ -196,16 +184,15 @@ router.post("/", auth, async (req, res) => {
       assignedTo: assignedTo || null
     });
 
-    /* =========================
-       🔥 ACTIVITY LOG
-    ========================= */
+    await Activity.create({
+      userId: req.user.userId,
+      userName: req.user.userName || "Unknown",
+      action: "CREATE_JOB",
+      detail: `รับเครื่องใหม่ ${job.receiptNumber}`,
+      jobId: job._id,
+      ipAddress: req.ip
+    });
 
-  await Activity.create({
-  action: "COMPLETE_JOB",
-  user: req.user.userId,
-  job: job._id,
-  description: `ปิดงาน ${job.receiptNumber}`
-});
     res.status(201).json({
       message: "รับเครื่องสำเร็จ",
       job
@@ -218,6 +205,7 @@ router.post("/", auth, async (req, res) => {
     });
   }
 });
+
 /* ==================================================
    PUT /api/jobs/:id
    อัปเดตข้อมูลงานซ่อม (สถานะ / วันที่ / ราคา)
@@ -230,7 +218,6 @@ router.put("/:id", auth, async (req, res) => {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
 
-    // 🔒 ตรวจสิทธิ์
     if (
       req.user.role !== "admin" &&
       job.assignedTo?.toString() !== req.user.userId
@@ -240,9 +227,6 @@ router.put("/:id", auth, async (req, res) => {
 
     const oldStatus = job.status;
 
-    /* =========================
-       🔧 HELPER
-    ========================= */
     const cleanDate = (v) => (v === "" || v === null ? null : v);
 
     const cleanNumber = (v) => {
@@ -256,18 +240,8 @@ router.put("/:id", auth, async (req, res) => {
       "รออะไหล่",
       "ซ่อมเสร็จ",
       "ยกเลิก"
-   ];
+    ];
 
-    /* =========================
-       🔥 DEBUG (ดูค่าจริง)
-    ========================= */
-    console.log("BODY:", req.body);
-
-    /* =========================
-       UPDATE DATA
-    ========================= */
-
-    // 📅 วันที่
     if (req.body.receivedDate !== undefined) {
       job.receivedDate = cleanDate(req.body.receivedDate);
     }
@@ -280,14 +254,12 @@ router.put("/:id", auth, async (req, res) => {
       job.finishDate = cleanDate(req.body.finishDate);
     }
 
-    // 📊 สถานะ (สำคัญสุด)
     if (req.body.status !== undefined) {
       const status = String(req.body.status)
         .trim()
         .replace(/\s+/g, " ");
 
       if (!validStatus.includes(status)) {
-        console.log("❌ INVALID STATUS:", status);
         return res.status(400).json({
           message: "สถานะไม่ถูกต้อง"
         });
@@ -296,21 +268,16 @@ router.put("/:id", auth, async (req, res) => {
       job.status = status;
     }
 
-    // 💰 ราคา
     if (req.body.priceQuoted !== undefined) {
       job.priceQuoted = cleanNumber(req.body.priceQuoted);
     }
 
-    // 🛠 ประเภทงาน
     if (req.body.jobType !== undefined) {
       job.jobType = req.body.jobType || null;
     }
 
     await job.save();
 
-    /* =========================
-       🔥 ACTIVITY LOG
-    ========================= */
     try {
       await Activity.create({
         userId: req.user.userId,
@@ -324,9 +291,6 @@ router.put("/:id", auth, async (req, res) => {
       console.error("ACTIVITY LOG ERROR:", logErr);
     }
 
-    /* =========================
-       RESPONSE
-    ========================= */
     res.json({
       message: "อัปเดตงานซ่อมสำเร็จ",
       job
@@ -335,7 +299,6 @@ router.put("/:id", auth, async (req, res) => {
   } catch (err) {
     console.error("UPDATE JOB ERROR:", err);
 
-    // 🔥 แยก error enum ให้ดูง่าย
     if (err.name === "ValidationError") {
       return res.status(400).json({
         message: "ข้อมูลไม่ถูกต้อง (Validation Error)",
@@ -349,8 +312,6 @@ router.put("/:id", auth, async (req, res) => {
   }
 });
 
-// POST /api/jobs/:id/withdraw
-// routes/jobRoutes.js
 router.post("/:id/use-part", auth, async (req, res) => {
   try {
     const { stockId, quantity } = req.body;
@@ -361,17 +322,11 @@ router.post("/:id/use-part", auth, async (req, res) => {
       });
     }
 
-    /* =========================
-       1️⃣ หา Job
-    ========================= */
     const job = await Job.findById(req.params.id);
     if (!job) {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
 
-    /* =========================
-       🔐 เช็คสิทธิ์
-    ========================= */
     if (
       req.user.role !== "admin" &&
       job.assignedTo?.toString() !== req.user.userId
@@ -381,9 +336,6 @@ router.post("/:id/use-part", auth, async (req, res) => {
       });
     }
 
-    /* =========================
-       2️⃣ หา Stock
-    ========================= */
     const stock = await Stock.findById(stockId);
     if (!stock) {
       return res.status(404).json({ message: "ไม่พบอะไหล่" });
@@ -395,9 +347,6 @@ router.post("/:id/use-part", auth, async (req, res) => {
       });
     }
 
-    /* =========================
-       3️⃣ ตัดสต็อก
-    ========================= */
     stock.quantity -= quantity;
 
     stock.withdrawHistory.push({
@@ -409,23 +358,19 @@ router.post("/:id/use-part", auth, async (req, res) => {
 
     await stock.save();
 
-    /* =========================
-       4️⃣ บันทึกในงาน
-    ========================= */
     job.usedParts = job.usedParts || [];
 
+    // FIX: schema Job.usedParts กำหนด field อ้างอิงว่า "stock" ไม่ใช่ "stockId"
     job.usedParts.push({
-      stockId: stock._id,
+      stock: stock._id,
       name: stock.name,
       model: stock.model,
-      quantity
+      quantity,
+      usedAt: new Date()
     });
 
     await job.save();
 
-    /* =========================
-       5️⃣ Activity Log
-    ========================= */
     await Activity.create({
       userId: req.user.userId,
       userName: req.user.userName || "Unknown",
@@ -443,16 +388,9 @@ router.post("/:id/use-part", auth, async (req, res) => {
   }
 });
 
-
-
-/* ==================================================
-   PUT /api/jobs/:id/complete
-================================================== */
-
-
 /* ==================================================
    GET /api/jobs/:id/receipt
-   สร้าง PDF ใบรับเครื่อง (Render ใช้ได้)
+   สร้างใบรับเครื่อง (แสดงเป็นหน้า HTML ให้กด print เอง)
 ================================================== */
 router.get("/:id/receipt", auth, async (req, res)=> {
   try {
@@ -482,17 +420,14 @@ body{
 
 .container{
   width: 100%;
-  min-height: calc(297mm - 30mm); /* A4 - margin บนล่าง */
+  min-height: calc(297mm - 30mm);
   box-sizing: border-box;
   margin: 0 auto;
   padding: 20mm;
   background:#fff;
-  /* แถบสีซ้าย */
   border-left: 8px solid #facc15;
 }
 
-
-/* ===== HEADER ===== */
 .header{
   display:flex;
   justify-content:space-between;
@@ -538,7 +473,6 @@ body{
   margin-top:4px;
 }
 
-/* ===== INFO ===== */
 .info{
   display:grid;
   grid-template-columns:2fr 1fr;
@@ -580,7 +514,6 @@ body{
   border:1px solid #10b981;
 }
 
-/* ===== TABLE ===== */
 table{
   width:100%;
   border-collapse:collapse;
@@ -598,7 +531,6 @@ tbody td{
   font-size:14px;
 }
 
-/* ===== PRICE ===== */
 .price-box{
   margin-top:18px;
   text-align:right;
@@ -610,7 +542,6 @@ tbody td{
   font-weight:700;
 }
 
-/* ===== TERMS ===== */
 .terms{
   margin-top:22px;
   background:#fff7ed;
@@ -619,7 +550,6 @@ tbody td{
   font-size:13px;
 }
 
-/* ===== SIGN ===== */
 .sign{
   margin-top:60px;
   display:flex;
@@ -633,7 +563,6 @@ tbody td{
   font-size:14px;
 }
 
-/* PRINT */
 .print-btn{
   display:block;
   width:200px;
@@ -665,7 +594,6 @@ tbody td{
 <body>
 <div class="container">
 
-  <!-- HEADER -->
   <div class="header">
     <div class="shop">
       <img src="https://www.tui-it.org/customer/logo1.png" class="logo">
@@ -682,8 +610,7 @@ tbody td{
       <div>วันที่ ${new Date(job.receivedDate).toLocaleDateString("th-TH")}</div>
     </div>
   </div>
-      
-  <!-- INFO -->
+
   <div class="info">
     <div class="box">
       <h3>ข้อมูลลูกค้า</h3>
@@ -703,7 +630,6 @@ tbody td{
     </div>
   </div>
 
-  <!-- TABLE -->
   <table>
     <thead>
       <tr>
@@ -721,13 +647,11 @@ tbody td{
     </tbody>
   </table>
 
-  <!-- PRICE -->
   <div class="price-box">
     ราคาประเมินรวม :
     <span>${(job.priceQuoted ?? 0).toLocaleString()} บาท</span>
   </div>
 
-  <!-- TERMS -->
   <div class="terms">
     <strong>เงื่อนไขการรับบริการ</strong><br>
     1. กรุณานำใบรับเครื่องมาแสดงเมื่อรับเครื่องคืน<br>
@@ -735,7 +659,6 @@ tbody td{
     3. ไม่มารับเครื่องภายใน 90 วัน ร้านขอสงวนสิทธิ์
   </div>
 
-  <!-- SIGN -->
   <div class="sign">
     <div class="line">ผู้ส่งเครื่องซ่อม<br>(${job.customerName})</div>
     <div class="line">ผู้รับเครื่อง<br>(ร้านตุ้ยไอที)</div>
