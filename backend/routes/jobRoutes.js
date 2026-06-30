@@ -1,0 +1,795 @@
+const express = require("express");
+const router = express.Router();
+const Job = require("../models/Job");
+const auth = require("../middleware/auth");
+// FIX: เดิม import puppeteer ไว้แต่ route ด้านล่างไม่เคยเรียกใช้จริง
+// (แค่ res.send HTML ไม่ได้ render เป็น PDF) จึงเอาออกเพื่อลด dependency ที่ไม่จำเป็น
+const Stock = require("../models/Stock");
+const Activity = require("../models/ActivityLog");
+
+console.log("✅ jobRoutes loaded");
+
+// ✅ DASHBOARD: ทุก role เห็นทุกงาน
+router.get("/", auth, async (req, res) => {
+  try {
+    const jobs = await Job.find({})
+      .populate("createdBy", "firstName lastName role")
+      .populate("assignedTo", "firstName lastName")
+      .sort({ createdAt: -1 });
+
+    res.json(jobs);
+  } catch (err) {
+    console.error("GET /api/jobs ERROR:", err);
+    res.status(500).json({ message: "โหลดข้อมูลงานซ่อมไม่สำเร็จ" });
+  }
+});
+
+router.get("/my", auth, async (req, res) => {
+  try {
+    let query = {};
+
+    if (req.user.role === "tech") {
+      // ✅ จุดชี้ชะตา
+      query = { assignedTo: req.user.userId };
+    } else if (req.user.role === "staff") {
+      query = { createdBy: req.user.userId };
+    } else if (req.user.role === "admin") {
+      query = {};
+    }
+
+    const jobs = await Job.find(query)
+      .populate("assignedTo", "firstName lastName")
+      .sort({ createdAt: -1 });
+
+    res.json(jobs);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "โหลดงานของฉันไม่สำเร็จ" });
+  }
+});
+
+/* ==================================================
+   GET /api/jobs/receipt/:receiptNumber
+   ลูกค้าเช็คสถานะงานซ่อม (ไม่ต้อง login)
+================================================== */
+router.get("/receipt/:receiptNumber", async (req, res) => {
+  try {
+    // FIX: เดิม res.json(job) ส่งทั้ง document กลับไปดิบๆ
+    // รวมถึง createdBy/assignedTo (ข้อมูลพนักงาน) และ usedParts
+    // เป็น route public ไม่ต้อง login จึงเลือกเฉพาะ field ที่ลูกค้าควรเห็น
+    const job = await Job.findOne({
+      receiptNumber: req.params.receiptNumber
+    }).select(
+      "receiptNumber customerName customerPhone customerAddress " +
+      "deviceType deviceModel symptom accessory jobType status " +
+      "priceQuoted receivedDate startDate finishDate"
+    );
+
+    if (!job) {
+      return res.status(404).json({ message: "ไม่พบงานซ่อม" });
+    }
+
+    res.json(job);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+router.put("/:id/complete", auth, async (req, res) => {
+  try {
+
+    const job = await Job.findById(req.params.id);
+    if (!job) {
+      return res.status(404).json({ message: "ไม่พบงานซ่อม" });
+    }
+
+    // 🔒 กันสิทธิ์ (เฉพาะ admin หรือ tech ที่รับผิดชอบงาน)
+    if (
+      req.user.role !== "admin" &&
+      job.assignedTo?.toString() !== req.user.userId
+    ) {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์ปิดงานนี้" });
+    }
+
+    // กันปิดซ้ำ
+    if (job.status === "ซ่อมเสร็จ") {
+      return res.status(400).json({ message: "งานนี้ถูกปิดแล้ว" });
+    }
+
+    const oldStatus = job.status;
+
+    job.status = "ซ่อมเสร็จ";
+    job.finishDate = new Date();
+    await job.save();
+
+    /* =========================
+       🔥 ACTIVITY LOG
+       FIX: เดิมใช้ action "CREATE_JOB" (label สลับกับ route POST /)
+            และอ้างตัวแปร receiptNumber ที่ไม่เคยถูกประกาศ -> ReferenceError
+            ทำให้ "ปิดงาน" พังทุกครั้ง ตอนนี้แก้เป็น action ที่ถูกต้อง
+            และใช้ field ให้ตรงกับ schema (userId/userName/jobId/detail)
+    ========================= */
+    await Activity.create({
+      userId: req.user.userId,
+      userName: req.user.userName || "Unknown",
+      action: "COMPLETE_JOB",
+      detail: `ปิดงาน ${job.receiptNumber} (สถานะ: ${oldStatus} → ซ่อมเสร็จ)`,
+      jobId: job._id,
+      ipAddress: req.ip
+    });
+
+    res.json({
+      message: "ปิดงานเรียบร้อย",
+      job
+    });
+
+  } catch (err) {
+    console.error("COMPLETE JOB ERROR:", err);
+    res.status(500).json({
+      message: "ไม่สามารถปิดงานได้"
+    });
+  }
+});
+
+/* ==================================================
+   GET /api/jobs (พนักงาน / แอดมิน)
+================================================== */
+
+
+/* ==================================================
+   GET /api/jobs/my
+================================================== */
+
+
+/* ==================================================
+   POST /api/jobs
+   รับเครื่องใหม่
+================================================== */
+router.post("/", auth, async (req, res) => {
+  try {
+
+    if (!req.user || !req.user.userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const {
+      customerName,
+      customerPhone,
+      customerAddress,
+      deviceType,
+      deviceModel,
+      symptom,
+      accessory,
+      priceQuoted,
+      assignedTo
+    } = req.body;
+
+    if (!customerName || !deviceType || !deviceModel || !symptom) {
+      return res.status(400).json({
+        message: "กรุณากรอกข้อมูลให้ครบถ้วน"
+      });
+    }
+
+    /* =========================
+       GENERATE RECEIPT NUMBER (กันชน)
+    ========================= */
+    const now = new Date();
+    const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
+
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date();
+    end.setHours(23, 59, 59, 999);
+
+    const countToday = await Job.countDocuments({
+      createdAt: { $gte: start, $lte: end }
+    });
+
+    const receiptNumber =
+      `IN${dateStr}-${String(countToday + 1).padStart(3, "0")}`;
+
+    /* =========================
+       CREATE JOB
+    ========================= */
+    const job = await Job.create({
+      customerName: customerName.trim(),
+      customerPhone: customerPhone || "-",
+      customerAddress: customerAddress || "-",
+      receiptNumber,
+      deviceType,
+      deviceModel,
+      symptom,
+      accessory,
+      priceQuoted: Number(priceQuoted) || 0,
+      status: "รับเครื่อง",
+      receivedDate: new Date(),
+      createdBy: req.user.userId,
+      assignedTo: assignedTo || null
+    });
+
+    /* =========================
+       🔥 ACTIVITY LOG
+       FIX: เดิมใช้ action "COMPLETE_JOB" (label สลับกับ route /:id/complete)
+            ทำให้ activity_log.html filter ผิดมาตลอด แก้เป็น "CREATE_JOB"
+            และใช้ field ให้ตรงกับ schema (userId/userName/jobId/detail)
+    ========================= */
+    await Activity.create({
+      userId: req.user.userId,
+      userName: req.user.userName || "Unknown",
+      action: "CREATE_JOB",
+      detail: `รับเครื่องใหม่ ${job.receiptNumber}`,
+      jobId: job._id,
+      ipAddress: req.ip
+    });
+
+    res.status(201).json({
+      message: "รับเครื่องสำเร็จ",
+      job
+    });
+
+  } catch (err) {
+    console.error("POST /api/jobs ERROR =", err);
+    res.status(500).json({
+      message: "บันทึกงานซ่อมไม่สำเร็จ"
+    });
+  }
+});
+/* ==================================================
+   PUT /api/jobs/:id
+   อัปเดตข้อมูลงานซ่อม (สถานะ / วันที่ / ราคา)
+================================================== */
+router.put("/:id", auth, async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({ message: "ไม่พบงานซ่อม" });
+    }
+
+    // 🔒 ตรวจสิทธิ์
+    if (
+      req.user.role !== "admin" &&
+      job.assignedTo?.toString() !== req.user.userId
+    ) {
+      return res.status(403).json({ message: "ไม่มีสิทธิ์แก้ไขงานนี้" });
+    }
+
+    const oldStatus = job.status;
+
+    /* =========================
+       🔧 HELPER
+    ========================= */
+    const cleanDate = (v) => (v === "" || v === null ? null : v);
+
+    const cleanNumber = (v) => {
+      const n = Number(v);
+      return isNaN(n) ? 0 : n;
+    };
+
+    const validStatus = [
+      "รับเครื่อง",
+      "กำลังซ่อม",
+      "รออะไหล่",
+      "ซ่อมเสร็จ",
+      "ยกเลิก"
+   ];
+
+    /* =========================
+       🔥 DEBUG (ดูค่าจริง)
+    ========================= */
+    console.log("BODY:", req.body);
+
+    /* =========================
+       UPDATE DATA
+    ========================= */
+
+    // 📅 วันที่
+    if (req.body.receivedDate !== undefined) {
+      job.receivedDate = cleanDate(req.body.receivedDate);
+    }
+
+    if (req.body.startDate !== undefined) {
+      job.startDate = cleanDate(req.body.startDate);
+    }
+
+    if (req.body.finishDate !== undefined) {
+      job.finishDate = cleanDate(req.body.finishDate);
+    }
+
+    // 📊 สถานะ (สำคัญสุด)
+    if (req.body.status !== undefined) {
+      const status = String(req.body.status)
+        .trim()
+        .replace(/\s+/g, " ");
+
+      if (!validStatus.includes(status)) {
+        console.log("❌ INVALID STATUS:", status);
+        return res.status(400).json({
+          message: "สถานะไม่ถูกต้อง"
+        });
+      }
+
+      job.status = status;
+    }
+
+    // 💰 ราคา
+    if (req.body.priceQuoted !== undefined) {
+      job.priceQuoted = cleanNumber(req.body.priceQuoted);
+    }
+
+    // 🛠 ประเภทงาน
+    if (req.body.jobType !== undefined) {
+      job.jobType = req.body.jobType || null;
+    }
+
+    await job.save();
+
+    /* =========================
+       🔥 ACTIVITY LOG
+    ========================= */
+    try {
+      await Activity.create({
+        userId: req.user.userId,
+        userName: req.user.userName || "Unknown",
+        action: "UPDATE_JOB",
+        detail: `แก้ไขงาน ${job.receiptNumber || "-"} (สถานะ: ${oldStatus} → ${job.status})`,
+        jobId: job._id,
+        ipAddress: req.ip
+      });
+    } catch (logErr) {
+      console.error("ACTIVITY LOG ERROR:", logErr);
+    }
+
+    /* =========================
+       RESPONSE
+    ========================= */
+    res.json({
+      message: "อัปเดตงานซ่อมสำเร็จ",
+      job
+    });
+
+  } catch (err) {
+    console.error("UPDATE JOB ERROR:", err);
+
+    // 🔥 แยก error enum ให้ดูง่าย
+    if (err.name === "ValidationError") {
+      return res.status(400).json({
+        message: "ข้อมูลไม่ถูกต้อง (Validation Error)",
+        error: err.message
+      });
+    }
+
+    res.status(500).json({
+      message: "อัปเดตงานซ่อมไม่สำเร็จ"
+    });
+  }
+});
+
+// POST /api/jobs/:id/withdraw
+// routes/jobRoutes.js
+router.post("/:id/use-part", auth, async (req, res) => {
+  try {
+    const { stockId, quantity } = req.body;
+
+    if (!stockId || !quantity || quantity <= 0) {
+      return res.status(400).json({
+        message: "ข้อมูลไม่ครบหรือจำนวนไม่ถูกต้อง"
+      });
+    }
+
+    /* =========================
+       1️⃣ หา Job
+    ========================= */
+    const job = await Job.findById(req.params.id);
+    if (!job) {
+      return res.status(404).json({ message: "ไม่พบงานซ่อม" });
+    }
+
+    /* =========================
+       🔐 เช็คสิทธิ์
+    ========================= */
+    if (
+      req.user.role !== "admin" &&
+      job.assignedTo?.toString() !== req.user.userId
+    ) {
+      return res.status(403).json({
+        message: "ไม่มีสิทธิ์เบิกอะไหล่ในงานนี้"
+      });
+    }
+
+    /* =========================
+       2️⃣ หา Stock
+    ========================= */
+    const stock = await Stock.findById(stockId);
+    if (!stock) {
+      return res.status(404).json({ message: "ไม่พบอะไหล่" });
+    }
+
+    if (stock.quantity < quantity) {
+      return res.status(400).json({
+        message: "จำนวนอะไหล่ไม่เพียงพอ"
+      });
+    }
+
+    /* =========================
+       3️⃣ ตัดสต็อก
+    ========================= */
+    stock.quantity -= quantity;
+
+    stock.withdrawHistory.push({
+      quantity,
+      employeeName: req.user.userName || "Unknown",
+      jobRef: job.receiptNumber,
+      withdrawnAt: new Date()
+    });
+
+    await stock.save();
+
+    /* =========================
+       4️⃣ บันทึกในงาน
+    ========================= */
+    job.usedParts = job.usedParts || [];
+
+    // FIX: schema Job.usedParts กำหนด field อ้างอิงว่า "stock" ไม่ใช่ "stockId"
+    // เดิมใช้ "stockId" ทำให้ mongoose ตัดทิ้งเงียบๆ และเสียการอ้างอิงไปยัง Stock จริง
+    job.usedParts.push({
+      stock: stock._id,
+      name: stock.name,
+      model: stock.model,
+      quantity,
+      usedAt: new Date()
+    });
+
+    await job.save();
+
+    /* =========================
+       5️⃣ Activity Log
+    ========================= */
+    await Activity.create({
+      userId: req.user.userId,
+      userName: req.user.userName || "Unknown",
+      action: "USE_PART",
+      detail: `เบิก ${stock.name} x${quantity} สำหรับงาน ${job.receiptNumber}`,
+      jobId: job._id,
+      ipAddress: req.ip
+    });
+
+    res.json({ message: "เบิกอะไหล่สำเร็จ" });
+
+  } catch (err) {
+    console.error("❌ use-part error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+
+
+/* ==================================================
+   PUT /api/jobs/:id/complete
+================================================== */
+
+
+/* ==================================================
+   GET /api/jobs/:id/receipt
+   สร้าง PDF ใบรับเครื่อง (Render ใช้ได้)
+================================================== */
+router.get("/:id/receipt", auth, async (req, res)=> {
+  try {
+    const job = await Job.findById(req.params.id);
+    if (!job) return res.status(404).send("ไม่พบงานซ่อม");
+
+    res.send(`<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ใบรับเครื่องซ่อม</title>
+
+<style>
+@page {
+  size: A4;
+  margin: 15mm;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap');
+
+body{
+ font-family:'Sarabun',sans-serif;
+  margin: 0;
+  padding: 0;
+  background: #fff;
+}
+
+.container{
+  width: 100%;
+  min-height: calc(297mm - 30mm); /* A4 - margin บนล่าง */
+  box-sizing: border-box;
+  margin: 0 auto;
+  padding: 20mm;
+  background:#fff;
+  /* แถบสีซ้าย */
+  border-left: 8px solid #facc15;
+}
+
+
+/* ===== HEADER ===== */
+.header{
+  display:flex;
+  justify-content:space-between;
+  border-bottom:3px solid #f6c200;
+  padding-bottom:18px;
+}
+
+.shop{
+  display:flex;
+  gap:16px;
+  align-items:center;
+}
+
+.logo{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  border:3px solid #0f3c8a;
+  object-fit:contain;
+  background:#fff;
+}
+
+.shop h1{
+  margin:0;
+  font-size:22px;
+  color:#0f3c8a;
+}
+.shop p{
+  margin:2px 0;
+  font-size:13px;
+}
+
+.doc{
+  text-align:right;
+}
+.doc h2{
+  margin:0;
+  color:#0f3c8a;
+}
+.doc .no{
+  color:#b91c1c;
+  font-weight:700;
+  margin-top:4px;
+}
+
+/* ===== INFO ===== */
+.info{
+  display:grid;
+  grid-template-columns:2fr 1fr;
+  gap:20px;
+  margin-top:22px;
+}
+
+.box{
+  border:1px solid #d1d5db;
+  border-radius:8px;
+  padding:14px 16px;
+  background:#f9fafb;
+}
+
+.box h3{
+  margin:0 0 10px;
+  font-size:15px;
+  color:#0f3c8a;
+  border-bottom:1px solid #d1d5db;
+  padding-bottom:6px;
+}
+
+.row{
+  display:flex;
+  font-size:14px;
+  margin-bottom:6px;
+}
+.label{
+  width:90px;
+  font-weight:600;
+}
+
+.badge{
+  background:#dcfce7;
+  color:#047857;
+  padding:4px 14px;
+  border-radius:999px;
+  font-size:13px;
+  border:1px solid #10b981;
+}
+
+/* ===== TABLE ===== */
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:22px;
+}
+thead th{
+  background:#0f3c8a;
+  color:#fff;
+  padding:12px;
+  font-size:14px;
+}
+tbody td{
+  padding:12px;
+  border-bottom:1px solid #e5e7eb;
+  font-size:14px;
+}
+
+/* ===== PRICE ===== */
+.price-box{
+  margin-top:18px;
+  text-align:right;
+  font-size:16px;
+}
+.price-box span{
+  font-size:18px;
+  color:#b91c1c;
+  font-weight:700;
+}
+
+/* ===== TERMS ===== */
+.terms{
+  margin-top:22px;
+  background:#fff7ed;
+  border-left:5px solid #f6c200;
+  padding:14px 16px;
+  font-size:13px;
+}
+
+/* ===== SIGN ===== */
+.sign{
+  margin-top:60px;
+  display:flex;
+  justify-content:space-between;
+  text-align:center;
+}
+.line{
+  width:40%;
+  border-top:1px solid #000;
+  padding-top:6px;
+  font-size:14px;
+}
+
+/* PRINT */
+.print-btn{
+  display:block;
+  width:200px;
+  margin:30px auto 0;
+  padding:12px;
+  background:#0f3c8a;
+  color:#fff;
+  text-align:center;
+  border-radius:999px;
+  cursor:pointer;
+}
+@media print {
+  body{
+    background:#fff;
+  }
+
+  .container{
+    box-shadow: none;
+    border-radius: 0;
+  }
+
+  .btn-print{
+    display:none;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="shop">
+      <img src="https://www.tui-it.org/customer/logo1.png" class="logo">
+      <div>
+        <h1>ร้านตุ้ยไอที โคราช</h1>
+        <p>ศูนย์ซ่อมและจำหน่ายอุปกรณ์ไอทีครบวงจร</p>
+        <p>โทร 080-4641677</p>
+      </div>
+    </div>
+
+    <div class="doc">
+      <h2>ใบรับเครื่องซ่อม</h2>
+      <div class="no">No. ${job.receiptNumber}</div>
+      <div>วันที่ ${new Date(job.receivedDate).toLocaleDateString("th-TH")}</div>
+    </div>
+  </div>
+      
+  <!-- INFO -->
+  <div class="info">
+    <div class="box">
+      <h3>ข้อมูลลูกค้า</h3>
+      <div class="row"><div class="label">ชื่อลูกค้า :</div>${job.customerName}</div>
+      <div class="row"><div class="label">เบอร์โทร :</div>${job.customerPhone || "-"}</div>
+      <div class="row"><div class="label">ที่อยู่ :</div>${job.customerAddress || "-"}</div>
+      <div class="row"><div class="label">อุปกรณ์ที่มาด้วย :</div>${job.accessory || "-"}</div>
+      <div class="row"><div class="label">ประเภทงาน :</div>${job.jobType || "-"}</div>
+    </div>
+
+    <div class="box">
+      <h3>สถานะงาน</h3>
+      <div class="row">
+        <div class="label">สถานะ</div>
+        <span class="badge">${job.status}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <table>
+    <thead>
+      <tr>
+        <th width="10%">ลำดับ</th>
+        <th width="50%">รายละเอียดอุปกรณ์</th>
+        <th width="40%">อาการเสีย</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td>1</td>
+        <td><strong>${job.deviceType} ${job.deviceModel}</strong></td>
+        <td>${job.symptom}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- PRICE -->
+  <div class="price-box">
+    ราคาประเมินรวม :
+    <span>${(job.priceQuoted ?? 0).toLocaleString()} บาท</span>
+  </div>
+
+  <!-- TERMS -->
+  <div class="terms">
+    <strong>เงื่อนไขการรับบริการ</strong><br>
+    1. กรุณานำใบรับเครื่องมาแสดงเมื่อรับเครื่องคืน<br>
+    2. ร้านไม่รับผิดชอบข้อมูลภายในเครื่อง<br>
+    3. ไม่มารับเครื่องภายใน 90 วัน ร้านขอสงวนสิทธิ์
+  </div>
+
+  <!-- SIGN -->
+  <div class="sign">
+    <div class="line">ผู้ส่งเครื่องซ่อม<br>(${job.customerName})</div>
+    <div class="line">ผู้รับเครื่อง<br>(ร้านตุ้ยไอที)</div>
+  </div>
+
+</div>
+
+<div class="print-btn" onclick="window.print()">พิมพ์เอกสาร</div>
+</body>
+</html>`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("สร้างใบรับเครื่องไม่สำเร็จ");
+  }
+});
+
+// 🔹 ดึงข้อมูลงานซ่อมตาม ID
+router.get("/:id", auth, async (req, res) => {
+  try {
+    const job = await Job.findById(req.params.id)
+       .populate("assignedTo", "firstName lastName")
+      .populate("createdBy", "firstName lastName");
+
+    if (!job) {
+      return res.status(404).json({ message: "ไม่พบงานซ่อม" });
+    }
+
+    res.json(job);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "ดึงข้อมูลงานไม่สำเร็จ" });
+  }
+});
+
+module.exports = router;

@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Activity Log</title>
+
+<link rel="icon" type="image/png" href="logo1.png">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+body{
+    margin:0;
+    font-family:'Kanit',sans-serif;
+    background:#f4f7fb;
+}
+
+header{
+    background:#1f2937;
+    color:#fff;
+    padding:18px 30px;
+    font-size:1.2rem;
+    font-weight:600;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:40px 20px;
+}
+
+.card{
+    background:#fff;
+    padding:30px;
+    border-radius:18px;
+    box-shadow:0 20px 40px rgba(0,0,0,.08);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+    margin-top:20px;
+}
+
+th,td{
+    padding:14px;
+    text-align:left;
+    border-bottom:1px solid #eee;
+    font-size:.95rem;
+}
+
+th{
+    background:#f9fafb;
+    font-weight:600;
+}
+
+tr:hover{
+    background:#f1f5f9;
+}
+
+select,input{
+    padding:10px 12px;
+    border-radius:10px;
+    border:1px solid #ddd;
+    font-family:'Kanit',sans-serif;
+}
+
+.filters{
+    display:flex;
+    gap:15px;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+}
+
+.badge{
+    padding:5px 10px;
+    border-radius:999px;
+    font-size:.8rem;
+    background:#e0f2fe;
+    color:#0369a1;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+📜 Activity Log
+</header>
+
+<div class="container">
+
+<div class="card">
+
+    <div class="filters">
+        <input type="text" id="searchUser" placeholder="ค้นหาชื่อผู้ใช้">
+        <select id="actionFilter">
+            <option value="all">ทุกการกระทำ</option>
+            <option value="CREATE_JOB">สร้างงาน</option>
+            <option value="UPDATE_STATUS">เปลี่ยนสถานะ</option>
+            <option value="UPDATE_PRICE">แก้ไขราคา</option>
+            <option value="DELETE_JOB">ลบงาน</option>
+        </select>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>วันที่</th>
+                <th>ผู้ใช้งาน</th>
+                <th>การกระทำ</th>
+                <th>รายละเอียด</th>
+            </tr>
+        </thead>
+        <tbody id="logTable"></tbody>
+    </table>
+
+</div>
+</div>
+
+<script>
+const API_BASE="/api";
+const token=localStorage.getItem("token");
+
+if(!token){
+    alert("กรุณาเข้าสู่ระบบ");
+    location.href="login.html";
+}
+
+let logs=[];
+
+async function fetchLogs(){
+    const res=await fetch(`${API_BASE}/activity`,{
+        headers:{ Authorization:`Bearer ${token}` }
+    });
+
+    if(!res.ok){
+        alert("โหลดข้อมูลไม่สำเร็จ");
+        return;
+    }
+
+    logs=await res.json();
+    renderLogs();
+}
+
+function renderLogs(){
+    const search=document.getElementById("searchUser").value.toLowerCase();
+    const action=document.getElementById("actionFilter").value;
+
+    const tbody=document.getElementById("logTable");
+    tbody.innerHTML="";
+
+    logs
+    .filter(log=>{
+        const matchUser=log.userName?.toLowerCase().includes(search);
+        const matchAction=(action==="all"||log.action===action);
+        return matchUser && matchAction;
+    })
+    .sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt))
+    .forEach(log=>{
+        const tr=document.createElement("tr");
+
+        tr.innerHTML=`
+            <td>${new Date(log.createdAt).toLocaleString("th-TH")}</td>
+            <td>${log.userName || "-"}</td>
+            <td><span class="badge">${log.action}</span></td>
+            <td>${log.detail || "-"}</td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+}
+
+document.getElementById("searchUser").addEventListener("input",renderLogs);
+document.getElementById("actionFilter").addEventListener("change",renderLogs);
+
+document.addEventListener("DOMContentLoaded",fetchLogs);
+</script>
+
+</body>
+</html>

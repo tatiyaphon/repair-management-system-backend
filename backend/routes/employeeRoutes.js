@@ -1,0 +1,396 @@
+const express = require("express");
+const bcrypt = require("bcryptjs");
+const Employee = require("../models/Employee");
+const verifyToken = require("../middleware/auth");
+const requireRole = require("../middleware/requireRole");
+const jwt = require("jsonwebtoken");
+const nodemailer = require("nodemailer");
+
+const router = express.Router();
+
+/* ==============================
+   SMTP (ใช้ port 587 สำหรับ Render)
+============================== */
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // สำคัญมาก
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS
+  },
+  tls: {
+    rejectUnauthorized: false
+  },
+  family: 4 // 👈 บังคับใช้ IPv4
+});
+
+
+
+
+/* =====================================
+   GET /api/employees (admin)
+===================================== */
+router.get("/", verifyToken, requireRole("admin"), async (req, res) => {
+  const employees = await Employee.find()
+    .select("_id firstName lastName email role phone active avatar lastSeen");
+
+  const now = Date.now();
+
+  const result = employees.map(emp => ({
+    ...emp.toObject(),
+    isOnline:
+      emp.lastSeen &&
+      (now - new Date(emp.lastSeen).getTime()) < 2 * 60 * 1000
+  }));
+
+  res.json(result);
+});
+
+/* =====================================
+   GET /api/employees/tech
+===================================== */
+router.get("/tech", verifyToken, async (req, res) => {
+  try {
+    const techs = await Employee.find({
+      role: "tech",
+      active: true
+    }).select("_id firstName lastName");
+
+    res.json(techs);
+  } catch (err) {
+    res.status(500).json({ message: "โหลดรายชื่อช่างไม่สำเร็จ" });
+  }
+});
+
+/* =====================================
+   POST /api/employees (admin)
+===================================== */
+router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
+  try {
+    let { firstName, lastName, email, password, role, phone } = req.body;
+
+    if (!firstName || !lastName || !email || !password) {
+      return res.status(400).json({ message: "ข้อมูลไม่ครบ" });
+    }
+
+    // FIX: เดิมไม่มีการเช็คความยาวรหัสผ่านตอนแอดมินสร้าง user ใหม่เลย
+    // (route change-password/reset-password เช็ค แต่ route นี้ไม่เคยเช็ค)
+    // ทำให้ตั้งรหัสผ่านสั้นๆ เช่น "123" ให้พนักงานได้โดยไม่มีอะไรเตือน
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร"
+      });
+    }
+
+    email = email.trim().toLowerCase();
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      return res.status(400).json({
+        message: "รูปแบบอีเมลไม่ถูกต้อง"
+      });
+    }
+
+    const exists = await Employee.findOne({
+      email: { $regex: new RegExp(`^${email}$`, "i") }
+    });
+
+    if (exists) {
+      return res.status(409).json({
+        message: "อีเมลนี้ถูกใช้แล้ว"
+      });
+    }
+
+    const hash = await bcrypt.hash(password, 10);
+
+    const user = await Employee.create({
+      firstName: firstName.trim(),
+      lastName: lastName.trim(),
+      email,
+      phone,
+      password: hash,
+      role,
+      active: true,
+      mustChangePassword: true,
+      isVerified: true
+    });
+
+    /* ==========================
+       ส่งเมลแบบไม่ทำให้ระบบล้ม
+    ========================== */
+    try {
+      const verifyToken = jwt.sign(
+        { id: user._id },
+        process.env.JWT_SECRET,
+        { expiresIn: "1d" }
+      );
+
+      const verifyLink = `${process.env.BASE_URL}/api/auth/verify/${verifyToken}`;
+
+      transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: user.email,
+        subject: "ยืนยันอีเมลระบบร้านตุ้ยไอที",
+        html: `
+          <h2>ยืนยันบัญชีของคุณ</h2>
+          <p>กรุณาคลิกปุ่มด้านล่างเพื่อยืนยันอีเมล</p>
+          <a href="${verifyLink}" 
+            style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
+            ยืนยันอีเมล
+          </a>
+          <p>ลิงก์นี้จะหมดอายุใน 24 ชั่วโมง</p>
+        `
+      })
+      .then(() => console.log("✅ Email sent successfully"))
+      .catch(err => console.error("❌ Email send failed:", err.message));
+
+
+    } catch (mailErr) {
+      console.error("❌ Email send failed:", mailErr.message);
+    }
+
+    res.status(201).json({
+      message: "เพิ่มผู้ใช้สำเร็จ",
+      user
+    });
+
+  } catch (err) {
+    console.error("CREATE EMPLOYEE ERROR:", err);
+    res.status(500).json({ message: "เพิ่มผู้ใช้ไม่สำเร็จ" });
+  }
+});
+
+/* =====================================
+   PUT /api/employees/:id (admin)
+===================================== */
+router.put("/:id", verifyToken, requireRole("admin"), async (req, res) => {
+  try {
+    const { firstName, lastName, phone, role, active } = req.body;
+
+    const user = await Employee.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: "ไม่พบผู้ใช้นี้" });
+    }
+
+    if (req.user.userId === req.params.id && role && role !== "admin") {
+      return res.status(400).json({
+        message: "ไม่สามารถเปลี่ยนสิทธิ์ของตัวเองได้"
+      });
+    }
+
+    await Employee.findByIdAndUpdate(req.params.id, {
+      firstName,
+      lastName,
+      phone,
+      role,
+      active
+    });
+
+    res.json({ message: "แก้ไขข้อมูลผู้ใช้เรียบร้อย" });
+
+  } catch (err) {
+    console.error("UPDATE EMPLOYEE ERROR:", err);
+    res.status(500).json({ message: "แก้ไขผู้ใช้ไม่สำเร็จ" });
+  }
+});
+
+/* =====================================
+   GET /api/employees/:id/profile
+===================================== */
+router.get("/:id/profile", verifyToken, async (req, res) => {
+  try {
+    if (
+      req.user.role !== "admin" &&
+      req.user.userId !== req.params.id
+    ) {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    const user = await Employee.findById(req.params.id)
+      .select("firstName lastName email role phone avatar active");
+
+    if (!user) {
+      return res.status(404).json({ message: "ไม่พบผู้ใช้" });
+    }
+
+    res.json(user);
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+/* =====================================
+   DELETE EMPLOYEE
+===================================== */
+router.delete("/:id", verifyToken, requireRole("admin"), async (req, res) => {
+  try {
+    if (req.user.userId === req.params.id) {
+      return res.status(400).json({ message: "ไม่สามารถลบตัวเองได้" });
+    }
+
+    await Employee.findByIdAndDelete(req.params.id);
+    res.json({ message: "ลบผู้ใช้เรียบร้อยแล้ว" });
+
+  } catch (err) {
+    res.status(500).json({ message: "ลบผู้ใช้ไม่สำเร็จ" });
+  }
+});
+
+/* =====================================
+   GET /api/employees/me
+===================================== */
+router.get("/me", verifyToken, async (req, res) => {
+  try {
+    const user = await Employee.findById(req.user.userId)
+      .select("firstName lastName email role phone avatar active");
+
+    if (!user) {
+      return res.status(404).json({ message: "ไม่พบผู้ใช้" });
+    }
+
+    res.json(user);
+
+  } catch (err) {
+    res.status(500).json({ message: "Server error" });
+  }
+});
+/* =====================================
+   SEND RESET LINK (admin)
+===================================== */
+router.post("/:id/send-reset-link",
+  verifyToken,
+  requireRole("admin"),
+  async (req, res) => {
+    try {
+      const user = await Employee.findById(req.params.id);
+      if (!user) {
+        return res.status(404).json({ message: "ไม่พบผู้ใช้" });
+      }
+
+      const resetToken = jwt.sign(
+        { id: user._id },
+        process.env.JWT_SECRET,
+        { expiresIn: "15m" }
+      );
+
+      user.resetToken = resetToken;
+      user.resetTokenExpire = Date.now() + 15 * 60 * 1000;
+      await user.save();
+
+      const resetLink =
+        `${process.env.BASE_URL}/employee/reset_password.html?token=${resetToken}`;
+
+      const msg = {
+        to: user.email,
+        from: process.env.EMAIL_USER, // ต้องเป็นเมลที่ verify ใน SendGrid
+        subject: "รีเซ็ตรหัสผ่านระบบร้านตุ้ยไอที",
+        html: `
+          <h2>รีเซ็ตรหัสผ่าน</h2>
+          <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสใหม่</p>
+          <a href="${resetLink}"
+             style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
+             ตั้งรหัสผ่านใหม่
+          </a>
+          <p>ลิงก์นี้จะหมดอายุใน 15 นาที</p>
+        `
+      };
+
+      await transporter.sendMail(msg);
+
+      res.json({ message: "ส่งลิงก์รีเซ็ตแล้ว" });
+
+    } catch (err) {
+      console.error("SEND RESET ERROR:", err.response?.body || err);
+      res.status(500).json({ message: "ส่งลิงก์ไม่สำเร็จ" });
+    }
+  }
+);
+router.post("/forgot-password", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "กรุณากรอกอีเมล" });
+    }
+
+    const emailLower = email.trim().toLowerCase();
+
+const user = await Employee.findOne({
+  email: { $regex: new RegExp(`^${emailLower}$`, "i") }
+});
+
+    if (!user) {
+      return res.status(404).json({ message: "ไม่พบอีเมลนี้" });
+    }
+
+    const resetToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
+
+    user.resetToken = resetToken;
+    user.resetTokenExpire = Date.now() + 15 * 60 * 1000;
+    await user.save();
+
+    const resetLink =
+      `${process.env.BASE_URL}/employee/reset_password.html?token=${resetToken}`;
+
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: user.email,
+      subject: "รีเซ็ตรหัสผ่าน",
+      html: `
+        <h2>รีเซ็ตรหัสผ่าน</h2>
+        <p>คลิกด้านล่างเพื่อตั้งรหัสใหม่</p>
+        <a href="${resetLink}"
+           style="padding:10px 20px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;">
+           ตั้งรหัสผ่านใหม่
+        </a>
+      `
+    });
+
+    res.json({ message: "ส่งลิงก์รีเซ็ตแล้ว" });
+
+  } catch (err) {
+    console.error("FORGOT PASSWORD ERROR:", err);
+    res.status(500).json({ message: "ส่งลิงก์ไม่สำเร็จ" });
+  }
+});
+// FIX: เดิมสร้าง multer storage ของตัวเองที่นี่ ซ้ำซ้อนกับ middleware/uploadAvatar.js
+// ที่มีอยู่แล้ว (และตั้งชื่อไฟล์เป็น Date.now() ทำให้ไฟล์เก่าค้างสะสมไม่ถูกลบ)
+// เปลี่ยนมาใช้ uploadAvatar.js แทน เหลือระบบอัปโหลด avatar ทางเดียว
+const uploadAvatar = require("../middleware/uploadAvatar");
+
+router.post(
+  "/profile/avatar",
+  verifyToken,
+  uploadAvatar.single("avatar"),
+  async (req, res) => {
+    try {
+      if (!req.file) {
+        return res.status(400).json({
+          message: "ไม่ได้เลือกไฟล์"
+        });
+      }
+
+      const avatarPath = `/uploads/profile/${req.file.filename}`;
+
+      await Employee.findByIdAndUpdate(
+        req.user.userId,
+        { avatar: avatarPath }
+      );
+
+      res.json({
+        avatar: avatarPath
+      });
+
+    } catch (err) {
+      console.error("UPLOAD AVATAR ERROR:", err);
+      res.status(500).json({ message: "อัปโหลดรูปไม่สำเร็จ" });
+    }
+  }
+);
+module.exports = router;

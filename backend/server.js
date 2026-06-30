@@ -1,0 +1,138 @@
+require("dotenv").config();
+
+const express  = require("express");
+const mongoose = require("mongoose");
+const cors     = require("cors");
+const path     = require("path");
+const morgan   = require("morgan");
+const bcrypt   = require("bcryptjs");
+const helmet = require("helmet");
+const rateLimit = require("express-rate-limit");
+
+
+
+const Employee = require("./models/Employee");
+const stockRoutes = require("./routes/stock");
+
+const app  = express();
+const PORT = process.env.PORT || 5000;
+
+app.set("trust proxy", 1);
+/* =========================
+   MIDDLEWARE
+========================= */
+
+// 🔐 Security Headers
+/* =========================
+   MIDDLEWARE
+========================= */
+
+// 🔐 Security Headers (ปิด CSP เพราะเว็บใช้ inline script)
+app.use(
+  helmet({
+    contentSecurityPolicy: false
+  })
+);
+
+// 🚫 Rate Limit
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100
+});
+app.use(limiter);
+
+// 🚫 จำกัด login brute force
+app.use("/api/auth/login", rateLimit({
+  windowMs: 10 * 60 * 1000,
+  max: 5
+}));
+
+// 🌍 CORS
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+app.use(morgan("dev"));
+
+/* =========================
+   STATIC FILES
+========================= */
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/employee", express.static(path.join(__dirname, "frontend-employee")));
+app.use("/customer", express.static(path.join(__dirname, "public/customer")));
+app.use("/uploads",  express.static(path.join(__dirname, "public/uploads")));
+/* =========================
+   ROOT
+========================= */
+app.get("/", (req, res) => {
+  res.redirect("/customer/index.html");
+});
+
+/* =========================
+   API ROUTES
+========================= */
+app.use("/api/auth",      require("./routes/auth"));
+app.use("/api/employees", require("./routes/employeeRoutes"));
+app.use("/api/customers", require("./routes/customers"));
+app.use("/api/stocks",    require("./routes/stock"));
+app.use("/api/jobs",      require("./routes/jobRoutes"));
+app.use("/api/activity", require("./routes/activityRoutes"));
+
+// FIX: เดิมมี errorHandler.js เขียนไว้แต่ไม่เคยถูก app.use() จริง
+// ทำให้ error ที่หลุดจาก middleware/route แบบ sync ไม่มี fallback ที่ดี
+app.use(require("./middleware/errorHandler"));
+
+
+
+
+/* =========================
+   MONGODB
+========================= */
+mongoose
+  .connect(process.env.MONGODB_URI)
+  .then(async () => {
+    console.log("✅ Connected to DB:", mongoose.connection.name);
+    await ensureAdmin();
+    app.listen(PORT, () => {
+      console.log(`🚀 Server running on port ${PORT}`);
+    });
+  })
+  .catch(err => {
+    console.error("❌ MongoDB error:", err.message);
+    process.exit(1);
+  });
+// 🔒 กันพิมพ์ path ผิด
+app.get("/status_page.html", (req, res) => {
+  const query = req._parsedUrl.search || "";
+  res.redirect("/customer/status_page.html" + query);
+});
+
+/* =========================
+   SEED ADMIN
+========================= */
+async function ensureAdmin() {
+  if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) return;
+
+  const exists = await Employee.findOne({ email: process.env.ADMIN_EMAIL });
+  if (exists) return;
+
+  const hash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+
+  await Employee.create({
+    firstName: process.env.ADMIN_FIRSTNAME || "Admin",
+    lastName:  process.env.ADMIN_LASTNAME  || "System",
+    email:     process.env.ADMIN_EMAIL,
+    password:  hash,
+    role:      "admin",
+    active:    true,
+    // FIX: เดิมไม่ได้ตั้งค่านี้ ทำให้ login route เช็ค isVerified แล้วบล็อก
+    // admin คนแรกที่ระบบ seed ให้ ไม่สามารถเข้าระบบได้เลยตั้งแต่ deploy ครั้งแรก
+    isVerified: true,
+    mustChangePassword: false,
+  });
+
+  console.log("👑 Admin account created");
+}

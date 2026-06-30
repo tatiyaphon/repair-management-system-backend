@@ -1,0 +1,1021 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>จัดการงานซ่อม | ระบบจัดการงานซ่อม</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="navbar.css">
+  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-color:#2c3e50;
+      --secondary-color:#1abc9c;
+      --accent-color:#3498db;
+      --background-color:#f4f7f9;
+      --card-background:#fff;
+      --text-color:#2c3e50;
+      --light-text-color:#95a5a6;
+      --border-radius:10px;
+      --success-color:#2ecc71;
+      --danger-color:#e74c3c;
+      --warning-color:#f39c12;
+      --info-color:#9b59b6;
+    }
+
+    body {
+      font-family:'Kanit',sans-serif;
+      background:var(--background-color);
+      color:var(--text-color);
+      margin:0; padding:0; line-height:1.6;
+    }
+
+
+
+
+    .container {
+      max-width:900px;
+      margin:40px auto;
+      padding:0 20px;
+      page-break-inside: avoid;
+    }
+
+    .card {
+      background:var(--card-background);
+      border-radius:var(--border-radius);
+      padding:35px;
+      box-shadow:var(--box-shadow);
+      margin-bottom:30px;
+    }
+
+    h2 {
+      text-align:center;
+      color:var(--primary-color);
+      margin-bottom:25px;
+      font-size:2rem;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      gap:10px;
+    }
+
+    .section-header {
+      font-size:1.2rem;
+      color:var(--primary-color);
+      border-bottom:2px solid #eee;
+      padding-bottom:8px;
+      margin-bottom:15px;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      font-weight:600;
+    }
+
+    .detail-item {
+      display:flex;
+      padding:8px 0;
+      border-bottom:1px dotted #eee;
+    }
+
+    .detail-item strong {
+      width:180px;
+      color:var(--primary-color);
+    }
+
+    .badge {
+      padding:5px 10px;
+      border-radius:15px;
+      color:#fff;
+      font-weight:600;
+      font-size:.9rem;
+    }
+    .badge.new{background:var(--accent-color);}
+    .badge.in_progress{background:var(--warning-color);}
+    .badge.waiting_parts{background:var(--danger-color);}
+    .badge.completed{background:var(--success-color);}
+    .badge.cancelled{background:var(--info-color);}
+    .badge.claim{background:#f1c40f;color:#000;}
+    .badge.new_repair{background:#2980b9;}
+
+    input, select, textarea {
+      width:100%;
+      padding:10px;
+      border:1px solid #ccc;
+      border-radius:8px;
+      font-family:'Kanit',sans-serif;
+      font-size:1rem;
+      transition:border-color .3s;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color:var(--secondary-color);
+      outline:none;
+    }
+
+    .btn-group{display:flex;gap:15px;justify-content:center;margin-top:25px;}
+    .btn{
+      padding:12px 24px;
+      border:none;
+      border-radius:50px;
+      cursor:pointer;
+      font-weight:600;
+      font-size:1rem;
+      transition:.3s;
+      display:flex;align-items:center;gap:8px;
+    }
+    .btn-primary{background:var(--accent-color);color:#fff;}
+    .btn-approve{background:var(--success-color);color:#fff;}
+    .btn-cancel{background:var(--danger-color);color:#fff;}
+    .btn:hover{transform:translateY(-2px);box-shadow:0 4px 10px rgba(0,0,0,.1);}
+
+    .history-item {
+      background:var(--background-color);
+      padding:15px;
+      border-radius:var(--border-radius);
+      margin-bottom:10px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      border-left:5px solid var(--secondary-color);
+      box-shadow:0 2px 5px rgba(0,0,0,.05);
+    }
+
+    .history-item.pending{border-left-color:var(--warning-color);}
+    .history-item .part-actions button{
+      background:none;border:none;color:var(--danger-color);cursor:pointer;font-size:1.1rem;
+    }
+    .history-item .part-actions button:hover{color:var(--primary-color);}
+
+    @media(max-width:600px){
+      header{flex-direction:column;padding:15px;}
+      .nav-links{flex-wrap:wrap;justify-content:center;margin-top:10px;}
+      .btn-group{flex-direction:column;}
+      .btn{width:100%;justify-content:center;}
+      .btn-receipt {
+    width: 80%;
+    justify-content: center;
+  }
+    }
+    .btn-receipt {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+
+  background: linear-gradient(120deg, #3b82f6, #2563eb);
+  color: #ffffff;
+
+  padding: 14px 30px;
+  font-size: 18px;
+  font-weight: 600;
+  text-decoration: none;
+
+  border-radius: 999px; /* pill */
+  border: none;
+  cursor: pointer;
+
+  box-shadow: 0 10px 20px rgba(59, 130, 246, 0.35);
+  transition: all 0.25s ease;
+}
+
+.btn-receipt i {
+  font-size: 18px;
+}
+
+.btn-receipt:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px rgba(59, 130, 246, 0.45);
+}
+
+.btn-receipt:active {
+  transform: translateY(0);
+  box-shadow: 0 8px 16px rgba(59, 130, 246, 0.35);
+}
+.btn-receipt {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 26px;
+  background: #3498db;
+  color: #fff;
+  border-radius: 999px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.25s ease;
+  box-shadow: 0 6px 14px rgba(0,0,0,0.15);
+}
+
+.btn-receipt:hover {
+  background: #2c80b4;
+  transform: translateY(-2px);
+}
+/* ===== Accordion Style ===== */
+.accordion-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 10px;
+  margin-bottom: 15px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 4px 10px rgba(0,0,0,.05);
+}
+
+.accordion-header {
+  padding: 15px 20px;
+  cursor: pointer;
+  background: #f8f9fa;
+  font-weight: 600;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.accordion-header:hover {
+  background: #eef2f7;
+}
+
+.accordion-header i {
+  transition: transform 0.3s;
+}
+
+.accordion-item.active .accordion-header i {
+  transform: rotate(180deg);
+}
+
+.accordion-content {
+  display: none;
+  padding: 20px;
+  border-top: 1px solid #eee;
+}
+
+.accordion-item.active .accordion-content {
+  display: block;
+  animation: fadeIn 0.3s ease-in-out;
+}
+/* ===== Accordion ===== */
+.accordion-item {
+  margin-bottom: 15px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid #e0e0e0;
+}
+
+.accordion-header {
+  background: #f0f4f8;
+  padding: 15px 20px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: 0.3s;
+}
+
+.accordion-header:hover {
+  background: #e2e8f0;
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+  background: #fff;
+  padding: 0 20px;
+}
+
+.accordion-item.active .accordion-content {
+  max-height: 1000px;
+  padding: 20px;
+}
+
+.accordion-icon {
+  transition: transform 0.3s;
+}
+
+.accordion-item.active .accordion-icon {
+  transform: rotate(180deg);
+}
+
+/* animation */
+@keyframes fadeSlide{
+  from{
+    opacity:0;
+    transform:translateY(-10px);
+  }
+  to{
+    opacity:1;
+    transform:translateY(0);
+  }
+}
+
+.upload-btn input{
+  display:none;
+}
+
+  </style>
+
+</head>
+<body>
+  <header class="main-header">
+
+  <div class="logo">
+    <i class="fas fa-tools"></i>
+    ระบบจัดการงานซ่อม
+  </div>
+
+  <nav class="nav-links">
+    <a href="employee_dashboard.html" class="nav-link">
+      <i class="fas fa-home"></i> หน้าหลัก
+    </a>
+
+    <a href="new_job.html" class="nav-link">
+      <i class="fas fa-plus-circle"></i> รับเครื่องซ่อม
+    </a>
+
+    <a href="stock_management.html" class="nav-link">
+      <i class="fas fa-box-open"></i> จัดการสต็อก
+    </a>
+
+    <a href="technician_jobs.html" class="nav-link">
+      <i class="fas fa-tools"></i> งานของฉัน
+    </a>
+
+    <a href="reports.html" class="nav-link">
+      <i class="fas fa-chart-line"></i> รายงาน
+    </a>
+
+    <a href="admin_dashboard.html" class="nav-link">
+      <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
+    </a>
+  </nav>
+
+  <!-- profile -->
+  <div class="profile-menu" id="profileMenu">
+    <div class="profile-trigger" onclick="toggleProfile()">
+      <img id="profileAvatar" src="/uploads/profile/default.jpg">
+    </div>
+
+
+    <div class="profile-dropdown" id="profileDropdown">
+      <div class="profile-header">
+        <img id="profileAvatarLarge"
+             src="/uploads/profile/default.jpg"
+             alt="avatar-large"
+             class="profile-avatar-large">
+        <div>
+          <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
+          <small id="profileRole">—</small>
+        </div>
+      </div>
+      
+       <div class="profile-divider"></div>
+        
+
+      <label class="profile-item upload-btn">
+  <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
+  <input type="file" accept="image/*" onchange="uploadAvatar(event)">
+</label>
+
+
+      <a class="profile-item" href="profile.html">
+        <i class="fas fa-user"></i> ข้อมูลส่วนตัว
+      </a>
+
+      <a class="profile-item" href="change_password.html">
+        <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
+      </a>
+
+      <a class="profile-item" href="repair_history.html">
+        <i class="fas fa-history"></i> ประวัติการซ่อม
+      </a>
+
+     <div class="profile-divider"></div>
+
+<button class="profile-logout" onclick="logout()">
+  <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+</button>
+
+    </div>
+  </div>
+
+</header>
+
+
+  <div class="container">
+    <div class="card">
+      <h2><i class="fas fa-cogs"></i> จัดการงานซ่อม</h2>
+
+<div id="job-details"></div>
+      <hr>
+              <div class="accordion-item">
+  <div class="accordion-header">
+    <span><i class="fas fa-tag"></i> แก้ไขประเภทงานซ่อม</span>
+    <i class="fas fa-chevron-down"></i>
+  </div>
+  <div class="accordion-content">
+    <form id="job-type-form">
+      <select id="new-job-type" required>
+        <option value="">-- เลือกประเภท --</option>
+        <option value="ซ่อมใหม่">ซ่อมใหม่</option>
+        <option value="เคลม">เคลม</option>
+      </select>
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> บันทึกประเภท
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+      <hr>
+
+      <div class="accordion-item">
+  <div class="accordion-header">
+    <span><i class="fas fa-calendar-alt"></i> แก้ไขวันที่งานซ่อม</span>
+    <i class="fas fa-chevron-down"></i>
+  </div>
+  <div class="accordion-content">
+    <form id="date-form">
+      <label>วันที่รับเครื่อง</label>
+      <input type="date" id="received-date" required />
+      <label>วันเริ่มซ่อม</label>
+      <input type="date" id="start-date" />
+      <label>วันที่ซ่อมเสร็จ</label>
+      <input type="date" id="finish-date" />
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> บันทึกวันที่
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+      <hr>
+
+     <div class="accordion-item">
+  <div class="accordion-header">
+    <span><i class="fas fa-sync"></i> อัปเดตสถานะงานซ่อม</span>
+    <i class="fas fa-chevron-down"></i>
+  </div>
+  <div class="accordion-content">
+    <form id="status-form">
+      <select id="new-status">
+        <option value="รับเครื่อง">รับเครื่อง</option>
+        <option value="กำลังซ่อม">กำลังซ่อม</option>
+        <option value="รออะไหล่">รออะไหล่</option>
+        <option value="ซ่อมเสร็จ">ซ่อมเสร็จ</option>
+        <option value="ยกเลิก">ยกเลิก</option>
+      </select>
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> บันทึกสถานะ
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+      <hr>
+
+     <!-- ================= ค่าใช้จ่าย ================= -->
+ <div class="accordion-item">
+  <div class="accordion-header">
+    <span><i class="fas fa-money-bill-wave"></i> ค่าใช้จ่าย</span>
+    <i class="fas fa-chevron-down"></i>
+  </div>
+
+  <div class="accordion-content">
+    <form id="price-form">
+      <div class="form-group">
+        <label for="new-price">ราคา (บาท):</label>
+        <input type="number" id="new-price" min="0" step="100" placeholder="เช่น 1500" />
+      </div>
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> บันทึกราคา
+        </button>
+        <button type="button" id="approve-price-btn" class="btn btn-approve">
+          <i class="fas fa-check-circle"></i> อนุมัติราคา (ปิดงาน)
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<hr>
+
+<!-- ================= ขอเบิกอะไหล่ ================= -->
+ <div class="accordion-item">
+  <div class="accordion-header">
+    <span><i class="fas fa-box-open"></i> ขอเบิกอะไหล่</span>
+    <i class="fas fa-chevron-down"></i>
+  </div>
+
+  <div class="accordion-content">
+    <form id="part-form">
+      <div class="form-group">
+        <label>เลือกอะไหล่:</label>
+        <select id="part-name">
+          <option value="">-- เลือกอะไหล่ --</option>
+        </select>
+
+        <label>เลือกรุ่น:</label>
+        <select id="part-model" disabled>
+          <option value="">-- เลือกรุ่น --</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="part-qty">จำนวน:</label>
+        <input type="number" id="part-qty" min="1" value="1" required />
+      </div>
+
+      <div class="btn-group">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-truck"></i> ขอเบิก
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+      <hr>
+
+      <h3 class="section-header"><i class="fas fa-list"></i> รายการอะไหล่ที่ใช้</h3>
+      <div id="parts-list"></div>
+
+      <hr>
+
+      <div class="btn-group">
+        <button id="cancel-job-btn" class="btn btn-cancel"><i class="fas fa-ban"></i> ยกเลิกงานซ่อม</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+/* ==========================================================
+   manage_job.html — PRODUCTION READY
+========================================================== */
+
+/* =========================
+   CONFIG
+========================= */
+const API_BASE = "/api";
+const token = localStorage.getItem("token");
+
+if (!token) {
+  alert("กรุณาเข้าสู่ระบบใหม่");
+  location.replace("login.html");
+}
+
+const headers = {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${token}`
+};
+
+/* =========================
+   PROFILE
+========================= */
+async function loadProfile() {
+  const userId = localStorage.getItem("userId");
+  if (!userId) return;
+
+  const res = await fetch(`${API_BASE}/employees/${userId}/profile`, {
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) return;
+
+  const user = await res.json();
+
+  if (document.getElementById("profileAvatar")) {
+    document.getElementById("profileAvatar").src =
+      user.avatar || "/uploads/profile/default.jpg";
+  }
+
+  if (document.getElementById("profileNameLarge")) {
+    document.getElementById("profileNameLarge").textContent =
+      `${user.firstName} ${user.lastName}`;
+  }
+
+  if (document.getElementById("profileRole")) {
+    document.getElementById("profileRole").textContent = user.role;
+  }
+}
+
+/* =========================
+   UTILS
+========================= */
+function formatInputDate(d) {
+  return d ? new Date(d).toISOString().slice(0, 10) : "";
+}
+function formatTH(d) {
+  return d ? new Date(d).toLocaleDateString("th-TH") : "-";
+}
+function statusBadgeClass(status) {
+  return {
+    "รับเครื่อง": "new",
+    "กำลังซ่อม": "in_progress",
+    "รออะไหล่": "waiting_parts",
+    "ซ่อมเสร็จ": "completed",
+    "ยกเลิก": "cancelled"
+  }[status] || "new";
+}
+
+/* =========================
+   STATE
+========================= */
+let currentJob = null;
+let stockList = [];
+
+/* =========================
+   FETCH JOB
+========================= */
+function getJobId() {
+  return new URLSearchParams(location.search).get("id");
+}
+
+async function fetchJob() {
+  const jobId = getJobId();
+
+  if (!jobId) {
+    alert("ไม่พบ Job ID");
+    location.replace("employee_dashboard.html");
+    return;
+  }
+
+  const res = await fetch(`${API_BASE}/jobs/${jobId}`, {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    }
+  });
+
+  if (!res.ok) {
+    alert("ไม่พบงานซ่อม");
+    location.replace("employee_dashboard.html");
+    return;
+  }
+
+  currentJob = await res.json();
+
+  renderJob();
+  renderParts();
+}
+/* =========================
+   FETCH STOCK
+========================= */
+async function fetchStock() {
+  const res = await fetch(`${API_BASE}/stocks`, { headers });
+  stockList = await res.json();
+
+  const nameSel = document.getElementById("part-name");
+  const modelSel = document.getElementById("part-model");
+  if (!nameSel || !modelSel) return;
+
+  const names = [...new Set(stockList.map(s => s.name))];
+  nameSel.innerHTML = `<option value="">-- เลือกอะไหล่ --</option>`;
+  names.forEach(n => nameSel.innerHTML += `<option>${n}</option>`);
+
+  nameSel.onchange = e => {
+    modelSel.innerHTML = `<option value="">-- เลือกรุ่น --</option>`;
+    const models = stockList.filter(
+      s => s.name === e.target.value && s.quantity > 0
+    );
+    if (!models.length) return (modelSel.disabled = true);
+
+    models.forEach(m => {
+      modelSel.innerHTML += `
+        <option value="${m._id}">
+          ${m.model} (คงเหลือ ${m.quantity})
+        </option>`;
+    });
+    modelSel.disabled = false;
+  };
+}
+
+/* =========================
+   RENDER JOB
+========================= */
+function renderJob() {
+  const div = document.getElementById("job-details");
+  if (!div) return;
+
+  div.innerHTML = `
+  <div><strong>ลูกค้า:</strong> ${currentJob.customerName}</div>
+  <div><strong>อุปกรณ์:</strong> ${currentJob.deviceType} ${currentJob.deviceModel}</div>
+  <div><strong>อาการ:</strong> ${currentJob.symptom}</div>
+  <div>
+    <strong>สถานะ:</strong>
+    <span class="badge ${statusBadgeClass(currentJob.status)}">
+      ${currentJob.status}
+    </span>
+  </div>
+  <div><strong>วันที่รับ:</strong> ${formatTH(currentJob.receivedDate)}</div>
+  <div><strong>ราคา:</strong> ${currentJob.priceQuoted || "-"} บาท</div>
+  <div><strong>ประเภทงาน:</strong> ${currentJob.jobType}</div>
+  
+
+  <!-- ปุ่มดูใบรับเครื่อง -->
+  <div style="margin-top:20px; text-align:center;">
+  <a
+    href="receipt.html?id=${currentJob._id}"
+    target="_blank"
+    class="btn-receipt"
+  >
+    <i class="fas fa-file-pdf"></i> ดูใบรับเครื่อง
+  </a>
+</div>
+`;
+
+  document.getElementById("received-date").value =
+    formatInputDate(currentJob.receivedDate);
+  document.getElementById("start-date").value =
+    formatInputDate(currentJob.startDate);
+  document.getElementById("finish-date").value =
+    formatInputDate(currentJob.finishDate);
+  document.getElementById("new-status").value = currentJob.status;
+  document.getElementById("new-price").value =
+  currentJob.priceQuoted ?? "";
+  document.getElementById("new-job-type").value = currentJob.jobType || "";
+}
+
+/* =========================
+   UPDATE HELPERS
+========================= */
+async function updateJob(body, successMessage = "บันทึกข้อมูลเรียบร้อยแล้ว") {
+  if (!currentJob || !currentJob._id) {
+    alert("ไม่พบ Job ID");
+    return false;
+  }
+
+  const res = await fetch(`${API_BASE}/jobs/${currentJob._id}`, {
+    method: "PUT",
+    headers,
+    body: JSON.stringify(body)
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    alert(err.message || "อัปเดตงานไม่สำเร็จ");
+    return false;
+  }
+
+  await fetchJob();
+
+  alert("✅ " + successMessage);
+  return true;
+}
+
+
+/* =========================
+   EVENTS
+========================= */
+
+// ✅ อัปเดตสถานะ
+document.getElementById("status-form")?.addEventListener("submit", async e => {
+  e.preventDefault();
+
+  await updateJob(
+    { status: document.getElementById("new-status").value },
+    "อัปเดตสถานะเรียบร้อยแล้ว"
+  );
+});
+
+// ✅ อัปเดตวันที่
+document.getElementById("date-form")?.addEventListener("submit", async e => {
+  e.preventDefault();
+
+  await updateJob({
+   receivedDate: document.getElementById("received-date").value || null,
+  startDate: document.getElementById("start-date").value || null,
+  finishDate: document.getElementById("finish-date").value || null
+  }, "บันทึกวันที่เรียบร้อยแล้ว");
+});
+
+// ✅ อัปเดตราคา
+document.getElementById("price-form")?.addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const priceInput = document.getElementById("new-price").value;
+  const price = Number(priceInput);
+
+  await updateJob({
+    priceQuoted: isNaN(price) ? 0 : price
+  }, "บันทึกราคาเรียบร้อยแล้ว");
+});
+
+// ✅ ปิดงาน
+document.getElementById("approve-price-btn")?.addEventListener("click", async () => {
+  if (!confirm("ยืนยันปิดงาน?")) return;
+
+  const success = await updateJob(
+    { status: "ซ่อมเสร็จ" },
+    "ปิดงานเรียบร้อยแล้ว"
+  );
+
+  if (success) {
+    window.location.href = "technician_jobs.html";
+  }
+});
+
+// ✅ ยกเลิกงาน
+document.getElementById("cancel-job-btn")?.addEventListener("click", async () => {
+  if (!confirm("ยืนยันการยกเลิกงานนี้?")) return;
+
+  const success = await updateJob(
+    { status: "ยกเลิก" },
+    "ยกเลิกงานเรียบร้อยแล้ว"
+  );
+
+  if (success) {
+    window.location.href = "technician_jobs.html";
+  }
+});
+
+// ✅ แก้ประเภทงาน
+document.getElementById("job-type-form")?.addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const newType = document.getElementById("new-job-type").value;
+
+  if (!newType) {
+    alert("กรุณาเลือกประเภทงาน");
+    return;
+  }
+
+  await updateJob(
+    { jobType: newType },
+    "บันทึกประเภทงานเรียบร้อยแล้ว"
+  );
+});
+
+document
+  .getElementById("part-form")
+  ?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    if (!currentJob || !currentJob._id) {
+      alert("ไม่พบ Job ID");
+      return;
+    }
+
+    const partId = document.getElementById("part-model").value;
+    const qty = Number(document.getElementById("part-qty").value);
+
+    if (!partId) {
+      alert("กรุณาเลือกอะไหล่และรุ่น");
+      return;
+    }
+
+    if (qty <= 0) {
+      alert("จำนวนต้องมากกว่า 0");
+      return;
+    }
+
+    const res = await fetch(
+  `${API_BASE}/jobs/${currentJob._id}/use-part`,
+  {
+    method: "POST",
+    headers,
+    body: JSON.stringify({
+      stockId: partId,
+      quantity: qty
+    })
+  }
+    );
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      alert(err.message || "ขอเบิกอะไหล่ไม่สำเร็จ");
+      return;
+    }
+
+    alert("ขอเบิกอะไหล่เรียบร้อยแล้ว");
+
+    // reset ฟอร์ม
+    document.getElementById("part-form").reset();
+    document.getElementById("part-model").disabled = true;
+
+    // โหลดงานใหม่ (อัปเดตรายการอะไหล่ที่ใช้)
+    await fetchJob();
+  });
+/* ===== Accordion Toggle ===== */
+document.addEventListener("click", function(e){
+  const header = e.target.closest(".accordion-header");
+  if(!header) return;
+
+  const item = header.parentElement;
+
+  // ปิดอันอื่นก่อน
+  document.querySelectorAll(".accordion-item").forEach(el=>{
+    if(el !== item) el.classList.remove("active");
+  });
+
+  item.classList.toggle("active");
+});
+function toggleSection(header) {
+  const item = header.parentElement;
+  item.classList.toggle("active");
+}
+function renderParts() {
+  const list = document.getElementById("parts-list");
+  if (!list) return;
+
+  if (!currentJob.usedParts || currentJob.usedParts.length === 0) {
+    list.innerHTML = `
+      <div style="color:#999;text-align:center;padding:10px">
+        ยังไม่มีการเบิกอะไหล่
+      </div>`;
+    return;
+  }
+
+  list.innerHTML = currentJob.usedParts.map(p => `
+    <div class="history-item">
+      <div>
+        <strong>${p.name || "-"}</strong>
+        (${p.model || "-"})
+        <br>
+        จำนวน: ${p.quantity}
+      </div>
+      <div>
+        ${p.usedAt ? new Date(p.usedAt).toLocaleDateString("th-TH") : ""}
+      </div>
+    </div>
+  `).join("");
+}
+
+/* =========================
+   INIT
+========================= */
+document.addEventListener("DOMContentLoaded", async () => {
+  await loadProfile();
+  await fetchStock();
+  await fetchJob();
+});
+
+function toggleProfile(){
+  document.getElementById("profileDropdown")
+          .classList.toggle("show");
+}
+
+document.addEventListener("click", function(e){
+  const menu = document.getElementById("profileMenu");
+  if(!menu.contains(e.target)){
+    document.getElementById("profileDropdown")
+            .classList.remove("show");
+  }
+});
+// =============================
+// UPLOAD AVATAR
+// =============================
+async function uploadAvatar(event){
+
+  const file = event.target.files[0];
+  if(!file) return;
+
+  const token = localStorage.getItem("token");
+
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  try{
+
+    const res = await fetch("/api/employees/profile/avatar",{
+      method:"POST",
+      headers:{
+        Authorization:`Bearer ${token}`
+      },
+      body:formData
+    });
+
+    const data = await res.json();
+
+    if(!res.ok){
+      alert(data.message || "อัปโหลดไม่สำเร็จ");
+      return;
+    }
+
+    // เปลี่ยนรูปทันที
+    const avatarSmall = document.getElementById("profileAvatar");
+    const avatarLarge = document.getElementById("profileAvatarLarge");
+
+    if(avatarSmall) avatarSmall.src = data.avatar;
+    if(avatarLarge) avatarLarge.src = data.avatar;
+
+    alert("เปลี่ยนรูปโปรไฟล์เรียบร้อย");
+
+  }catch(err){
+    console.error(err);
+    alert("เกิดข้อผิดพลาด");
+  }
+}
+
+
+</script>
+</div>
+</body>
+</html>

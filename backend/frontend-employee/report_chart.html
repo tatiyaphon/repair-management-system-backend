@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>รายงานกราฟงานซ่อม</title>
+
+<link rel="icon" type="image/png" href="logo1.png">
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{
+    margin:0;
+    font-family:'Kanit',sans-serif;
+    background:#f4f7fb;
+}
+
+header{
+    background:#1f2937;
+    color:#fff;
+    padding:18px 30px;
+    font-size:1.2rem;
+    font-weight:600;
+}
+
+.container{
+    max-width:1200px;
+    margin:auto;
+    padding:40px 20px;
+}
+
+.card{
+    background:#fff;
+    padding:30px;
+    border-radius:16px;
+    box-shadow:0 20px 40px rgba(0,0,0,.08);
+    margin-bottom:30px;
+}
+
+select{
+    padding:10px 15px;
+    border-radius:10px;
+    border:1px solid #ddd;
+    font-family:'Kanit',sans-serif;
+}
+
+.summary{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:20px;
+    margin-top:20px;
+}
+
+.summary-box{
+    background:#fff;
+    padding:20px;
+    border-radius:14px;
+    box-shadow:0 10px 25px rgba(0,0,0,.06);
+}
+
+.summary-box h3{
+    margin:0;
+    font-size:1.8rem;
+}
+
+.summary-box span{
+    color:#6b7280;
+    font-size:.9rem;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+📊 รายงานกราฟงานซ่อม
+</header>
+
+<div class="container">
+
+    <div class="card">
+        <label>เลือกปี:</label>
+        <select id="yearSelect"></select>
+    </div>
+
+    <div class="card">
+        <canvas id="jobChart" height="100"></canvas>
+    </div>
+
+    <div class="summary" id="summaryBox"></div>
+
+</div>
+
+<script>
+const API_BASE = "/api";
+const token = localStorage.getItem("token");
+
+if(!token){
+    alert("กรุณาเข้าสู่ระบบ");
+    location.href="login.html";
+}
+
+async function fetchJobs(){
+    const res = await fetch(`${API_BASE}/jobs`,{
+        headers:{ Authorization:`Bearer ${token}` }
+    });
+
+    return await res.json();
+}
+
+let jobs = [];
+let chart;
+
+function initYearSelector(){
+    const years = [...new Set(
+        jobs.map(j => new Date(j.receivedDate).getFullYear())
+    )].sort((a,b)=>b-a);
+
+    const select = document.getElementById("yearSelect");
+    select.innerHTML="";
+
+    years.forEach(y=>{
+        const opt = document.createElement("option");
+        opt.value=y;
+        opt.textContent=y;
+        select.appendChild(opt);
+    });
+
+    select.addEventListener("change",()=>{
+        renderChart(select.value);
+    });
+}
+
+function renderChart(year){
+    const monthly = new Array(12).fill(0);
+
+    const filtered = jobs.filter(j=>{
+        const d=new Date(j.receivedDate);
+        return d.getFullYear()==year;
+    });
+
+    filtered.forEach(j=>{
+        const month=new Date(j.receivedDate).getMonth();
+        monthly[month]++;
+    });
+
+    if(chart) chart.destroy();
+
+    const ctx=document.getElementById("jobChart");
+
+    chart=new Chart(ctx,{
+        type:"bar",
+        data:{
+            labels:[
+                "ม.ค","ก.พ","มี.ค","เม.ย","พ.ค","มิ.ย",
+                "ก.ค","ส.ค","ก.ย","ต.ค","พ.ย","ธ.ค"
+            ],
+            datasets:[{
+                label:"จำนวนงาน",
+                data:monthly,
+                borderWidth:1
+            }]
+        },
+        options:{
+            responsive:true,
+            plugins:{
+                legend:{display:false}
+            }
+        }
+    });
+
+    renderSummary(filtered);
+}
+
+function renderSummary(filtered){
+    const countStatus = status =>
+        filtered.filter(j=>j.status===status).length;
+
+    const box=document.getElementById("summaryBox");
+    box.innerHTML=`
+        <div class="summary-box">
+            <h3>${filtered.length}</h3>
+            <span>งานทั้งหมด</span>
+        </div>
+        <div class="summary-box">
+            <h3>${countStatus("รับเครื่อง")}</h3>
+            <span>รับเครื่อง</span>
+        </div>
+        <div class="summary-box">
+            <h3>${countStatus("กำลังซ่อม")}</h3>
+            <span>กำลังซ่อม</span>
+        </div>
+        <div class="summary-box">
+            <h3>${countStatus("รออะไหล่")}</h3>
+            <span>รออะไหล่</span>
+        </div>
+        <div class="summary-box">
+            <h3>${countStatus("ซ่อมเสร็จ")}</h3>
+            <span>ซ่อมเสร็จ</span>
+        </div>
+        <div class="summary-box">
+            <h3>${countStatus("ยกเลิก")}</h3>
+            <span>ยกเลิก</span>
+        </div>
+    `;
+}
+
+document.addEventListener("DOMContentLoaded", async()=>{
+    jobs = await fetchJobs();
+    initYearSelector();
+    renderChart(document.getElementById("yearSelect").value);
+});
+</script>
+
+</body>
+</html>

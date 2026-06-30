@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard | ระบบจัดการงานซ่อม</title>
+  <link rel="icon" type="image/png" href="logo1.png">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome -->
+    <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        rel="stylesheet">
+    <link rel="stylesheet" href="navbar.css">
+    <style>
+        /* ==========================================================
+           1. Variables and Base Styles
+        ========================================================== */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #1abc9c;
+            --accent-color: #3498db;
+            --background-color: #f4f7f9;
+            --card-background: #fff;
+            --text-color: #2c3e50;
+            --light-text-color: #95a5a6;
+            --border-radius: 12px;
+            --box-shadow: 0 8px 25px rgba(0, 0, 0, .08);
+
+            /* Status Colors */
+            --new-color: #3498db;
+            --in_progress-color: #f39c12;
+            --waiting_parts-color: #e74c3c;
+            --completed-color: #2ecc71;
+            --cancelled-color: #6b7280;
+
+
+            /* Job Type Colors */
+            --claim-color: #9b59b6;
+            --new-repair-color: #2c3e50;
+            
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            page-break-inside: avoid;
+        }
+
+        /* ==========================================================
+           2. Header and Navigation
+        ========================================================== */
+        .login-btn,
+        .logout-btn {
+            border: 1px solid var(--secondary-color);
+            color: var(--secondary-color);
+            background: #fff;
+            padding: 8px 16px;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: .3s;
+        }
+
+        .login-btn:hover,
+        .logout-btn:hover {
+            background: var(--secondary-color);
+            color: #fff;
+        }
+
+        /* ==========================================================
+           3. Dashboard Header + Cards
+        ========================================================== */
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            gap: 20px;
+        }
+
+        .dashboard-header-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0;
+        }
+
+        .month-filter {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .month-filter label {
+            font-weight: 500;
+            color: var(--light-text-color);
+        }
+
+        .month-filter select {
+            padding: 6px 10px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-family: inherit;
+        }
+
+        .monthly-summary {
+            margin-bottom: 20px;
+            font-weight: 500;
+            color: var(--primary-color);
+        }
+
+        .monthly-summary span {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-left: 5px;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            gap: 24px;
+            grid-template-columns: repeat(4, 1fr);
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+
+        .card {
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, .1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: .3s;
+            border-left: 5px solid;
+        }
+
+        .card:hover {
+            transform: translateY(-7px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, .15);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            opacity: .2;
+        }
+
+        .card-content {
+            text-align: right;
+        }
+
+        .card h2 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--light-text-color);
+            margin: 0 0 5px;
+        }
+
+        .card p {
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin: 0;
+            line-height: 1;
+        }
+        .card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+
+        /* Card Color Mapping */
+        .card:nth-child(1) { border-left-color: var(--new-color); }
+        .card:nth-child(2) { border-left-color: var(--in_progress-color); }
+        .card:nth-child(3) { border-left-color: var(--waiting_parts-color); }
+        .card:nth-child(4) { border-left-color: var(--completed-color); }
+
+        .card:nth-child(1) .card-icon { color: var(--new-color); }
+        .card:nth-child(2) .card-icon { color: var(--in_progress-color); }
+        .card:nth-child(3) .card-icon { color: var(--waiting_parts-color); }
+        .card:nth-child(4) .card-icon { color: var(--completed-color); }
+
+        /* ==========================================================
+           4. Content and Table Styles
+        ========================================================== */
+        .content-section {
+            background: var(--card-background);
+            border-radius: var(--border-radius);
+            padding:0;
+            box-shadow: var(--box-shadow);
+            overflow-x: auto;
+
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin: 0 0 25px;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 10px;
+        }
+
+        .styled-table {
+            width: 100%;
+            border-collapse:collapse;
+            border-spacing: 0 10px;
+            font-size: .9rem;
+        }
+
+        .styled-table thead tr {
+            background: var(--primary-color);
+            color: #fff;
+        }
+
+        .styled-table th,
+        .styled-table td {
+            padding: 12px 15px;
+            vertical-align: middle;
+            text-align:left;
+            white-space:nowrap;
+        }
+
+        .styled-table tbody tr {
+            background: #fff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, .05);
+            transition: .2s;
+            border-radius: 8px;
+        }
+
+        .styled-table tbody tr:hover {
+            background: #fcfdfe;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, .1);
+        }
+
+        /* ==========================================================
+           5. Status and Type Badges
+        ========================================================== */
+        .status-badge {
+            display: inline-block;
+            padding:8px 14px;
+            border-radius:8px;
+            color: #fff;
+            font-weight: 600;
+            font-size: .85rem;
+            min-width:92px;
+            text-align: center;
+        }
+
+        .status-new { background: var(--new-color); }
+        .status-in_progress { background: var(--in_progress-color); }
+        .status-waiting_parts { background: var(--waiting_parts-color); }
+        .status-completed { background: var(--completed-color); }
+
+        .type-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            color: #fff;
+            font-weight: 500;
+            font-size: .75rem;
+            text-align: center;
+            text-transform: uppercase;
+        }
+
+        .type-claim { background: var(--claim-color); }
+        .type-new_repair { background: var(--new-repair-color); }
+
+        /* ==========================================================
+           6. Action Buttons
+        ========================================================== */
+        .action-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .action-btn {
+            background: var(--secondary-color);
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: .3s;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            text-align: center;
+            display: block;
+        }
+
+        .action-btn:hover {
+            background: #16a085;
+            transform: translateY(-1px);
+        }
+
+        .finish-btn {
+            background: var(--completed-color);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: .3s;
+            width: 100%;
+            text-align: center;
+            display: block;
+        }
+
+        .finish-btn:hover {
+            background: #27ae60;
+            transform: translateY(-1px);
+        }
+
+        /* ==========================================================
+           7. Responsive Design
+        ========================================================== */
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                padding: 15px;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                flex-direction: row-reverse;
+                text-align: left;
+            }
+
+            .card-icon {
+                margin-left: 15px;
+                opacity: .5;
+            }
+
+            .card-content {
+                text-align: left;
+            }
+
+            .card p {
+                font-size: 2.5rem;
+            }
+        }
+        
+
+.upload-btn input { display: none; }
+
+.divider {
+  height: 1px;
+  background: #eee;
+  margin: 6px 0;
+}
+.avatar-wrapper {
+  position: relative;
+}
+
+.avatar-wrapper img {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+  border: 2px solid #1abc9c;
+}
+
+/* dropdown */
+.avatar-menu {
+  position: absolute;
+  right: 0;
+  top: 120%;
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,.15);
+  display: none;
+  overflow: hidden;
+  z-index: 1000;
+  min-width: 120px;
+}
+
+.avatar-menu.show {
+  display: block;
+}
+
+.avatar-item {
+  padding: 10px 14px;
+  font-size: 14px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.avatar-item:hover {
+  background: #f4f7f9;
+}
+
+.avatar-item.logout {
+  color: #e74c3c;
+  font-weight: 600;
+}
+
+.btn-manage {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 18px;
+  background: linear-gradient(135deg, #10b981, #22c55e);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 999px;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px rgba(16,185,129,.25);
+}
+
+.btn-manage:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(16,185,129,.35);
+}
+
+.btn-manage:active {
+  transform: scale(0.96);
+}
+.status-cancelled {
+  background: var(--cancelled-color);
+}
+@media(max-width:1200px){
+  .dashboard-grid{
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media(max-width:768px){
+  .dashboard-grid{
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media(max-width:480px){
+  .dashboard-grid{
+    grid-template-columns: 1fr;
+  }
+}
+.table-box{
+  background:#ffffff;
+  margin:0 30px 30px;
+  border-radius:14px;
+  padding:0;              /* ❗ เอา padding ออก */
+  overflow:hidden;        /* ❗ ให้หัวตารางชนขอบ */
+  box-shadow:0 10px 25px rgba(0,0,0,.06);
+}
+/* คุมความกว้างคอลัมน์ */
+.styled-table th:nth-child(1),
+.styled-table td:nth-child(1){
+  width:140px; /* ID */
+}
+
+.styled-table th:nth-child(6),
+.styled-table td:nth-child(6){
+  width:130px; /* สถานะ */
+  text-align:center;
+}
+
+.styled-table th:nth-child(10),
+.styled-table td:nth-child(10){
+  width:110px; /* การจัดการ */
+  text-align:center;
+}
+.dashboard-container {
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+  padding: 30px;
+  margin-bottom: 0;   /* ไม่ให้เกิด box ล่าง */
+}
+.btn-view {
+  background: #9ca3af !important;
+  cursor: default;
+}
+
+    </style>
+</head>
+
+<body>
+  <header class="main-header">
+
+  <div class="logo">
+    <i class="fas fa-tools"></i>
+    ระบบจัดการงานซ่อม
+  </div>
+
+  <nav class="nav-links">
+    <a href="employee_dashboard.html" class="nav-link">
+      <i class="fas fa-home"></i> หน้าหลัก
+    </a>
+
+    <a href="new_job.html" class="nav-link">
+      <i class="fas fa-plus-circle"></i> รับเครื่องซ่อม
+    </a>
+
+    <a href="stock_management.html" class="nav-link">
+      <i class="fas fa-box-open"></i> จัดการสต็อก
+    </a>
+
+    <a href="technician_jobs.html" class="nav-link">
+      <i class="fas fa-tools"></i> งานของฉัน
+    </a>
+
+    <a href="reports.html" class="nav-link">
+      <i class="fas fa-chart-line"></i> รายงาน
+    </a>
+
+    <a href="admin_dashboard.html" class="nav-link">
+      <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
+    </a>
+  </nav>
+
+  <!-- profile -->
+  <div class="profile-menu" id="profileMenu">
+    <div class="profile-trigger" onclick="toggleProfile()">
+      <img id="profileAvatar" src="/uploads/profile/default.jpg">
+    </div>
+
+
+    <!-- DROPDOWN -->
+    <div class="profile-dropdown" id="profileDropdown">
+
+      <div class="profile-header">
+        <img id="profileAvatarLarge"
+             src="/uploads/profile/default.jpg"
+             alt="avatar-large">
+
+        <div>
+          <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
+          <small id="profileRole">—</small>
+        </div>
+      </div>
+
+      <label class="profile-item upload-btn">
+        <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
+        <input type="file" accept="image/*" onchange="uploadAvatar(event)">
+      </label>
+
+      <a class="profile-item" href="profile.html">
+        <i class="fas fa-user"></i> ข้อมูลส่วนตัว
+      </a>
+
+      <a class="profile-item" href="change_password.html">
+        <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
+      </a>
+
+      <a class="profile-item" href="repair_history.html">
+        <i class="fas fa-history"></i> ประวัติการซ่อม
+      </a>
+
+      <div class="divider"></div>
+
+      <button class="profile-logout" onclick="logout()">
+  <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+</button>
+
+    </div>
+  </div>
+
+</header>
+    <!-- ==========================================================
+         Main Content
+    ========================================================== -->
+    <main class=" dashboard-container">
+        <!-- ส่วนหัว + ตัวกรองเดือน/ปี -->
+        <div class="dashboard-header">
+            <h2 class="dashboard-header-title">งานซ่อม</h2>
+            <div class="month-filter">
+                <label for="monthFilter">เลือกเดือน:</label>
+                <select id="monthFilter"></select>
+
+                <label for="yearFilter">ปี:</label>
+                <select id="yearFilter"></select>
+            </div>
+        </div>
+
+        <div class="monthly-summary">
+            งานทั้งหมดในเดือนนี้:
+            <span id="monthly-total">0</span> งาน
+        </div>
+
+        <!-- การ์ดสรุป -->
+        <div class="dashboard-grid">
+
+    <a class="card card-link" href="technician_jobs.html?status=new">
+        <div class="card-content">
+            <h2>คิวงานใหม่</h2>
+            <p id="new-jobs-count">0</p>
+        </div>
+        <i class="fas fa-plus-square card-icon"></i>
+    </a>
+
+    <a class="card card-link" href="technician_jobs.html?status=in_progress">
+        <div class="card-content">
+            <h2>กำลังซ่อม</h2>
+            <p id="in-progress-count">0</p>
+        </div>
+        <i class="fas fa-wrench card-icon"></i>
+    </a>
+
+    <a class="card card-link" href="technician_jobs.html?status=waiting_parts">
+        <div class="card-content">
+            <h2>รออะไหล่</h2>
+            <p id="waiting-parts-count">0</p>
+        </div>
+        <i class="fas fa-clock card-icon"></i>
+    </a>
+
+    <a class="card card-link" href="technician_jobs.html?status=completed">
+        <div class="card-content">
+            <h2>งานที่เสร็จสิ้น</h2>
+            <p id="completed-count">0</p>
+        </div>
+        <i class="fas fa-check-circle card-icon"></i>
+    </a>
+
+</div>
+      <div class="table-box">
+        <div class="content-section">
+            <h2 class="section-title">รายการงานซ่อมล่าสุด</h2>
+            <div style="overflow-x:auto;">
+                <table class="styled-table" id="job-list-table">
+                    <thead>
+                      <tr>
+                        <th>ID</th>
+                        <th>ประเภท</th>
+                        <th>ลูกค้า</th>
+                        <th>เครื่อง</th>
+                        <th>อาการเสีย</th>
+                        <th>สถานะ</th>
+                        <th>วันที่รับ</th>
+                        <th>วันเริ่มซ่อม</th>
+                        <th>วันซ่อมเสร็จ</th>
+                        <th>การจัดการ</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                        <!-- จะถูกเติมด้วย JS -->
+                    </tbody>
+                </table>
+            </div>
+          </div>
+        </div>
+    </main>
+ <script>
+/* ==========================================================
+   DASHBOARD SCRIPT (FIXED + PRODUCTION READY)
+========================================================== */
+
+/* =============================
+   CONFIG
+============================= */
+const API_BASE = "";
+let jobs = [];
+let filteredJobs = [];
+
+/* =============================
+   AUTH
+============================= */
+function getToken() {
+  return localStorage.getItem("token");
+}
+
+function requireAuth() {
+  if (!getToken()) {
+    alert("กรุณาเข้าสู่ระบบ");
+    location.href = "login.html";
+  }
+}
+
+/* =============================
+   API FETCH
+============================= */
+async function apiFetch(path, options = {}) {
+  const headers = {
+    ...(options.headers || {}),
+    Authorization: `Bearer ${getToken()}`,
+  };
+
+  if (!(options.body instanceof FormData)) {
+    headers["Content-Type"] = "application/json";
+  }
+
+  const res = await fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers,
+  });
+
+  if (res.status === 401 || res.status === 403) {
+    alert("Session หมดอายุ");
+    localStorage.clear();
+    location.href = "login.html";
+    return;
+  }
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.message || "Server error");
+  return data;
+}
+
+/* =============================
+   STATUS
+============================= */
+function statusClass(status) {
+  return {
+    "รับเครื่อง": "status-new",
+    "กำลังซ่อม": "status-in_progress",
+    "รออะไหล่": "status-waiting_parts",
+    "ซ่อมเสร็จ": "status-completed",
+    "ยกเลิก": "status-cancelled",
+  }[status] || "";
+}
+
+
+/* =============================
+   LOAD JOBS
+============================= */
+async function loadJobs() {
+  const data = await apiFetch("/api/jobs");
+  jobs = Array.isArray(data) ? data : [];
+  initMonthYearFilter();
+  applyFilter();
+}
+
+/* =============================
+   MONTH / YEAR FILTER
+============================= */
+function initMonthYearFilter() {
+  const monthSel = document.getElementById("monthFilter");
+  const yearSel  = document.getElementById("yearFilter");
+
+  monthSel.innerHTML = `<option value="all">ทุกเดือน</option>`;
+  yearSel.innerHTML  = `<option value="all">ทุกปี</option>`;
+
+  for (let m = 1; m <= 12; m++) {
+    monthSel.innerHTML += `<option value="${m}">${m}</option>`;
+  }
+
+  const years = [...new Set(
+    jobs.map(j => new Date(j.receivedDate))
+        .filter(d => !isNaN(d))
+        .map(d => d.getFullYear())
+  )].sort((a,b) => b - a);
+
+  years.forEach(y => {
+    yearSel.innerHTML += `<option value="${y}">${y}</option>`;
+  });
+}
+
+function applyFilter() {
+  const month = document.getElementById("monthFilter").value;
+  const year  = document.getElementById("yearFilter").value;
+
+  filteredJobs = jobs.filter(j => {
+   if (j.status === "ซ่อมเสร็จ" || j.status === "ยกเลิก") {
+      return false;
+    }
+
+    const d = new Date(j.receivedDate);
+    if (isNaN(d)) return false;
+
+    if (month !== "all" && d.getMonth() + 1 !== Number(month)) return false;
+    if (year !== "all" && d.getFullYear() !== Number(year)) return false;
+
+    return true;
+  });
+
+  updateCards();
+  renderTable();
+}
+
+document.getElementById("monthFilter")?.addEventListener("change", applyFilter);
+document.getElementById("yearFilter")?.addEventListener("change", applyFilter);
+
+/* =============================
+   DASHBOARD CARDS
+============================= */
+function updateCards() {
+  const count = s => filteredJobs.filter(j => j.status === s).length;
+
+  document.getElementById("monthly-total").textContent = filteredJobs.length;
+  document.getElementById("new-jobs-count").textContent = count("รับเครื่อง");
+  document.getElementById("in-progress-count").textContent = count("กำลังซ่อม");
+  document.getElementById("waiting-parts-count").textContent = count("รออะไหล่");
+  document.getElementById("completed-count").textContent = count("ซ่อมเสร็จ");
+
+}
+
+
+/* =============================
+   TABLE
+============================= */
+function renderTable() {
+  const tbody = document.querySelector("#job-list-table tbody");
+  tbody.innerHTML = "";
+
+  filteredJobs.forEach(job => {
+
+    const isLocked = 
+      job.status === "ซ่อมเสร็จ" || 
+      job.status === "ยกเลิก";
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${job.receiptNumber}</td>
+      <td>${job.jobType || "-"}</td>
+      <td>${job.customerName}</td>
+      <td>${job.deviceType} ${job.deviceModel}</td>
+      <td>${job.symptom}</td>
+      <td>
+        <span class="status-badge ${statusClass(job.status)}">
+          ${job.status}
+        </span>
+      </td>
+      <td>${formatDate(job.receivedDate)}</td>
+      <td>${formatDate(job.startDate)}</td>
+      <td>${formatDate(job.finishDate)}</td>
+      <td>
+        <a class="btn-manage ${isLocked ? 'btn-view' : ''}" 
+           href="manage_job.html?id=${job._id}">
+          ${isLocked ? "ดูข้อมูล" : "จัดการ"}
+        </a>
+      </td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+
+
+/* =============================
+   UTILS
+============================= */
+function formatDate(date) {
+  if (!date) return "-";
+  const d = new Date(date);
+  return isNaN(d) ? "-" : d.toISOString().split("T")[0];
+}
+
+/* =============================
+   PROFILE
+============================= */
+async function loadProfile() {
+  try{
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+
+    const user = await apiFetch(`/api/employees/${userId}/profile`);
+
+    const avatar = user.avatar || "/uploads/profile/default.jpg";
+
+    const avatarSmall = document.getElementById("profileAvatar");
+    const avatarLarge = document.getElementById("profileAvatarLarge");
+
+    if (avatarSmall) avatarSmall.src = avatar;
+    if (avatarLarge) avatarLarge.src = avatar;
+
+    const nameEl = document.getElementById("profileNameLarge");
+    if (nameEl) {
+      nameEl.textContent = `${user.firstName} ${user.lastName}`;
+    }
+
+    const roleEl = document.getElementById("profileRole");
+    if (roleEl) {
+      roleEl.textContent = user.role;
+    }
+
+  }catch(err){
+    console.error("PROFILE ERROR:", err);
+  }
+}
+
+/* =============================
+   PROFILE TOGGLE ✅ (ตัวที่ขาด)
+============================= */
+function toggleProfile() {
+  const dropdown = document.getElementById("profileDropdown");
+  if (!dropdown) return;
+  dropdown.classList.toggle("show");
+}
+
+/* ปิด dropdown เมื่อคลิกข้างนอก */
+document.addEventListener("click", (e) => {
+  const menu = document.getElementById("profileMenu");
+  const dropdown = document.getElementById("profileDropdown");
+  if (!menu || !dropdown) return;
+
+  if (!menu.contains(e.target)) {
+    dropdown.classList.remove("show");
+  }
+});
+
+async function logout() {
+  await fetch("/api/auth/logout", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`
+    }
+  });
+
+  localStorage.clear();
+  location.href = "login.html";
+}
+
+
+/* =============================
+   INIT
+============================= */
+document.addEventListener("DOMContentLoaded", async () => {
+  requireAuth();
+
+  document.getElementById("profileRole").textContent =
+    localStorage.getItem("role") || "-";
+
+  await loadProfile();
+  await loadJobs();
+});
+async function uploadAvatar(event){
+
+  const file = event.target.files[0];
+  if(!file) return;
+
+  const token = localStorage.getItem("token");
+
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  try{
+
+    const res = await fetch("/api/employees/profile/avatar",{
+      method:"POST",
+      headers:{
+        Authorization:`Bearer ${token}`
+      },
+      body:formData
+    });
+
+    const data = await res.json();
+
+    if(!res.ok){
+      alert(data.message || "อัปโหลดไม่สำเร็จ");
+      return;
+    }
+
+    // เปลี่ยนรูปทันที
+    const avatarSmall = document.getElementById("profileAvatar");
+    const avatarLarge = document.getElementById("profileAvatarLarge");
+
+    if(avatarSmall) avatarSmall.src = data.avatar;
+    if(avatarLarge) avatarLarge.src = data.avatar;
+
+
+    alert("เปลี่ยนรูปโปรไฟล์เรียบร้อย");
+
+  }catch(err){
+    console.error(err);
+    alert("เกิดข้อผิดพลาด");
+  }
+
+}
+
+</script>
+
+</body>
+</html>

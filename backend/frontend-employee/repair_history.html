@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ประวัติการซ่อม</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+body{
+  margin:0;
+  font-family:'Kanit',sans-serif;
+  background:#f4f7f9;
+}
+header{
+  background:#2c3e50;
+  color:#fff;
+  padding:15px 30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header a{
+  color:#fff;
+  text-decoration:none;
+  margin-left:20px;
+}
+.container{
+  max-width:1300px;
+  margin:30px auto;
+  padding:0 20px;
+}
+h2{
+  margin-bottom:20px;
+}
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0 10px;
+}
+thead tr{
+  background:#2c3e50;
+  color:#fff;
+}
+th,td{
+  padding:12px 15px;
+  text-align:left;
+}
+tbody tr{
+  background:#fff;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);
+}
+.badge{
+  background:#2ecc71;
+  color:#fff;
+  padding:5px 12px;
+  border-radius:20px;
+  font-size:.8rem;
+}
+.action-btn{
+  background:#3498db;
+  color:#fff;
+  padding:6px 14px;
+  border-radius:20px;
+  text-decoration:none;
+  font-size:.85rem;
+}
+.empty{
+  background:#fff;
+  padding:40px;
+  text-align:center;
+  border-radius:12px;
+  color:#7f8c8d;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div><i class="fas fa-history"></i> ประวัติการซ่อม</div>
+  <nav>
+     <nav class="nav-links">
+      <a href="employee_dashboard.html" class="nav-link">
+        <i class="fas fa-home"></i> หน้าหลัก
+      </a>
+      <a href="new_job.html" class="nav-link">
+        <i class="fas fa-plus-circle"></i> รับเครื่องซ่อม
+      </a>
+      <a href="stock_management.html" class="nav-link">
+        <i class="fas fa-box-open"></i> จัดการสต็อก
+      </a>
+      <a href="technician_jobs.html" class="nav-link">
+        <i class="fas fa-tools"></i> งานของฉัน
+      </a>
+      <a href="reports.html" class="nav-link">
+        <i class="fas fa-chart-line"></i> รายงาน
+      </a>
+      <a href="admin_dashboard.html" class="nav-link active">
+        <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
+      </a>
+  </nav>
+</header>
+
+<div class="container">
+  <h2>รายการงานซ่อมที่เสร็จสิ้น</h2>
+
+  <table>
+    <thead>
+      <tr>
+        <th>รหัสงาน</th>
+        <th>ลูกค้า</th>
+        <th>เครื่อง</th>
+        <th>อาการ</th>
+        <th>วันที่รับ</th>
+        <th>วันที่ซ่อมเสร็จ</th>
+        <th>สถานะ</th>
+        <th>ดูรายละเอียด</th>
+      </tr>
+    </thead>
+    <tbody id="historyBody"></tbody>
+  </table>
+
+  <div id="emptyBox" class="empty" style="display:none;">
+    <i class="fas fa-box-open"></i><br>
+    ยังไม่มีประวัติการซ่อม
+  </div>
+</div>
+
+<script>
+/* ==========================================================
+   repair_history.html — PRODUCTION READY
+========================================================== */
+
+const API_BASE = "/api";
+const token = localStorage.getItem("token");
+
+/* =========================
+   AUTH CHECK
+========================= */
+if (!token) {
+  location.replace("login.html");
+}
+
+/* =========================
+   LOAD HISTORY (ซ่อมเสร็จ)
+========================= */
+async function loadHistory() {
+  const tbody   = document.getElementById("historyBody");
+  const emptyBox = document.getElementById("emptyBox");
+
+  if (!tbody || !emptyBox) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/jobs`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    });
+
+    // session หมด
+    if (res.status === 401 || res.status === 403) {
+      alert("Session หมดอายุ กรุณาเข้าสู่ระบบใหม่");
+      localStorage.clear();
+      location.replace("login.html");
+      return;
+    }
+
+    const jobs = await res.json();
+
+    // ✅ เอาเฉพาะงานที่ซ่อมเสร็จ
+    const historyJobs = Array.isArray(jobs)
+      ? jobs.filter(j => j.status === "ซ่อมเสร็จ")
+      : [];
+
+    tbody.innerHTML = "";
+
+    if (!historyJobs.length) {
+      emptyBox.style.display = "block";
+      return;
+    }
+
+    emptyBox.style.display = "none";
+
+    historyJobs.forEach(job => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${job.receiptNumber || "-"}</td>
+        <td>${job.customerName || "-"}</td>
+        <td>${job.deviceType || "-"} ${job.deviceModel || ""}</td>
+        <td>${job.symptom || "-"}</td>
+        <td>${formatDate(job.receivedDate)}</td>
+        <td>${formatDate(job.finishDate)}</td>
+        <td><span class="badge badge-success">ซ่อมเสร็จ</span></td>
+        <td>
+          <a class="action-btn" href="manage_job.html?id=${job._id}">
+            ดูรายละเอียด
+          </a>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+  } catch (err) {
+    console.error(err);
+    emptyBox.style.display = "block";
+    emptyBox.textContent = "❌ ไม่สามารถโหลดประวัติการซ่อมได้";
+  }
+}
+
+/* =========================
+   UTIL
+========================= */
+function formatDate(date) {
+  if (!date) return "-";
+  const d = new Date(date);
+  if (isNaN(d)) return "-";
+  return d.toLocaleDateString("th-TH");
+}
+
+/* =========================
+   INIT
+========================= */
+document.addEventListener("DOMContentLoaded", loadHistory);
+</script>
+
+</body>
+</html>

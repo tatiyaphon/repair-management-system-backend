@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<title>ข้อมูลส่วนตัว</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:'Kanit',sans-serif;
+  background:#f4f7f9;
+  color:#2c3e50;
+}
+header{
+  background:#2c3e50;
+  color:#fff;
+  padding:15px 30px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+header a{
+  color:#fff;
+  text-decoration:none;
+  margin-left:20px;
+}
+.container{
+  max-width:900px;
+  margin:40px auto;
+  background:#fff;
+  padding:30px;
+  border-radius:14px;
+  box-shadow:0 10px 30px rgba(0,0,0,.1);
+}
+
+.avatar-box{ position:relative; }
+.avatar-box img{
+  width:120px;
+  height:120px;
+  border-radius:50%;
+  object-fit:cover;
+  border:3px solid #1abc9c;
+}
+.avatar-box label{
+  position:absolute;
+  bottom:0;
+  right:0;
+  background:#1abc9c;
+  color:#fff;
+  width:36px;
+  height:36px;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  cursor:pointer;
+}
+.avatar-box input{display:none}
+
+form{ margin-top:20px; }
+.form-group{ margin-bottom:18px; }
+label{ display:block; margin-bottom:6px; }
+input{
+  width:100%;
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ddd;
+}
+input:disabled{ background:#f3f4f6; }
+
+.actions{ margin-top:20px; display:flex; gap:10px; }
+.btn{
+  padding:10px 20px;
+  border-radius:30px;
+  border:none;
+  cursor:pointer;
+}
+.btn.save{ background:#1abc9c; color:#fff; }
+.btn.cancel{ background:#eee; }
+</style>
+</head>
+
+<body>
+
+<header>
+  <div>ข้อมูลส่วนตัว</div>
+</header>
+
+<div class="container">
+
+  <div class="avatar-box">
+    <img id="avatarPreview" src="/uploads/profile/default.jpg">
+    <label>
+      <i class="fas fa-camera"></i>
+      <input type="file" accept="image/*" onchange="changeAvatar(event)">
+    </label>
+  </div>
+
+  <h2 id="displayName">ผู้ใช้งาน</h2>
+  <p id="displayRole"></p>
+
+  <form onsubmit="saveProfile(event)">
+    <div class="form-group">
+      <label>ชื่อ</label>
+      <input type="text" id="nameInput">
+    </div>
+
+    <div class="form-group">
+      <label>อีเมล</label>
+      <input type="email" id="emailInput">
+    </div>
+
+    <div class="form-group">
+      <label>เบอร์</label>
+      <input type="text" id="phoneInput">
+    </div>
+
+    <button class="btn save">บันทึก</button>
+  </form>
+
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+const userId = localStorage.getItem("userId");
+
+if (!token) {
+  alert("กรุณาเข้าสู่ระบบ");
+  location.href = "login.html";
+}
+
+/* ===============================
+   LOAD PROFILE FROM SERVER
+=============================== */
+async function loadProfile(){
+  try{
+    const res = await fetch(`/api/employees/${userId}/profile`,{
+      headers:{
+        Authorization:`Bearer ${token}`
+      }
+    });
+
+    const user = await res.json();
+
+    document.getElementById("displayName").textContent = user.name || "ผู้ใช้งาน";
+    document.getElementById("displayRole").textContent = user.role || "-";
+
+    document.getElementById("nameInput").value = user.name || "";
+    document.getElementById("emailInput").value = user.email || "";
+    document.getElementById("phoneInput").value = user.phone || "";
+
+    document.getElementById("avatarPreview").src =
+      user.avatar || "/uploads/profile/default.jpg";
+
+  }catch(err){
+    console.error(err);
+    alert("โหลดข้อมูลไม่สำเร็จ");
+  }
+}
+
+/* ===============================
+   CHANGE AVATAR (UPLOAD SERVER)
+=============================== */
+async function changeAvatar(e){
+  const file = e.target.files[0];
+  if (!file) return;
+
+  if (file.size > 2 * 1024 * 1024) {
+    alert("ไฟล์ต้องไม่เกิน 2MB");
+    return;
+  }
+
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  try{
+    const res = await fetch("/api/employees/profile/avatar",{
+      method:"POST",
+      headers:{
+        Authorization:`Bearer ${token}`
+      },
+      body:formData
+    });
+
+    const data = await res.json();
+
+    if(!res.ok){
+      alert(data.message);
+      return;
+    }
+
+    document.getElementById("avatarPreview").src = data.avatar;
+
+    alert("เปลี่ยนรูปสำเร็จ");
+
+  }catch(err){
+    console.error(err);
+    alert("อัปโหลดไม่สำเร็จ");
+  }
+}
+
+/* ===============================
+   SAVE PROFILE
+=============================== */
+async function saveProfile(e){
+  e.preventDefault();
+
+  const name  = document.getElementById("nameInput").value;
+  const email = document.getElementById("emailInput").value;
+  const phone = document.getElementById("phoneInput").value;
+
+  try{
+    const res = await fetch(`/api/employees/${userId}`,{
+      method:"PUT",
+      headers:{
+        "Content-Type":"application/json",
+        Authorization:`Bearer ${token}`
+      },
+      body:JSON.stringify({name,email,phone})
+    });
+
+    if(!res.ok){
+      alert("บันทึกไม่สำเร็จ");
+      return;
+    }
+
+    alert("บันทึกสำเร็จ");
+    location.href="employee_dashboard.html";
+
+  }catch(err){
+    console.error(err);
+  }
+}
+
+/* INIT */
+document.addEventListener("DOMContentLoaded", loadProfile);
+</script>
+
+</body>
+</html>

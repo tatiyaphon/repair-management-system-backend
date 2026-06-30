@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>รับเครื่องซ่อมใหม่ | ระบบจัดการงานซ่อม</title>
+    <link rel="icon" type="image/png" href="logo1.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="navbar.css">
+
+    <style>
+        /* === 1. Variables & Global Styles === */
+        :root {
+            --primary-color: #2c3e50; /* Dark Blue */
+            --secondary-color: #1abc9c; /* Turquoise (Accent) */
+            --background-color: #f4f7f9; /* Light Gray Background */
+            --card-background: #ffffff;
+            --text-color: #2c3e50;
+            --border-radius: 15px; 
+            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            --input-focus-shadow: 0 0 8px rgba(26, 188, 156, 0.5);
+        }
+
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        /* === 3. Form Container & Sections === */
+        .form-container {
+            background-color: var(--card-background);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            width: 100%;
+            max-width: 700px;
+            margin: 40px auto;
+        }
+
+        .form-container h2 {
+            text-align: center;
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--secondary-color);
+            font-weight: 700;
+        }
+
+        .form-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: #fcfcfc;
+            border: 1px solid #e0e0e0;
+        }
+
+        .form-section h3 {
+            font-size: 1.4rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+            margin: 0 0 20px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        
+        .form-section h3 i { color: var(--primary-color); }
+
+        /* Grid Layout */
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        .form-group.full-width { grid-column: 1 / -1; }
+
+        /* Radio Group for Repair Type */
+        .radio-group {
+            display: flex;
+            flex-wrap: wrap; /* ให้ห่อเมื่อหน้าจอเล็ก */
+            gap: 20px;
+            padding: 10px 0;
+            align-items: center;
+        }
+        .radio-group label {
+            display: inline-flex;
+            align-items: center;
+            font-weight: 500;
+            cursor: pointer;
+            margin-bottom: 0;
+            user-select: none;
+        }
+        .radio-group input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            margin-right: 8px;
+            appearance: none;
+            border: 2px solid var(--secondary-color);
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+        .radio-group input[type="radio"]:checked {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+            transform: scale(1.1);
+        }
+
+        /* === 4. Input & Label Styles === */
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: var(--text-color);
+            font-size: 0.95rem;
+        }
+
+        input, textarea, select {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Kanit', sans-serif;
+            box-sizing: border-box;
+            background-color: #ffffff;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: var(--input-focus-shadow);
+        }
+
+        textarea { resize: vertical; }
+
+        /* Specific style for price field */
+        #price-quoted {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--secondary-color);
+            text-align: right;
+            border-color: #bdc3c7;
+        }
+        
+        /* === 5. Button Style === */
+        .btn-submit {
+            background-color: var(--secondary-color);
+            color: white;
+            padding: 18px 50px;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: block;
+            margin: 40px auto 0;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(26, 188, 156, 0.4);
+            display: flex; align-items: center; gap: 10px;
+        }
+
+        .btn-submit:hover {
+            background-color: #16a085;
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(26, 188, 156, 0.5);
+        }
+
+        /* === 6. Responsive === */
+        @media (max-width: 768px) {
+            header { flex-direction: column; padding: 15px; }
+            .form-container { padding: 20px; margin: 20px auto; }
+            .form-grid { grid-template-columns: 1fr; }
+            .form-section h3 { font-size: 1.2rem; }
+            .btn-submit { width: 100%; padding: 15px 0; font-size: 1.1rem; }
+        }
+/* animation */
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+    </style>
+</head>
+
+<body>
+   <header class="main-header">
+
+  <div class="logo">
+    <i class="fas fa-tools"></i>
+    ระบบจัดการงานซ่อม
+  </div>
+
+  <nav class="nav-links">
+    <a href="employee_dashboard.html" class="nav-link">
+      <i class="fas fa-home"></i> หน้าหลัก
+    </a>
+
+    <a href="new_job.html" class="nav-link">
+      <i class="fas fa-plus-circle"></i> รับเครื่องซ่อม
+    </a>
+
+    <a href="stock_management.html" class="nav-link">
+      <i class="fas fa-box-open"></i> จัดการสต็อก
+    </a>
+
+    <a href="technician_jobs.html" class="nav-link">
+      <i class="fas fa-tools"></i> งานของฉัน
+    </a>
+
+    <a href="reports.html" class="nav-link">
+      <i class="fas fa-chart-line"></i> รายงาน
+    </a>
+
+    <a href="admin_dashboard.html" class="nav-link">
+      <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
+    </a>
+  </nav>
+
+  <!-- profile -->
+  <div class="profile-menu" id="profileMenu">
+    <div class="profile-trigger" onclick="toggleProfile()">
+      <img id="profileAvatar" src="/uploads/profile/default.jpg">
+    </div>
+
+
+    <div class="profile-dropdown" id="profileDropdown">
+
+  <div class="profile-header">
+  <img id="profileAvatarLarge"
+       src="/uploads/profile/default.jpg"
+       class="profile-avatar-large">
+
+  <div>
+    <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
+    <small id="profileRole">—</small>
+  </div>
+</div>
+
+  <div class="profile-divider"></div>
+
+  <label class="profile-item">
+    <i class="fas fa-camera"></i>
+    เปลี่ยนรูปโปรไฟล์
+    <input type="file" hidden onchange="uploadAvatar(event)">
+  </label>
+
+  <a class="profile-item" href="/employee/profile.html">
+    <i class="fas fa-user"></i>
+    ข้อมูลส่วนตัว
+  </a>
+
+  <a class="profile-item" href="/employee/change_password.html">
+    <i class="fas fa-lock"></i>
+    เปลี่ยนรหัสผ่าน
+  </a>
+
+  <a class="profile-item" href="/employee/repair_history.html">
+    <i class="fas fa-history"></i>
+    ประวัติการซ่อม
+  </a>
+
+  <div class="profile-divider"></div>
+
+ <button class="profile-logout" onclick="logout()">
+  <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
+</button>
+
+</div>
+</header>
+
+
+    <main>
+        <div class="form-container">
+            <h2><i class="fas fa-clipboard-list"></i> สร้างใบงานซ่อมใหม่</h2>
+            <form id="new-job-form">
+                
+                <div class="form-section">
+                    <h3><i class="fas fa-user-circle"></i> ข้อมูลลูกค้าและการรับเครื่อง</h3>
+                    <div class="form-grid">
+                        
+                        <div class="form-group full-width">
+                            <label>สถานะการรับเครื่อง:</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="repair-type" value="new-repair" required checked /> 
+                                    <i class="fas fa-plus-square" style="color: var(--secondary-color);"></i> **เครื่องซ่อมใหม่**
+                                </label>
+                                <label>
+                                    <input type="radio" name="repair-type" value="warranty-claim" required /> 
+                                    <i class="fas fa-undo" style="color: #f39c12;"></i> **กลับมาเคลมในประกัน**
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="employee-id">เลขที่ใบเสร็จ/อ้างอิง:</label>
+                            <input type="text"id="employee-id"readonlyplaceholder="ระบบจะสร้างให้อัตโนมัติ"/>
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-name">ชื่อ-นามสกุล:</label>
+                            <input type="text" id="customer-name" required placeholder="กรอกชื่อลูกค้า" />
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-phone">เบอร์โทรศัพท์:</label>
+                            <input type="tel" id="customer-phone" required placeholder="เช่น 08x-xxx-xxxx" />
+                        </div>
+                        <div class="form-group">
+                            <label for="customer-address">ที่อยู่ (ไม่บังคับ):</label>
+                            <input type="text" id="customer-address" placeholder="ที่อยู่สำหรับติดต่อ" />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-laptop-code"></i> ข้อมูลเครื่องและอาการ</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="device-type">ประเภทเครื่อง:</label>
+                            <select id="device-type" required>
+                                <option value="" disabled selected>--- เลือกประเภท ---</option>
+                                <option value="Laptop">โน้ตบุ๊ก (Laptop)</option>
+                                <option value="PC">คอมพิวเตอร์ตั้งโต๊ะ (PC)</option>
+                                <option value="Mobile">โทรศัพท์มือถือ/แท็บเล็ต</option>
+                                <option value="Monitor">หน้าจอ/อุปกรณ์ต่อพ่วง</option>
+                                <option value="Other">อื่นๆ</option>
+                            </select>
+                           <div class="form-group">
+                                <label for="assigned-tech">ผู้รับผิดชอบ (ช่าง):</label>
+                                    <select id="assigned-tech" required>
+                                        <option value="" disabled selected>--- เลือกช่าง ---</option>
+                                    </select>
+                        </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="device-model">ยี่ห้อ/รุ่น:</label>
+                            <input type="text" id="device-model" required placeholder="ยี่ห้อ รุ่น (เช่น Dell Inspiron 15)" />
+                        </div>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="symptom">อาการเสียที่แจ้ง:</label>
+                        <textarea id="symptom" rows="4" required placeholder="เช่น เปิดไม่ติด, จอแตก, ชาร์จไม่เข้า"></textarea>
+                    </div>
+                    <div class="form-group full-width">
+                        <label for="accessory">อุปกรณ์ที่มาด้วย (ไม่บังคับ):</label>
+                        <textarea id="accessory" rows="2" placeholder="เช่น ที่ชาร์จ, แบตเตอรี่สำรอง, กระเป๋า"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3><i class="fas fa-file-invoice-dollar"></i> การเงินและกำหนดเวลา</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="price-quoted">ราคาที่แจ้งลูกค้า (บาท):</label>
+                            <input type="number" id="price-quoted" step="1" min="0" placeholder="0" required />
+                        </div>
+                        <div class="form-group">
+                        <label for="received-date">วันที่รับเครื่อง:</label>
+                        <input type="date" id="received-date" required />
+                        </div>
+
+                        <div class="form-group">
+                        <label for="start-date">วันที่เริ่มซ่อม:</label>
+                        <input type="date" id="start-date" />
+                        </div>
+
+                        <div class="form-group">
+                            <label for="finished-date">วันที่คาดว่าจะเสร็จ (ไม่บังคับ):</label>
+                            <input type="date" id="finished-date" />
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-paper-plane"></i> **บันทึกงานซ่อมและสร้างใบรับ**
+                </button>
+            </form>
+        </div>
+    </main>
+
+ <script>
+/* ==========================================================
+   new_job.html — PRODUCTION READY
+========================================================== */
+
+/* =========================
+   CONFIG
+========================= */
+const API_BASE = "/api";
+const token = localStorage.getItem("token");
+
+/* =========================
+   AUTH CHECK
+========================= */
+if (!token) {
+  alert("กรุณาเข้าสู่ระบบ");
+  location.replace("login.html");
+}
+
+const headers = {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${token}`
+};
+
+/* =========================
+   LOAD TECHNICIANS (role = tech)
+========================= */
+async function loadTechnicians() {
+  try {
+    const res = await fetch(`${API_BASE}/employees/tech`, {
+      headers: {
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${localStorage.getItem("token")}`
+}
+
+    });
+
+    if (!res.ok) {
+      console.warn("ไม่พบ endpoint /employees/tech");
+      return;
+    }
+
+    const techs = await res.json();
+    const select = document.getElementById("assigned-tech");
+    if (!select) return;
+
+    select.innerHTML =
+      `<option value="" disabled selected>--- เลือกช่าง ---</option>`;
+
+    techs.forEach(t => {
+      const opt = document.createElement("option");
+      opt.value = t._id;
+      opt.textContent = `${t.firstName} ${t.lastName}`;
+      select.appendChild(opt);
+    });
+
+  } catch (err) {
+    console.error("LOAD TECH ERROR:", err);
+    alert("โหลดรายชื่อช่างไม่สำเร็จ");
+  }
+}
+
+/* =========================
+   REPAIR TYPE (radio)
+========================= */
+function getRepairType() {
+  return (
+    document.querySelector('input[name="repair-type"]:checked')?.value
+    || "ซ่อมใหม่"
+  );
+}
+
+/* =========================
+   SET TODAY DATE
+========================= */
+document.addEventListener("DOMContentLoaded", () => {
+  const received = document.getElementById("received-date");
+  if (received) received.valueAsDate = new Date();
+
+  const receiptInput = document.getElementById("employee-id");
+  if (receiptInput) {
+    receiptInput.value = generateReceiptNumber();
+  }
+});
+
+
+/* =========================
+   SUBMIT FORM
+========================= */
+document.getElementById("new-job-form")?.addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const jobData = {
+    receiptNumber: document.getElementById("employee-id")?.value.trim(),
+    customerName: document.getElementById("customer-name")?.value.trim(),
+    customerPhone: document.getElementById("customer-phone")?.value.trim(),
+    customerAddress: document.getElementById("customer-address")?.value.trim() || null,
+
+    deviceType: document.getElementById("device-type")?.value,
+    deviceModel: document.getElementById("device-model")?.value.trim(),
+    symptom: document.getElementById("symptom")?.value.trim(),
+    accessory: document.getElementById("accessory")?.value.trim() || null,
+
+    priceQuoted: Number(
+      document.getElementById("price-quoted")?.value || 0
+    ),
+
+    receivedDate: document.getElementById("received-date")?.value,
+    startDate: document.getElementById("start-date")?.value || null,
+    finishDate: document.getElementById("finished-date")?.value || null,
+
+    assignedTo: document.getElementById("assigned-tech")?.value,
+    jobType: getRepairType()
+    // ❌ ไม่ส่ง status → backend default = "รับเครื่อง"
+  };
+
+  /* =========================
+     VALIDATE
+  ========================= */
+  if (
+    !jobData.receiptNumber ||
+    !jobData.customerName ||
+    !jobData.customerPhone ||
+    !jobData.deviceType ||
+    !jobData.deviceModel ||
+    !jobData.symptom ||
+    !jobData.assignedTo
+  ) {
+    alert("กรุณากรอกข้อมูลให้ครบถ้วน");
+    return;
+  }
+
+  try {
+    const res = await fetch(`${API_BASE}/jobs`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify(jobData)
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      alert(data.message || "บันทึกงานไม่สำเร็จ");
+      return;
+    }
+
+    alert("✅ บันทึกงานซ่อมสำเร็จ");
+
+    /* =========================
+       OPEN RECEIPT (PDF)
+    ========================= */
+    if (data.job?._id) {
+     window.open(
+  `/employee/receipt.html?id=${data.job._id}`,
+  "_blank"
+);
+    }
+
+    /* =========================
+       REDIRECT
+    ========================= */
+    setTimeout(() => {
+      location.replace("employee_dashboard.html");
+    }, 800);
+
+  } catch (err) {
+    console.error(err);
+    alert("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
+  }
+});
+
+/* =========================
+   INIT
+========================= */
+document.addEventListener("DOMContentLoaded", loadTechnicians);
+
+function generateReceiptNumber() {
+  const now = new Date();
+
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, "0");
+  const d = String(now.getDate()).padStart(2, "0");
+
+  const random = Math.floor(100 + Math.random() * 900); // 3 หลัก
+  return `IN${y}${m}${d}-${random}`;
+}
+/* =========================
+   LOAD PROFILE
+========================= */
+async function loadProfile() {
+  try {
+    const res = await fetch(`${API_BASE}/employees/me`, {
+      headers
+    });
+
+    if (!res.ok) return;
+
+    const user = await res.json();
+
+    const avatar = user.avatar || "/uploads/profile/default.jpg";
+
+    document.getElementById("profileAvatar").src = avatar;
+    document.getElementById("profileAvatarLarge").src = avatar;
+    document.getElementById("profileNameLarge").textContent =
+      `${user.firstName} ${user.lastName}`;
+    document.getElementById("profileRole").textContent = user.role;
+
+  } catch (err) {
+    console.error("LOAD PROFILE ERROR:", err);
+  }
+}
+
+document.addEventListener("DOMContentLoaded", loadProfile);
+
+function toggleProfile(){
+  document.getElementById("profileDropdown")
+    .classList.toggle("show");
+}
+
+document.addEventListener("click", function(e){
+  const menu = document.getElementById("profileMenu");
+  if(!menu.contains(e.target)){
+    document.getElementById("profileDropdown")
+      .classList.remove("show");
+  }
+});
+async function uploadAvatar(event){
+
+  const file = event.target.files[0];
+  if(!file) return;
+
+  const token = localStorage.getItem("token");
+
+  const formData = new FormData();
+  formData.append("avatar", file);
+
+  try{
+
+    const res = await fetch("/api/employees/profile/avatar",{
+      method:"POST",
+      headers:{
+        Authorization:`Bearer ${token}`
+      },
+      body:formData
+    });
+
+    const data = await res.json();
+
+    if(!res.ok){
+      alert(data.message || "อัปโหลดไม่สำเร็จ");
+      return;
+    }
+
+    // เปลี่ยนรูปทันที
+    const avatarSmall = document.getElementById("profileAvatar");
+    const avatarLarge = document.getElementById("profileAvatarLarge");
+
+    if(avatarSmall) avatarSmall.src = data.avatar;
+    if(avatarLarge) avatarLarge.src = data.avatar;
+
+  
+
+    alert("เปลี่ยนรูปโปรไฟล์เรียบร้อย");
+
+  }catch(err){
+    console.error(err);
+    alert("เกิดข้อผิดพลาด");
+  }
+}
+// FIX: เดิมมีฟังก์ชัน loadProfile ซ้อนผิดตำแหน่งอยู่ข้างใน uploadAvatar
+// (วงเล็บปิดไม่ตรงตำแหน่ง ทำให้กลายเป็น local function ที่ไม่มีใครเรียกใช้)
+// ลบออกแล้ว เพราะมี loadProfile ตัวจริงที่ผูกกับ DOMContentLoaded อยู่แล้วด้านบน
+</script>
+
+</body>
+</html>

@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สถานะงานซ่อม | ระบบจัดการงานซ่อม</title>
+    <link rel="icon" type="image/png" href="logo1.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        /* === 1. Variables & Colors === */
+        :root {
+            --primary-color: #2c3e50; /* Dark Blue */
+            --secondary-color: #3498db; /* Bright Blue */
+            --background-color: #ecf0f1; /* Light Gray */
+            --card-background: #ffffff;
+            --text-color: #333;
+            --light-text-color: #7f8c8d;
+            --border-radius: 12px;
+            --box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            --danger-color: #e74c3c;
+            --success-color: #2ecc71;
+            --warning-color: #f39c12;
+            --line-color: #00b900;
+        }
+
+        /* === 2. Base & Layout === */
+        body {
+            font-family: 'Kanit', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            text-align: center;
+            background-image: linear-gradient(to bottom, #d9e3f0, #e9eff5);
+            padding: 20px 0;
+        }
+
+        .container {
+            background-color: var(--card-background);
+            padding: 40px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            width: 90%;
+            max-width: 700px;
+            margin: 20px auto;
+            animation: fadeIn 0.8s ease-in-out;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-weight: 700;
+        }
+        
+        /* === 3. Status Box & Details === */
+        .status-box {
+            border-radius: 10px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: left;
+            background-color: #f4f7f9;
+            border: 1px solid #e0e0e0;
+        }
+
+        .status-box h2 {
+            margin-top: 0;
+            color: var(--secondary-color);
+            border-bottom: 2px solid var(--secondary-color);
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.3rem;
+        }
+
+        /* Current Status Display */
+        .status-display {
+            font-size: 2.2rem;
+            font-weight: 700;
+            text-align: center;
+            padding: 18px;
+            border-radius: 10px;
+            color: #ffffff;
+            letter-spacing: 1px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .status-complete { background-color: var(--success-color); }
+        .status-in-progress { background-color: var(--warning-color); }
+        .status-new { background-color: var(--secondary-color); }
+
+        .detail-item {
+            margin-bottom: 12px;
+            line-height: 1.6;
+            display: flex;
+        }
+
+        .detail-item strong {
+            color: var(--primary-color);
+            font-weight: 600;
+            display: inline-block;
+            width: 150px;
+            flex-shrink: 0;
+        }
+
+        /* Price Styling */
+        .price-display {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--danger-color);
+            display: block;
+            margin-top: 5px;
+        }
+        
+        /* === 4. Links & Not Found === */
+        .back-link {
+            display: inline-block;
+            margin-top: 25px;
+            color: var(--secondary-color);
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 500;
+            transition: color 0.3s, transform 0.3s;
+        }
+
+        .back-link:hover {
+            color: var(--primary-color);
+            transform: translateX(-3px);
+        }
+
+        .not-found {
+            color: var(--danger-color);
+            font-size: 1.4rem;
+            margin: 30px 0;
+            font-weight: 600;
+        }
+
+        /* === 5. Contact Info === */
+        .contact-info {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px dashed #ccc;
+        }
+
+        .contact-info h3 {
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .contact-methods {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+        }
+
+        .contact-methods a {
+            text-decoration: none;
+            color: var(--text-color);
+            font-size: 1.1rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 15px;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        .contact-methods a:hover {
+            background-color: #e0e0e0;
+        }
+
+        .contact-methods .fa-phone { color: var(--secondary-color); }
+        .contact-methods .fa-line { color: var(--line-color); }
+
+
+        /* === 6. Animations & Responsiveness === */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+
+    header {
+        flex-direction: column;
+        gap: 10px;
+        align-items: flex-start;
+    }
+
+    header img {
+        height: 36px;
+    }
+
+    nav {
+        width: 100%;
+        display: flex;
+        justify-content: flex-end;
+    }
+
+    .hero {
+        padding: 30px 20px;
+        text-align: center;
+    }
+
+    .hero h1 {
+        font-size: 1.6rem;
+    }
+
+    .hero p {
+        font-size: 0.95rem;
+    }
+
+    .container {
+        padding: 20px;
+    }
+
+    .check-box {
+        flex-direction: column;
+        text-align: center;
+        margin-top: -40px;
+    }
+
+    .check-box h2 {
+        font-size: 1.2rem;
+    }
+
+    .check-box a {
+        width: 100%;
+        text-align: center;
+    }
+
+    .stats {
+        grid-template-columns: 1fr;
+    }
+
+    footer {
+        font-size: 0.8rem;
+        padding: 15px;
+    }
+}
+/* ===== MOBILE RESPONSIVE ===== */
+@media (max-width: 768px) {
+
+    header{
+        padding:12px 16px;
+    }
+
+    header img{
+        height:32px;
+    }
+
+    .hero{
+        padding:30px 16px;
+        text-align:center;
+    }
+
+    .hero h1{
+        font-size:1.6rem;
+    }
+
+    .container{
+        padding:20px 16px;
+    }
+
+    /* กล่องตรวจสอบ */
+    .check-box{
+        flex-direction:column;
+        align-items:flex-start;
+        margin-top:-40px;
+    }
+
+    .check-box a{
+        width:100%;
+        text-align:center;
+    }
+
+    /* cards */
+    .stats{
+        grid-template-columns:1fr;
+    }
+
+    .timeline{
+        margin-top:30px;
+    }
+
+    footer{
+        font-size:0.8rem;
+        padding:15px;
+    }
+    .check-box a{
+    min-height:48px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+}
+
+    </style>
+</head>
+<body>
+    <div class="container" id="status-container">
+        <h1><i class="fas fa-info-circle"></i> สถานะงานซ่อม</h1>
+        
+        <div id="status-content" class="status-box">
+            
+            </div>
+
+        <div class="contact-info">
+            <h3><i class="fas fa-headset"></i> ช่องทางการติดต่อสอบถามเพิ่มเติม</h3>
+            <div class="contact-methods">
+                <a href="tel:02-123-4567">
+                    <i class="fas fa-phone"></i> โทร: 080-4641677
+                </a>
+                <a href="#" target="_blank">
+                    <i class="fab fa-line"></i> Line ID: @080-4641677
+                </a>
+            </div>
+        </div>
+    </div>
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+
+    
+  const API = "/api/jobs/receipt";
+  const box = document.getElementById("status-content");
+  const params = new URLSearchParams(location.search);
+  const receipt = params.get("receipt_number");
+
+  if(!receipt){
+    box.innerHTML = `<div class="not-found">ไม่พบเลขที่ใบเสร็จ</div>`;
+    return;
+  }
+    const res = await fetch(`${API}/${receipt}`);
+    if(!res.ok){
+      box.innerHTML = `<div class="not-found">ไม่พบข้อมูลงานซ่อม</div>`;
+      return;
+    }
+
+    const j = await res.json();
+
+    let statusClass = "status-new";
+let statusText  = j.status;
+
+if (j.status === "ซ่อมเสร็จ") {
+  statusClass = "status-complete";
+} else if (j.status !== "รับเครื่อง") {
+  statusClass = "status-in-progress";
+}
+
+box.innerHTML = `
+  <!-- สถานะปัจจุบัน -->
+  <div class="status-box">
+    <h2><i class="fas fa-sync-alt"></i> สถานะปัจจุบัน</h2>
+    <div class="status-display ${statusClass}">
+      ${statusText}
+    </div>
+  </div>
+
+  <!-- ข้อมูลลูกค้า -->
+
+    <div class="status-box">
+  <h2><i class="fas fa-user"></i> ข้อมูลลูกค้า</h2>
+  <div class="detail-item"><strong>เลขใบเสร็จ:</strong> ${j.receiptNumber}</div>
+  <div class="detail-item"><strong>ชื่อ:</strong> ${j.customerName}</div>
+  <div class="detail-item"><strong>เบอร์:</strong> ${j.customerPhone || "-"}</div>
+  <div class="detail-item"><strong>ที่อยู่:</strong> ${j.customerAddress || "-"}</div>
+  <div class="detail-item"><strong>อุปกรณ์ที่มาด้วย:</strong> ${j.accessory || "-"}</div>
+
+  <div class="detail-item">
+    <strong>ประเภทการรับเครื่อง:</strong> 
+    ${j.jobType === "เคลม" 
+      ? '<span style="color:#e67e22;font-weight:600;">🔁 เคลมสินค้า</span>' 
+      : '<span style="color:#2980b9;font-weight:600;">🛠 รับเครื่องใหม่</span>'
+    }
+  </div>
+  </div>
+
+  <!-- ข้อมูลเครื่อง -->
+  <div class="status-box">
+    <h2><i class="fas fa-laptop"></i> รายละเอียดเครื่อง</h2>
+    <div class="detail-item"><strong>ประเภท:</strong> ${j.deviceType}</div>
+    <div class="detail-item"><strong>รุ่น:</strong> ${j.deviceModel}</div>
+    <div class="detail-item"><strong>อาการ:</strong> ${j.symptom}</div>
+  </div>
+
+  <!-- ราคา -->
+  <div class="status-box">
+    <h2><i class="fas fa-baht-sign"></i> ราคาและกำหนดการ</h2>
+    <span class="price-display">${j.priceQuoted.toLocaleString()} บาท</span>
+    <div class="detail-item">
+      <strong>วันที่รับเครื่อง:</strong>
+      ${new Date(j.receivedDate).toLocaleDateString("th-TH")}
+    </div>
+    <div class="detail-item">
+      <strong>วันที่เริ่มซ่อม:</strong>
+      ${j.startDate ? new Date(j.startDate).toLocaleDateString("th-TH") : "-"}
+    </div>
+    
+    <div class="detail-item">
+      <strong>วันที่ซ่อมเสร็จ:</strong>
+      ${j.finishDate ? new Date(j.finishDate).toLocaleDateString("th-TH") : "-"}
+    </div>
+  </div>
+
+  <a href="/customer/check_status.html" class="back-link">
+    ← กลับไปตรวจสอบงานอื่น
+  </a>
+`;
+});
+</script>
+</body>
+</html>
