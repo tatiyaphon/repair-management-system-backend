@@ -27,10 +27,12 @@ const stockSchema = new mongoose.Schema({
   },
   price: {
     type: Number,
-    default: 0
+    default: 0,
+    // FIX: เดิมไม่มี min กำกับ ต่างจาก quantity ที่มี min:0 อยู่แล้ว
+    // ทำให้พิมพ์ราคาติดลบผ่านได้โดยไม่มีอะไรเตือน
+    min: 0
   },
 
-  // ✅ เพิ่มตรงนี้
   withdrawHistory: [
     {
       quantity: {
