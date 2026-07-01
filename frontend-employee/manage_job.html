@@ -704,6 +704,8 @@ function renderJob() {
   const div = document.getElementById("job-details");
   if (!div) return;
 
+  const isLocked = currentJob.status === "ซ่อมเสร็จ" || currentJob.status === "ยกเลิก";
+
   div.innerHTML = `
   <div><strong>ลูกค้า:</strong> ${currentJob.customerName}</div>
   <div><strong>อุปกรณ์:</strong> ${currentJob.deviceType} ${currentJob.deviceModel}</div>
@@ -715,22 +717,69 @@ function renderJob() {
     </span>
   </div>
   <div><strong>วันที่รับ:</strong> ${formatTH(currentJob.receivedDate)}</div>
-  <div><strong>ราคา:</strong> ${currentJob.priceQuoted || "-"} บาท</div>
+  <div><strong>ราคา:</strong> ${currentJob.priceQuoted ?? "-"} บาท</div>
   <div><strong>ประเภทงาน:</strong> ${currentJob.jobType}</div>
-  
 
   <!-- ปุ่มดูใบรับเครื่อง -->
   <div style="margin-top:20px; text-align:center;">
-  <a
-    href="receipt.html?id=${currentJob._id}"
-    target="_blank"
-    class="btn-receipt"
-  >
-    <i class="fas fa-file-pdf"></i> ดูใบรับเครื่อง
-  </a>
-</div>
+    <a href="receipt.html?id=${currentJob._id}" target="_blank" class="btn-receipt">
+      <i class="fas fa-file-pdf"></i> ดูใบรับเครื่อง
+    </a>
+  </div>
 `;
 
+  if (isLocked) {
+    // ลบ accordion ทุกอัน, hr ทุกเส้น, ปุ่มยกเลิก, section อะไหล่ ออกจาก DOM จริงๆ
+    // (ใช้ remove() แทน display:none เพื่อให้ event listener ไม่ทำงานด้วย)
+    document.querySelectorAll(".accordion-item, hr").forEach(el => el.remove());
+    document.querySelector(".section-header")?.remove();
+    document.getElementById("parts-list")?.remove();
+    document.getElementById("cancel-job-btn")?.closest(".btn-group")?.remove();
+
+    // แบนเนอร์แจ้งเตือน
+    const banner = document.createElement("div");
+    banner.style.cssText = `
+      background: ${currentJob.status === "ซ่อมเสร็จ" ? "#dcfce7" : "#fee2e2"};
+      color: ${currentJob.status === "ซ่อมเสร็จ" ? "#166534" : "#991b1b"};
+      padding: 14px 20px;
+      border-radius: 10px;
+      font-weight: 600;
+      text-align: center;
+      margin: 20px 0;
+      font-size: 1rem;
+    `;
+    banner.textContent = currentJob.status === "ซ่อมเสร็จ"
+      ? "✅ งานนี้ซ่อมเสร็จแล้ว — ดูข้อมูลได้เท่านั้น"
+      : "🚫 งานนี้ถูกยกเลิกแล้ว — ดูข้อมูลได้เท่านั้น";
+    div.after(banner);
+
+    // แสดงรายการอะไหล่ที่ใช้ (view only)
+    if (currentJob.usedParts?.length) {
+      const partsSection = document.createElement("div");
+      partsSection.style.marginTop = "20px";
+      const partsHtml = currentJob.usedParts.map(p => `
+        <div class="history-item">
+          <div>
+            <strong>${p.name || "-"}</strong> (${p.model || "-"})
+            <br>จำนวน: ${p.quantity}
+          </div>
+          <div>${p.usedAt ? new Date(p.usedAt).toLocaleDateString("th-TH") : ""}</div>
+        </div>
+      `).join("");
+      partsSection.innerHTML = `
+        <h3 style="font-size:1.1rem;font-weight:600;color:#2c3e50;
+                   border-bottom:2px solid #eee;padding-bottom:8px;margin-bottom:15px;">
+          <i class="fas fa-list"></i> รายการอะไหล่ที่ใช้
+        </h3>
+        ${partsHtml}
+      `;
+      banner.after(partsSection);
+    }
+
+    return; // หยุดแค่นี้ ไม่ต้องเซ็ตค่า input ที่ถูกลบไปแล้ว
+  }
+
+  // งานที่ยังแก้ไขได้ — เซ็ตค่า input ตามปกติ
   document.getElementById("received-date").value =
     formatInputDate(currentJob.receivedDate);
   document.getElementById("start-date").value =
@@ -738,8 +787,7 @@ function renderJob() {
   document.getElementById("finish-date").value =
     formatInputDate(currentJob.finishDate);
   document.getElementById("new-status").value = currentJob.status;
-  document.getElementById("new-price").value =
-  currentJob.priceQuoted ?? "";
+  document.getElementById("new-price").value = currentJob.priceQuoted ?? "";
   document.getElementById("new-job-type").value = currentJob.jobType || "";
 }
 
