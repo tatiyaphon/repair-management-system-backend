@@ -1027,12 +1027,18 @@ withdrawForm.onsubmit = async e => {
   const id = withdrawStockIdInput.value;
   const qty = Number(withdrawQuantityInput.value);
 
+  const withdrawDateInput = document.getElementById("withdrawDate");
+  const withdrawnAt = withdrawDateInput?.value
+    ? new Date(withdrawDateInput.value).toISOString()
+    : undefined;
+
   await apiFetch(`/stocks/${id}/withdraw`, {
     method: "PATCH",
     body: JSON.stringify({
       quantity: qty,
       employeeName: withdrawEmployeeNameInput.value,
-      jobRef: withdrawJobIdInput.value
+      jobRef: withdrawJobIdInput.value,
+      withdrawnAt
     })
   });
 
