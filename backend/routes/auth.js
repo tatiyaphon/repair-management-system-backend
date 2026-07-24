@@ -9,9 +9,15 @@ const Job = require("../models/Job");
 const verifyToken = require("../middleware/auth");
 const crypto = require("crypto");
 const requireRole = require("../middleware/requireRole");
-const sgMail = require("@sendgrid/mail");
+const nodemailer = require("nodemailer");
 
-sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
+  },
+});
 
 
 
@@ -313,29 +319,34 @@ try {
 
     console.log("📨 SENDING EMAIL...");
 
-   const msg = {
-    to: user.email,
-    from: process.env.EMAIL_USER,   // ต้องเป็น Sender ที่ Verify ใน SendGrid
-    subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
-    html: `
-        <div style="font-family:sans-serif">
-            <h2>รีเซ็ตรหัสผ่าน</h2>
-            <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
+   await transporter.sendMail({
+  from: `"ร้านตุ้ยไอที" <${process.env.EMAIL_USER}>`,
+  to: user.email,
+  subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
+  html: `
+    <div style="font-family:sans-serif">
+      <h2>รีเซ็ตรหัสผ่าน</h2>
+      <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
 
-            <a href="${resetLink}"
-                style="display:inline-block;
-                       padding:10px 20px;
-                       background:#2563eb;
-                       color:#fff;
-                       text-decoration:none;
-                       border-radius:6px;">
-                ตั้งรหัสผ่านใหม่
-            </a>
+      <a href="${resetLink}"
+        style="
+          display:inline-block;
+          padding:10px 20px;
+          background:#2563eb;
+          color:#fff;
+          text-decoration:none;
+          border-radius:6px;
+        ">
+        ตั้งรหัสผ่านใหม่
+      </a>
 
-            <p>${resetLink}</p>
-        </div>
-    `
-};
+      <p>หรือคัดลอกลิงก์นี้</p>
+      <p>${resetLink}</p>
+
+      <p>ลิงก์นี้มีอายุ 30 นาที</p>
+    </div>
+  `,
+});
 
 await sgMail.send(msg);
 
@@ -343,14 +354,10 @@ console.log("✅ EMAIL SENT");
 
 } catch (err) {
 
-    console.error("❌ SENDGRID ERROR");
+    console.error("❌ GMAIL ERROR");
 
-    if (err.response) {
-        console.error(err.response.body);
-    } else {
-        console.error(err);
-    }
-
+    console.error(err);
+    
     return res.status(500).json({
         message: "ส่งอีเมลไม่สำเร็จ"
     });
