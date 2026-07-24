@@ -12,9 +12,9 @@ const router = express.Router();
    SMTP (ใช้ port 587 สำหรับ Render)
 ============================== */
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // สำคัญมาก
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+port: Number(process.env.SMTP_PORT) || 587,
+secure: process.env.SMTP_SECURE === "true",
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
