@@ -348,7 +348,6 @@ try {
   `,
 });
 
-await sgMail.send(msg);
 
 console.log("✅ EMAIL SENT");
 
@@ -357,7 +356,7 @@ console.log("✅ EMAIL SENT");
     console.error("❌ GMAIL ERROR");
 
     console.error(err);
-    
+
     return res.status(500).json({
         message: "ส่งอีเมลไม่สำเร็จ"
     });
