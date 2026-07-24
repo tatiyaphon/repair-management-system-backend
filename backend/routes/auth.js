@@ -329,15 +329,13 @@ try {
 
     console.log("📨 SENDING EMAIL...");
 
-    const info = await transporter.sendMail({
-        from: `"ระบบซ่อม" <${process.env.EMAIL_USER}>`,
-        to: user.email,
-        subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
-
-        html: `
+   const msg = {
+    to: user.email,
+    from: process.env.EMAIL_USER,   // ต้องเป็น Sender ที่ Verify ใน SendGrid
+    subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
+    html: `
         <div style="font-family:sans-serif">
             <h2>รีเซ็ตรหัสผ่าน</h2>
-
             <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
 
             <a href="${resetLink}"
@@ -352,11 +350,12 @@ try {
 
             <p>${resetLink}</p>
         </div>
-        `
-    });
+    `
+};
 
-    console.log("✅ EMAIL SENT");
-    console.log(info);
+await sgMail.send(msg);
+
+console.log("✅ EMAIL SENT");
 
 } catch (err) {
 
