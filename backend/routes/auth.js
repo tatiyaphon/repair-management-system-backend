@@ -9,7 +9,9 @@ const Job = require("../models/Job");
 const verifyToken = require("../middleware/auth");
 const crypto = require("crypto");
 const requireRole = require("../middleware/requireRole");
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
+
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 
 
@@ -261,25 +263,55 @@ router.post("/reset-password/:token", async (req, res) => {
   }
 });
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  connectionTimeout: 30000,
-  greetingTimeout: 30000,
-  socketTimeout: 30000
-});
+try {
 
-(async () => {
-  try {
-    await transporter.verify();
-    console.log("✅ SMTP READY");
-  } catch (err) {
-    console.error("❌ SMTP VERIFY ERROR:", err);
-  }
-})();
+    console.log("📨 SENDING EMAIL...");
+
+    const msg = {
+        to: user.email,
+        from: process.env.EMAIL_USER, // ต้องเป็น Sender ที่ Verify ใน SendGrid
+        subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
+
+        html: `
+        <div style="font-family:sans-serif">
+            <h2>รีเซ็ตรหัสผ่าน</h2>
+
+            <p>คลิกปุ่มด้านล่างเพื่อตั้งรหัสผ่านใหม่</p>
+
+            <a href="${resetLink}"
+                style="
+                    display:inline-block;
+                    padding:10px 20px;
+                    background:#2563eb;
+                    color:#fff;
+                    text-decoration:none;
+                    border-radius:6px;">
+                ตั้งรหัสผ่านใหม่
+            </a>
+
+            <p style="margin-top:15px">${resetLink}</p>
+        </div>
+        `
+    };
+
+    await sgMail.send(msg);
+
+    console.log("✅ EMAIL SENT");
+
+} catch (err) {
+
+    console.error("❌ SENDGRID ERROR");
+
+    if (err.response) {
+        console.error(err.response.body);
+    } else {
+        console.error(err);
+    }
+
+    return res.status(500).json({
+        message: "ส่งอีเมลไม่สำเร็จ"
+    });
+}
 // =======================
 // 🔐 Forgot Password
 // =======================
