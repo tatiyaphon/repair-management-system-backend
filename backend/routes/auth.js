@@ -12,12 +12,12 @@ const requireRole = require("../middleware/requireRole");
 const nodemailer = require("nodemailer");
 
 const transporter = nodemailer.createTransport({
-  host: "smtp-relay.brevo.com",
-  port: 587,
-  secure: false,
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true,
   auth: {
-    user: process.env.BREVO_USER,
-    pass: process.env.BREVO_SMTP_KEY,
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASS,
   },
 });
 /* =========================
