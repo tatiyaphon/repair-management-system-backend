@@ -20,6 +20,14 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS,
   },
 });
+
+transporter.verify((err, success) => {
+  if (err) {
+    console.error("SMTP ERROR:", err);
+  } else {
+    console.log("✅ Gmail SMTP Ready");
+  }
+});
 /* =========================
    POST /api/auth/login
 ========================= */
