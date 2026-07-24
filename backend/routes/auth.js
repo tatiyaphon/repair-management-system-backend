@@ -9,18 +9,10 @@ const Job = require("../models/Job");
 const verifyToken = require("../middleware/auth");
 const crypto = require("crypto");
 const requireRole = require("../middleware/requireRole");
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  connectionTimeout: 10000,
-  greetingTimeout: 10000,
-  socketTimeout: 10000,
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
+
 
 /* =========================
    POST /api/auth/login
@@ -320,8 +312,8 @@ try {
 
     console.log("📨 SENDING EMAIL...");
 
-   await transporter.sendMail({
-  from: `"ร้านตุ้ยไอที" <${process.env.EMAIL_USER}>`,
+   const result = await resend.emails.send({
+  from: `ร้านตุ้ยไอที <${process.env.EMAIL_FROM}>`,
   to: user.email,
   subject: "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
   html: `
@@ -349,12 +341,12 @@ try {
   `,
 });
 
-
+console.log(result);
 console.log("✅ EMAIL SENT");
 
 } catch (err) {
 
-    console.error("❌ GMAIL ERROR");
+    console.error("❌ RESEND ERROR");
 
     console.error(err);
 
