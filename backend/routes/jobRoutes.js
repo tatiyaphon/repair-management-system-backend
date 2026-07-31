@@ -254,6 +254,11 @@ router.put("/:id", auth, async (req, res) => {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
 
+    if (job.status === "ซ่อมเสร็จ" || job.status === "ยกเลิก") {
+    return res.status(400).json({
+        message: "งานนี้ถูกปิดแล้ว ไม่สามารถแก้ไขได้"
+    });
+}
     // 🔒 ตรวจสิทธิ์
     if (
       req.user.role !== "admin" &&
