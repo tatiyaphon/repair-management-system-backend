@@ -224,7 +224,7 @@ form.addEventListener("submit", async (e) => {
     /* =========================
        REDIRECT BY ROLE
     ========================= */
-    if (data.user.role === "admin") {
+    if (data.user.role === "staff") {
       location.replace("/employee/admin_dashboard.html");
     } else {
       // tech / staff
