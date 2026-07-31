@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ผู้ดูแลระบบ | ระบบจัดการงานซ่อม</title>
+  <title>จัดการระบบ | ระบบจัดการงานซ่อม</title>
   <link rel="icon" type="image/png" href="logo1.png">
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -737,7 +737,7 @@
     </a>
 
     <a href="admin_dashboard.html" class="nav-link">
-      <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
+      <i class="fas fa-user-tie"></i> จัดการระบบ
     </a>
   </nav>
 
@@ -799,15 +799,13 @@
     <div class="page-header">
       <div>
         <h1 class="page-title">
-          <i class="fas fa-user-shield"></i> แผงควบคุมผู้ดูแลระบบ
+          <i class="fas fa-user-tie"></i> แผงควบคุม
         </h1>
-        <p class="page-subtitle">
-          ตรวจสอบภาพรวมงานซ่อม จัดการบัญชีผู้ใช้ และบันทึกการใช้งานระบบ
-        </p>
+        <p class="page-subtitle">สรุปข้อมูลและจัดการผู้ใช้งานระบบ</p>
       </div>
       <div class="tag-admin">
         <i class="fas fa-lock"></i>
-        สิทธิ์: ผู้ดูแลระบบ
+        สิทธิ์: พนักงาน
       </div>
     </div>
 
@@ -926,8 +924,8 @@
 
       <select id="new-user-role">
         <option value="tech">ช่างซ่อม</option>
-        <option value="staff">พนักงานหน้าร้าน</option>
-        <option value="admin">ผู้ดูแลระบบ</option>
+        <option value="staff">พนักงาน</option>
+        
       </select>
 
       <button type="button" class="btn-add-user" id="btn-add-user">
@@ -975,8 +973,8 @@ const userName = localStorage.getItem("userName");
 /* ==================================================
    AUTH GUARD
 ================================================== */
-if (!token || role !== "admin") {
-  alert("หน้านี้สำหรับผู้ดูแลระบบเท่านั้น");
+if (!token || role !== "staff") {
+  alert("หน้านี้สำหรับพนักงานเท่านั้น");
   localStorage.clear();
   location.href = "login.html";
 }
@@ -989,7 +987,7 @@ function safeSet(id, value) {
   if (el) el.textContent = value;
 }
 
-safeSet("user-meta", `${userName || "Admin"} (ผู้ดูแลระบบ)`);
+safeSet("user-meta", `${userName || "Staff"} (พนักงาน)`);
 
 /* ==================================================
    API FETCH
@@ -1162,7 +1160,6 @@ function renderUsersTable(users) {
 
       <td>
         <select onchange="updateUserRole('${u._id}', this.value)">
-          <option value="admin" ${u.role==="admin"?"selected":""}>ผู้ดูแลระบบ</option>
           <option value="staff" ${u.role==="staff"?"selected":""}>พนักงาน</option>
           <option value="tech" ${u.role==="tech"?"selected":""}>ช่าง</option>
         </select>
