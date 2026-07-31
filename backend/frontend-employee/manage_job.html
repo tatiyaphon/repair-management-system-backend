@@ -948,6 +948,20 @@ function renderParts() {
   `).join("");
 }
 
+function lockJobIfClosed() {
+
+    if (!currentJob) return;
+
+    if (
+        currentJob.status === "ซ่อมเสร็จ" ||
+        currentJob.status === "ยกเลิก"
+    ) {
+
+        // ซ่อนเมนูจัดการทั้งหมด
+        document.getElementById("manage-section").style.display = "none";
+    }
+
+}
 /* =========================
    INIT
 ========================= */
@@ -956,23 +970,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   await fetchStock();
   await fetchJob();
 
-  lockJobIfClosed(); {
-     if (!currentJob) return;
-
-    if (
-        currentJob.status === "ซ่อมเสร็จ" ||
-        currentJob.status === "ยกเลิก"
-    ) {
-
-        document
-            .querySelectorAll("input, select, textarea")
-            .forEach(el => el.disabled = true);
-
-        document
-            .querySelectorAll("button")
-            .forEach(btn => btn.disabled = true);
-    }
-}
+  lockJobIfClosed(); 
 });
 
 function toggleProfile(){
