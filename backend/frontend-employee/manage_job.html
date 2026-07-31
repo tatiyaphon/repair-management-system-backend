@@ -406,12 +406,17 @@
       <h2><i class="fas fa-cogs"></i> จัดการงานซ่อม</h2>
 
 <div id="job-details"></div>
-      <hr>
-              <div class="accordion-item">
+
+<div id="manage-section">
+
+<hr>
+
+<div class="accordion-item">
   <div class="accordion-header">
     <span><i class="fas fa-tag"></i> แก้ไขประเภทงานซ่อม</span>
     <i class="fas fa-chevron-down"></i>
   </div>
+
   <div class="accordion-content">
     <form id="job-type-form">
       <select id="new-job-type" required>
@@ -419,16 +424,16 @@
         <option value="ซ่อมใหม่">ซ่อมใหม่</option>
         <option value="เคลม">เคลม</option>
       </select>
+
       <div class="btn-group">
         <button type="submit" class="btn btn-primary">
           <i class="fas fa-save"></i> บันทึกประเภท
         </button>
       </div>
+
     </form>
   </div>
 </div>
-
-
       <hr>
 
       <div class="accordion-item">
@@ -544,18 +549,33 @@
 </div>
 
 
-      <hr>
+      <div id="job-details"></div>
 
-      <h3 class="section-header"><i class="fas fa-list"></i> รายการอะไหล่ที่ใช้</h3>
-      <div id="parts-list"></div>
+<div id="manage-section">
 
-      <hr>
+    <hr>
 
-      <div class="btn-group">
-        <button id="cancel-job-btn" class="btn btn-cancel"><i class="fas fa-ban"></i> ยกเลิกงานซ่อม</button>
-      </div>
+    <!-- Accordion ทั้งหมด -->
+    ...
+    ...
+
+    <hr>
+
+    <div class="btn-group">
+        <button id="cancel-job-btn" class="btn btn-cancel">
+            <i class="fas fa-ban"></i> ยกเลิกงานซ่อม
+        </button>
     </div>
-  </div>
+
+</div> <!-- ปิด manage-section -->
+
+<hr>
+
+<h3 class="section-header">
+    <i class="fas fa-list"></i> รายการอะไหล่ที่ใช้
+</h3>
+
+<div id="parts-list"></div>
 
 <script>
 /* ==========================================================
@@ -951,16 +971,13 @@ function renderParts() {
 
 function lockJobIfClosed() {
 
+    if (!currentJob) return;
+
     if (
         currentJob.status === "ซ่อมเสร็จ" ||
         currentJob.status === "ยกเลิก"
     ) {
-
-        document.querySelectorAll(".accordion-item").forEach(el=>{
-            el.style.display = "none";
-        });
-
-        document.getElementById("cancel-job-btn").style.display = "none";
+        document.getElementById("manage-section").style.display = "none";
     }
 
 }
