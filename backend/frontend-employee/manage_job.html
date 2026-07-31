@@ -662,8 +662,9 @@ async function fetchJob() {
 
   currentJob = await res.json();
 
-  renderJob();
-  renderParts();
+renderJob();
+renderParts();
+lockJobIfClosed();
 }
 /* =========================
    FETCH STOCK
@@ -950,15 +951,16 @@ function renderParts() {
 
 function lockJobIfClosed() {
 
-    if (!currentJob) return;
-
     if (
         currentJob.status === "ซ่อมเสร็จ" ||
         currentJob.status === "ยกเลิก"
     ) {
 
-        // ซ่อนเมนูจัดการทั้งหมด
-        document.getElementById("manage-section").style.display = "none";
+        document.querySelectorAll(".accordion-item").forEach(el=>{
+            el.style.display = "none";
+        });
+
+        document.getElementById("cancel-job-btn").style.display = "none";
     }
 
 }
