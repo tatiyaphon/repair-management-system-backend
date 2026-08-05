@@ -28,7 +28,7 @@ const transporter = nodemailer.createTransport({
 /* =====================================
    GET /api/employees (admin)
 ===================================== */
-router.get("/", verifyToken, requireRole("admin"), async (req, res) => {
+router.get("/", verifyToken, requireRole("staff"), async (req, res) => {
   const employees = await Employee.find()
     .select("_id firstName lastName email role phone active avatar lastSeen");
 
@@ -63,7 +63,7 @@ router.get("/tech", verifyToken, async (req, res) => {
 /* =====================================
    POST /api/employees (admin)
 ===================================== */
-router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
+router.post("/", verifyToken, requireRole("staff"), async (req, res) => {
   try {
     let { firstName, lastName, email, password, role, phone } = req.body;
 
@@ -161,7 +161,7 @@ router.post("/", verifyToken, requireRole("admin"), async (req, res) => {
 /* =====================================
    PUT /api/employees/:id (admin)
 ===================================== */
-router.put("/:id", verifyToken, requireRole("admin"), async (req, res) => {
+router.put("/:id", verifyToken, requireRole("staff"), async (req, res) => {
   try {
     const { firstName, lastName, phone, role, active } = req.body;
 
@@ -221,7 +221,7 @@ router.get("/:id/profile", verifyToken, async (req, res) => {
 /* =====================================
    DELETE EMPLOYEE
 ===================================== */
-router.delete("/:id", verifyToken, requireRole("admin"), async (req, res) => {
+router.delete("/:id", verifyToken, requireRole("staff"), async (req, res) => {
   try {
     if (req.user.userId === req.params.id) {
       return res.status(400).json({ message: "ไม่สามารถลบตัวเองได้" });
@@ -258,7 +258,7 @@ router.get("/me", verifyToken, async (req, res) => {
 ===================================== */
 router.post("/:id/send-reset-link",
   verifyToken,
-  requireRole("admin"),
+  requireRole("staff"),
   async (req, res) => {
     try {
       const user = await Employee.findById(req.params.id);

@@ -7,7 +7,7 @@ const requireRole = require("../middleware/requireRole");
 /* =========================
    GET ALL ACTIVITY (ADMIN ONLY)
 ========================= */
-router.get("/", verifyToken, requireRole("admin"), async (req, res) => {
+router.get("/", verifyToken, requireRole("staff"), async (req, res) => {
   try {
 
     const logs = await Activity.find()

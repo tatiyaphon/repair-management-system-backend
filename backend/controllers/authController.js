@@ -2,11 +2,11 @@ const Employee = require('../models/Employee');
 const bcrypt = require('bcryptjs');
 
 // แอดมินเพิ่มสมาชิก
-exports.adminCreateUser = async (req, res) => {
+exports.createUser = async (req, res) => {
   try {
-    // ต้องเป็นแอดมินเท่านั้น
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({ message: 'เฉพาะแอดมินเท่านั้น' });
+    
+    if (req.user.role !== 'staff') {
+      return res.status(403).json({ message: 'เฉพาะพนักงานเท่านั้น' });
     }
 
     const { name, email, password, role } = req.body;

@@ -183,19 +183,19 @@ router.post("/change-password", verifyToken, async (req, res) => {
 
 
 /* =========================
-   POST /api/auth/reset-admin
+   POST /api/auth/reset-staff
 ========================= */
-router.post("/reset-admin", async (req, res) => {
+router.post("/reset-staff", async (req, res) => {
   try {
     const { email, newPassword, secret } = req.body;
 
-    if (secret !== process.env.ADMIN_RESET_SECRET) {
+    if (secret !== process.env.STAFF_RESET_SECRET) {
       return res.status(403).json({ message: "Forbidden" });
     }
 
     const user = await Employee.findOne({
       email,
-      role: "admin"
+      role: "staff"
     });
 
     if (!user) {
@@ -362,7 +362,7 @@ console.log("✅ EMAIL SENT");
     res.status(500).json({ message: "เกิดข้อผิดพลาด" });
   }
 });
-router.get("/monthly-report", verifyToken, requireRole("admin"), async (req, res) => {
+router.get("/monthly-report", verifyToken, requireRole("staff"), async (req, res) => {
   try {
     const data = await Job.aggregate([
       {

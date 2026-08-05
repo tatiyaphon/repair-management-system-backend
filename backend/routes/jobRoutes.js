@@ -29,13 +29,10 @@ router.get("/my", auth, async (req, res) => {
     let query = {};
 
     if (req.user.role === "tech") {
-      // ✅ จุดชี้ชะตา
-      query = { assignedTo: req.user.userId };
-    } else if (req.user.role === "staff") {
-      query = { createdBy: req.user.userId };
-    } else if (req.user.role === "admin") {
-      query = {};
-    }
+    query = { assignedTo: req.user.userId };
+} else if (req.user.role === "staff") {
+    query = {};
+}
 
     const jobs = await Job.find(query)
       .populate("assignedTo", "firstName lastName")
@@ -90,9 +87,8 @@ router.put("/:id/complete", auth, async (req, res) => {
     message: "งานนี้ถูกปิดแล้ว ไม่สามารถแก้ไขได้"
   });
 }
-    // 🔒 กันสิทธิ์ (เฉพาะ admin หรือ tech ที่รับผิดชอบงาน)
     if (
-      req.user.role !== "admin" &&
+      req.user.role !== "tech" &&
       job.assignedTo?.toString() !== req.user.userId
     ) {
       return res.status(403).json({ message: "ไม่มีสิทธิ์ปิดงานนี้" });
@@ -261,7 +257,7 @@ router.put("/:id", auth, async (req, res) => {
 }
     // 🔒 ตรวจสิทธิ์
     if (
-      req.user.role !== "admin" &&
+      req.user.role !== "tech" &&
       job.assignedTo?.toString() !== req.user.userId
     ) {
       return res.status(403).json({ message: "ไม่มีสิทธิ์แก้ไขงานนี้" });
@@ -402,7 +398,7 @@ router.post("/:id/use-part", auth, async (req, res) => {
        🔐 เช็คสิทธิ์
     ========================= */
     if (
-      req.user.role !== "admin" &&
+      req.user.role !== "staff" &&
       job.assignedTo?.toString() !== req.user.userId
     ) {
       return res.status(403).json({
