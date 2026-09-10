@@ -170,7 +170,7 @@ router.put("/:id", verifyToken, requireRole("staff"), async (req, res) => {
       return res.status(404).json({ message: "ไม่พบผู้ใช้นี้" });
     }
 
-    if (req.user.userId === req.params.id && role && role !== "admin") {
+    if (req.user.userId === req.params.id && role && role !== "staff") {
       return res.status(400).json({
         message: "ไม่สามารถเปลี่ยนสิทธิ์ของตัวเองได้"
       });

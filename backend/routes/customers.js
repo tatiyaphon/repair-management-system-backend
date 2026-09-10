@@ -6,13 +6,13 @@ const verifyToken = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 
 /* ดูลูกค้าทั้งหมด (admin เท่านั้น) */
-router.get("/", verifyToken, requireRole("admin"), async (_req, res) => {
+router.get("/", verifyToken, requireRole("staff"), async (req, res) => {
   const customers = await Customer.find().sort({ createdAt: -1 });
   res.json(customers);
 });
 
 /* เพิ่มลูกค้า */
-router.post("/", verifyToken, async (req, res) => {
+router.post("/", verifyToken, requireRole("staff"), async (req, res) => {
   const customer = await Customer.create(req.body);
   res.status(201).json(customer);
 });
