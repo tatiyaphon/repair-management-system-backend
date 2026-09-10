@@ -24,6 +24,10 @@ router.post("/login", async (req, res) => {
   try {
     let { email, password } = req.body;
 
+    // -------------------------------------------------
+    // ตรวจสอบข้อมูล
+    // -------------------------------------------------
+
     if (!email || !password) {
       return res.status(400).json({
         error: "Email และ password จำเป็นต้องกรอก"
@@ -31,6 +35,10 @@ router.post("/login", async (req, res) => {
     }
 
     email = email.trim().toLowerCase();
+
+    // -------------------------------------------------
+    // ค้นหาผู้ใช้
+    // -------------------------------------------------
 
     const user = await Employee.findOne({ email });
 
@@ -40,9 +48,9 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // =================================================
-    // อนุญาตเฉพาะ staff และ tech
-    // =================================================
+    // -------------------------------------------------
+    // อนุญาตเฉพาะ Staff และ Tech
+    // -------------------------------------------------
 
     if (!["staff", "tech"].includes(user.role)) {
       return res.status(403).json({
@@ -50,13 +58,22 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // =================================================
+    // -------------------------------------------------
     // ตรวจสอบ Password
-    // =================================================
+    // -------------------------------------------------
 
-    const isMatch = user.password.startsWith("$2")
-      ? await bcrypt.compare(password, user.password)
-      : password === user.password;
+    let isMatch = false;
+
+    if (user.password.startsWith("$2")) {
+      // Password เป็น bcrypt แล้ว
+      isMatch = await bcrypt.compare(
+        password,
+        user.password
+      );
+    } else {
+      // รองรับ password เก่าที่เป็น plaintext
+      isMatch = password === user.password;
+    }
 
     if (!isMatch) {
       return res.status(401).json({
@@ -64,9 +81,9 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // =================================================
-    // ต้องยืนยัน Email ก่อน
-    // =================================================
+    // -------------------------------------------------
+    // ตรวจสอบการยืนยัน Email
+    // -------------------------------------------------
 
     if (!user.isVerified) {
       return res.status(403).json({
@@ -74,26 +91,41 @@ router.post("/login", async (req, res) => {
       });
     }
 
-    // =================================================
-    // Online
-    // =================================================
+    // -------------------------------------------------
+    // ตั้งสถานะ Online
+    // -------------------------------------------------
 
     user.online = true;
 
-    // =================================================
-    // Upgrade password เก่าเป็น bcrypt
-    // =================================================
+    // -------------------------------------------------
+    // ถ้า Password เดิมยังไม่เป็น bcrypt
+    // ให้แปลงเป็น bcrypt อัตโนมัติ
+    //
+    // สำคัญ:
+    // ไม่บังคับให้ผู้ใช้เปลี่ยน Password
+    // -------------------------------------------------
 
     if (!user.password.startsWith("$2")) {
-      user.password = await bcrypt.hash(password, 10);
-      user.mustChangePassword = true;
+      user.password = await bcrypt.hash(
+        password,
+        10
+      );
     }
+
+    // -------------------------------------------------
+    // ไม่บังคับเปลี่ยน Password
+    //
+    // ช่างสามารถใช้รหัสที่ Staff ให้มา Login ได้เลย
+    // และสามารถเปลี่ยนเองภายหลังจากเมนูเปลี่ยนรหัสผ่าน
+    // -------------------------------------------------
+
+    user.mustChangePassword = false;
 
     await user.save();
 
-    // =================================================
-    // JWT
-    // =================================================
+    // -------------------------------------------------
+    // สร้าง JWT
+    // -------------------------------------------------
 
     const token = jwt.sign(
       {
@@ -106,11 +138,11 @@ router.post("/login", async (req, res) => {
       }
     );
 
-    // =================================================
-    // Response
-    // =================================================
+    // -------------------------------------------------
+    // ส่งข้อมูลกลับ
+    // -------------------------------------------------
 
-    res.json({
+    return res.json({
       message: "เข้าสู่ระบบสำเร็จ",
 
       token,
@@ -121,7 +153,7 @@ router.post("/login", async (req, res) => {
         lastName: user.lastName,
         role: user.role,
         avatar: user.avatar,
-        mustChangePassword: user.mustChangePassword
+        mustChangePassword: false
       }
     });
 
@@ -129,7 +161,7 @@ router.post("/login", async (req, res) => {
 
     console.error("LOGIN ERROR:", err);
 
-    res.status(500).json({
+    return res.status(500).json({
       error: "Login failed"
     });
   }
@@ -138,6 +170,7 @@ router.post("/login", async (req, res) => {
 
 // =====================================================
 // GET /api/auth/verify/:token
+// ยืนยัน Email
 // =====================================================
 
 router.get("/verify/:token", async (req, res) => {
@@ -148,32 +181,64 @@ router.get("/verify/:token", async (req, res) => {
       process.env.JWT_SECRET
     );
 
-    // สำคัญ:
-    // ตอนสร้าง JWT ใช้ userId ไม่ใช่ id
-    const user = await Employee.findById(decoded.userId);
+    // รองรับทั้ง userId และ id
+    const userId = decoded.userId || decoded.id;
+
+    const user = await Employee.findById(userId);
 
     if (!user) {
-      return res.status(404).send("ไม่พบผู้ใช้");
+      return res.status(404).send(
+        "ไม่พบผู้ใช้"
+      );
     }
 
+    // -------------------------------------------------
+    // ถ้ายืนยันแล้ว
+    // -------------------------------------------------
+
     if (user.isVerified) {
-      return res.send("บัญชีนี้ยืนยันแล้ว");
+      return res.send(`
+        <!DOCTYPE html>
+        <html lang="th">
+        <head>
+          <meta charset="UTF-8">
+          <title>ยืนยันอีเมล</title>
+        </head>
+        <body>
+          <h2>✅ บัญชีนี้ยืนยันอีเมลแล้ว</h2>
+          <p>สามารถกลับไปเข้าสู่ระบบได้</p>
+        </body>
+        </html>
+      `);
     }
+
+    // -------------------------------------------------
+    // ยืนยัน Email
+    // -------------------------------------------------
 
     user.isVerified = true;
 
     await user.save();
 
-    res.send(`
-      <h2>✅ ยืนยันอีเมลสำเร็จ</h2>
-      <p>สามารถกลับไปเข้าสู่ระบบได้แล้ว</p>
+    return res.send(`
+      <!DOCTYPE html>
+      <html lang="th">
+      <head>
+        <meta charset="UTF-8">
+        <title>ยืนยันอีเมลสำเร็จ</title>
+      </head>
+      <body>
+        <h2>✅ ยืนยันอีเมลสำเร็จ</h2>
+        <p>สามารถกลับไปเข้าสู่ระบบได้แล้ว</p>
+      </body>
+      </html>
     `);
 
   } catch (err) {
 
     console.error("VERIFY ERROR:", err);
 
-    res.status(400).send(
+    return res.status(400).send(
       "❌ ลิงก์ไม่ถูกต้องหรือหมดอายุ"
     );
   }
@@ -184,33 +249,42 @@ router.get("/verify/:token", async (req, res) => {
 // POST /api/auth/logout
 // =====================================================
 
-router.post("/logout", verifyToken, async (req, res) => {
-  try {
+router.post(
+  "/logout",
+  verifyToken,
+  async (req, res) => {
 
-    await Employee.findByIdAndUpdate(
-      req.user.userId,
-      {
-        online: false
-      }
-    );
+    try {
 
-    res.json({
-      message: "logout success"
-    });
+      await Employee.findByIdAndUpdate(
+        req.user.userId,
+        {
+          online: false
+        }
+      );
 
-  } catch (err) {
+      return res.json({
+        message: "logout success"
+      });
 
-    console.error("LOGOUT ERROR:", err);
+    } catch (err) {
 
-    res.status(500).json({
-      message: "Logout failed"
-    });
+      console.error(
+        "LOGOUT ERROR:",
+        err
+      );
+
+      return res.status(500).json({
+        message: "Logout failed"
+      });
+    }
   }
-});
+);
 
 
 // =====================================================
 // POST /api/auth/change-password
+// เปลี่ยนรหัสผ่านด้วยตัวเอง
 // =====================================================
 
 router.post(
@@ -225,6 +299,10 @@ router.post(
         newPassword
       } = req.body;
 
+      // -------------------------------------------------
+      // ตรวจสอบข้อมูล
+      // -------------------------------------------------
+
       if (!oldPassword || !newPassword) {
         return res.status(400).json({
           message:
@@ -232,12 +310,20 @@ router.post(
         });
       }
 
+      // -------------------------------------------------
+      // Password ใหม่อย่างน้อย 6 ตัว
+      // -------------------------------------------------
+
       if (newPassword.length < 6) {
         return res.status(400).json({
           message:
             "รหัสผ่านใหม่ต้องอย่างน้อย 6 ตัว"
         });
       }
+
+      // -------------------------------------------------
+      // ค้นหาผู้ใช้
+      // -------------------------------------------------
 
       const user = await Employee.findById(
         req.user.userId
@@ -249,9 +335,9 @@ router.post(
         });
       }
 
-      // =================================================
-      // ตรวจสอบรหัสผ่านเดิม
-      // =================================================
+      // -------------------------------------------------
+      // ตรวจสอบ Password เดิม
+      // -------------------------------------------------
 
       let isMatch = false;
 
@@ -265,30 +351,34 @@ router.post(
       } else {
 
         // รองรับ password เก่า
-        isMatch = oldPassword === user.password;
+        isMatch =
+          oldPassword === user.password;
       }
 
       if (!isMatch) {
         return res.status(400).json({
-          message: "รหัสผ่านเดิมไม่ถูกต้อง"
+          message:
+            "รหัสผ่านเดิมไม่ถูกต้อง"
         });
       }
 
-      // =================================================
-      // บันทึก password ใหม่เป็น bcrypt
-      // =================================================
+      // -------------------------------------------------
+      // Hash Password ใหม่
+      // -------------------------------------------------
 
       user.password = await bcrypt.hash(
         newPassword,
         10
       );
 
+      // ไม่บังคับเปลี่ยนอีก
       user.mustChangePassword = false;
 
       await user.save();
 
-      res.json({
-        message: "เปลี่ยนรหัสผ่านสำเร็จ"
+      return res.json({
+        message:
+          "เปลี่ยนรหัสผ่านสำเร็จ"
       });
 
     } catch (err) {
@@ -298,7 +388,7 @@ router.post(
         err
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         message:
           "ไม่สามารถเปลี่ยนรหัสผ่านได้"
       });
@@ -309,6 +399,7 @@ router.post(
 
 // =====================================================
 // POST /api/auth/reset-password/:token
+// รีเซ็ตรหัสผ่านจาก Email
 // =====================================================
 
 router.post(
@@ -325,6 +416,10 @@ router.post(
         token
       } = req.params;
 
+      // -------------------------------------------------
+      // ตรวจสอบ Password
+      // -------------------------------------------------
+
       if (!password) {
         return res.status(400).json({
           message:
@@ -338,6 +433,10 @@ router.post(
             "รหัสผ่านต้องอย่างน้อย 6 ตัว"
         });
       }
+
+      // -------------------------------------------------
+      // ตรวจสอบ Reset Token
+      // -------------------------------------------------
 
       const user = await Employee.findOne({
         resetToken: token,
@@ -353,18 +452,28 @@ router.post(
         });
       }
 
+      // -------------------------------------------------
+      // เปลี่ยน Password
+      // -------------------------------------------------
+
       user.password = await bcrypt.hash(
         password,
         10
       );
 
+      // -------------------------------------------------
+      // ล้าง Reset Token
+      // -------------------------------------------------
+
       user.resetToken = undefined;
       user.resetTokenExpire = undefined;
+
+      // ไม่บังคับเปลี่ยนหลัง Reset
       user.mustChangePassword = false;
 
       await user.save();
 
-      res.json({
+      return res.json({
         message:
           "เปลี่ยนรหัสผ่านสำเร็จ"
       });
@@ -376,7 +485,7 @@ router.post(
         err
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         message:
           "ไม่สามารถรีเซ็ตได้"
       });
@@ -397,9 +506,14 @@ router.post(
 
       let { email } = req.body;
 
+      // -------------------------------------------------
+      // ตรวจสอบ Email
+      // -------------------------------------------------
+
       if (!email) {
         return res.status(400).json({
-          message: "กรุณากรอกอีเมล"
+          message:
+            "กรุณากรอกอีเมล"
         });
       }
 
@@ -407,15 +521,24 @@ router.post(
         .trim()
         .toLowerCase();
 
+      // -------------------------------------------------
+      // ค้นหา User
+      // -------------------------------------------------
+
       const user = await Employee.findOne({
         email
       });
 
       if (!user) {
         return res.status(404).json({
-          message: "ไม่พบผู้ใช้นี้"
+          message:
+            "ไม่พบผู้ใช้นี้"
         });
       }
+
+      // -------------------------------------------------
+      // ตรวจสอบบัญชี
+      // -------------------------------------------------
 
       if (user.active === false) {
         return res.status(403).json({
@@ -424,23 +547,27 @@ router.post(
         });
       }
 
-      // =================================================
+      // -------------------------------------------------
       // สร้าง Reset Token
-      // =================================================
+      // -------------------------------------------------
 
       const resetToken =
-        crypto.randomBytes(32).toString("hex");
+        crypto
+          .randomBytes(32)
+          .toString("hex");
 
       user.resetToken = resetToken;
 
+      // Token อายุ 30 นาที
       user.resetTokenExpire =
-        Date.now() + 1000 * 60 * 30;
+        Date.now() +
+        1000 * 60 * 30;
 
       await user.save();
 
-      // =================================================
-      // Reset Link
-      // =================================================
+      // -------------------------------------------------
+      // สร้าง Reset Link
+      // -------------------------------------------------
 
       const resetLink =
         `${process.env.BASE_URL}/employee/reset_password.html?token=${resetToken}`;
@@ -450,9 +577,9 @@ router.post(
         user.email
       );
 
-      // =================================================
+      // -------------------------------------------------
       // ส่ง Email
-      // =================================================
+      // -------------------------------------------------
 
       try {
 
@@ -462,37 +589,50 @@ router.post(
             from:
               `ร้านตุ้ยไอที <${process.env.EMAIL_FROM}>`,
 
-            to: user.email,
+            to:
+              user.email,
 
             subject:
               "รีเซ็ตรหัสผ่านร้านตุ้ยไอที",
 
             html: `
-              <div style="font-family:sans-serif">
+              <div
+                style="
+                  font-family:sans-serif;
+                  max-width:600px;
+                  margin:auto;
+                "
+              >
 
-                <h2>รีเซ็ตรหัสผ่าน</h2>
+                <h2>
+                  รีเซ็ตรหัสผ่าน
+                </h2>
 
                 <p>
                   คลิกปุ่มด้านล่าง
                   เพื่อตั้งรหัสผ่านใหม่
                 </p>
 
-                <a
-                  href="${resetLink}"
-                  style="
-                    display:inline-block;
-                    padding:10px 20px;
-                    background:#2563eb;
-                    color:#fff;
-                    text-decoration:none;
-                    border-radius:6px;
-                  "
-                >
-                  ตั้งรหัสผ่านใหม่
-                </a>
+                <p>
+
+                  <a
+                    href="${resetLink}"
+                    style="
+                      display:inline-block;
+                      padding:10px 20px;
+                      background:#2563eb;
+                      color:#fff;
+                      text-decoration:none;
+                      border-radius:6px;
+                    "
+                  >
+                    ตั้งรหัสผ่านใหม่
+                  </a>
+
+                </p>
 
                 <p>
-                  หรือคัดลอกลิงก์นี้
+                  หรือคัดลอกลิงก์นี้:
                 </p>
 
                 <p>
@@ -525,7 +665,11 @@ router.post(
         });
       }
 
-      res.json({
+      // -------------------------------------------------
+      // สำเร็จ
+      // -------------------------------------------------
+
+      return res.json({
         message:
           "ส่งลิงก์รีเซ็ตแล้ว"
       });
@@ -537,7 +681,7 @@ router.post(
         err
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         message:
           "เกิดข้อผิดพลาด"
       });
@@ -582,7 +726,7 @@ router.get(
 
         ]);
 
-      res.json(data);
+      return res.json(data);
 
     } catch (err) {
 
@@ -591,7 +735,7 @@ router.get(
         err
       );
 
-      res.status(500).json({
+      return res.status(500).json({
         message:
           "โหลดรายงานไม่สำเร็จ"
       });
@@ -599,5 +743,9 @@ router.get(
   }
 );
 
+
+// =====================================================
+// EXPORT
+// =====================================================
 
 module.exports = router;
