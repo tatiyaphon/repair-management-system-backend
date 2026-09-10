@@ -101,7 +101,7 @@ mongoose
   .connect(process.env.MONGODB_URI)
   .then(async () => {
     console.log("✅ Connected to DB:", mongoose.connection.name);
-    await ensureAdmin();
+    await ensureStaff();
     app.listen(PORT, () => {
       console.log(`🚀 Server running on port ${PORT}`);
     });
@@ -117,28 +117,28 @@ app.get("/status_page.html", (req, res) => {
 });
 
 /* =========================
-   SEED ADMIN
+   SEED STAFF
 ========================= */
-async function ensureAdmin() {
-  if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) return;
+async function ensureStaff() {
+  if (!process.env.STAFF_EMAIL || !process.env.STAFF_PASSWORD) return;
 
-  const exists = await Employee.findOne({ email: process.env.ADMIN_EMAIL });
+  const exists = await Employee.findOne({ email: process.env.STAFF_EMAIL });
   if (exists) return;
 
-  const hash = await bcrypt.hash(process.env.ADMIN_PASSWORD, 10);
+  const hash = await bcrypt.hash(process.env.STAFF_PASSWORD, 10);
 
   await Employee.create({
-    firstName: process.env.ADMIN_FIRSTNAME || "Admin",
-    lastName:  process.env.ADMIN_LASTNAME  || "System",
-    email:     process.env.ADMIN_EMAIL,
+    firstName: process.env.STAFF_FIRSTNAME || "Staff",
+    lastName:  process.env.STAFF_LASTNAME  || "System",
+    email:     process.env.STAFF_EMAIL,
     password:  hash,
-    role:      "admin",
+    role:      "staff",
     active:    true,
     // FIX: เดิมไม่ได้ตั้งค่านี้ ทำให้ login route เช็ค isVerified แล้วบล็อก
-    // admin คนแรกที่ระบบ seed ให้ ไม่สามารถเข้าระบบได้เลยตั้งแต่ deploy ครั้งแรก
+    // staff คนแรกที่ระบบ seed ให้ ไม่สามารถเข้าระบบได้เลยตั้งแต่ deploy ครั้งแรก
     isVerified: true,
     mustChangePassword: false,
   });
 
-  console.log("👑 Admin account created");
+  console.log("👑 Staff account created");
 }

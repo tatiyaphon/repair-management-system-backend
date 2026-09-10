@@ -113,7 +113,7 @@ const userId = params.get("id");
 
 if(!token || !userId){
   alert("ไม่พบข้อมูลผู้ใช้");
-  location.href = "admin_dashboard.html";
+  location.href = "staff_dashboard.html";
 }
 
 /* ========================
@@ -162,7 +162,7 @@ async function saveUser(){
   }
 
   alert("✅ บันทึกข้อมูลเรียบร้อย");
-  location.href = "admin_dashboard.html";
+  location.href = "staff_dashboard.html";
 }
 
 loadUser();
