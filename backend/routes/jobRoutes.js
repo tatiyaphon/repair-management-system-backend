@@ -87,12 +87,19 @@ router.put("/:id/complete", auth, async (req, res) => {
     message: "งานนี้ถูกปิดแล้ว ไม่สามารถแก้ไขได้"
   });
 }
-    if (
-      req.user.role !== "tech" &&
-      job.assignedTo?.toString() !== req.user.userId
-    ) {
-      return res.status(403).json({ message: "ไม่มีสิทธิ์ปิดงานนี้" });
-    }
+    // 🔒 staff ปิดได้ทุกงาน
+// tech ปิดได้เฉพาะงานของตัวเอง
+if (
+  req.user.role !== "staff" &&
+  !(
+    req.user.role === "tech" &&
+    job.assignedTo?.toString() === req.user.userId
+  )
+) {
+  return res.status(403).json({
+    message: "ไม่มีสิทธิ์ปิดงานนี้"
+  });
+}
 
     // กันปิดซ้ำ
     if (job.status === "ซ่อมเสร็จ") {
@@ -257,11 +264,16 @@ router.put("/:id", auth, async (req, res) => {
 }
     // 🔒 ตรวจสิทธิ์
     if (
-      req.user.role !== "tech" &&
-      job.assignedTo?.toString() !== req.user.userId
-    ) {
-      return res.status(403).json({ message: "ไม่มีสิทธิ์แก้ไขงานนี้" });
-    }
+  req.user.role !== "staff" &&
+  !(
+    req.user.role === "tech" &&
+    job.assignedTo?.toString() === req.user.userId
+  )
+) {
+  return res.status(403).json({
+    message: "ไม่มีสิทธิ์แก้ไขงานนี้"
+  });
+}
 
     const oldStatus = job.status;
 
