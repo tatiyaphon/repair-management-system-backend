@@ -508,13 +508,15 @@ router.get("/:id/receipt", auth, async (req, res) => {
     // QR เดียวกันทุกใบ
     // ==================================================
 
-    const websiteUrl = "https://www.tui-it.org/";
-
-    const qrCode = await QRCode.toDataURL(websiteUrl, {
-      width: 180,
-      margin: 1,
-      errorCorrectionLevel: "M"
-    });
+   const qrCode = await QRCode.toString(
+  "https://www.tui-it.org/",
+  {
+    type: "svg",
+    width: 120,
+    margin: 0,
+    errorCorrectionLevel: "M"
+  }
+);
 
     res.send(`<!DOCTYPE html>
 
@@ -726,29 +728,30 @@ tbody td {
 ========================================= */
 
 .qr-website {
-  width: 160px;
+  width: 150px;
   margin-left: auto;
-  margin-top: 18px;
+  margin-top: 15px;
   text-align: center;
-
   page-break-inside: avoid;
   break-inside: avoid;
 }
 
-.qr-website img {
+.qr-image {
+  width: 110px;
+  height: 110px;
+  margin: 0 auto 4px;
+}
+
+.qr-image svg {
   display: block;
-
-  width: 120px;
-  height: 120px;
-
-  margin: 0 auto 5px;
+  width: 110px;
+  height: 110px;
 }
 
 .qr-title {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   color: #0f3c8a;
-  margin-bottom: 2px;
 }
 
 .qr-url {
@@ -756,14 +759,6 @@ tbody td {
   font-weight: 700;
   color: #0f3c8a;
 }
-
-.qr-help {
-  font-size: 9px;
-  line-height: 1.3;
-  color: #374151;
-  margin-top: 2px;
-}
-
 /* =========================================
    PRINT
 ========================================= */
@@ -1073,10 +1068,9 @@ tbody td {
 
 <div class="qr-website">
 
-  <img
-    src="${qrCode}"
-    alt="QR Code เว็บไซต์ร้านตุ้ยไอที"
-  >
+  <div class="qr-image">
+  ${qrCode}
+</div>
 
   <div class="qr-title">
     สแกนเพื่อเข้าเว็บไซต์
