@@ -83,15 +83,6 @@ router.put("/:id/complete", auth, async (req, res) => {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
 
-    // QR Code เว็บไซต์ร้าน
-const websiteUrl = "https://www.tui-it.org/";
-
-const qrCode = await QRCode.toDataURL(websiteUrl, {
-  width: 180,
-  margin: 1,
-  errorCorrectionLevel: "M"
-});
-
     if (job.status === "ซ่อมเสร็จ" || job.status === "ยกเลิก") {
   return res.status(400).json({
     message: "งานนี้ถูกปิดแล้ว ไม่สามารถแก้ไขได้"
@@ -506,7 +497,6 @@ router.post("/:id/use-part", auth, async (req, res) => {
 ================================================== */
 router.get("/:id/receipt", auth, async (req, res) => {
   try {
-
     const job = await Job.findById(req.params.id);
 
     if (!job) {
@@ -515,7 +505,7 @@ router.get("/:id/receipt", auth, async (req, res) => {
 
     // ==================================================
     // QR CODE เว็บไซต์ร้าน
-    // QR นี้ใช้เหมือนกันทุกใบเสร็จ
+    // QR เดียวกันทุกใบ
     // ==================================================
 
     const websiteUrl = "https://www.tui-it.org/";
@@ -525,7 +515,6 @@ router.get("/:id/receipt", auth, async (req, res) => {
       margin: 1,
       errorCorrectionLevel: "M"
     });
-
 
     res.send(`<!DOCTYPE html>
 
@@ -537,7 +526,6 @@ router.get("/:id/receipt", auth, async (req, res) => {
 
 <title>ใบรับเครื่องซ่อม</title>
 
-
 <style>
 
 @page {
@@ -545,9 +533,7 @@ router.get("/:id/receipt", auth, async (req, res) => {
   margin: 15mm;
 }
 
-
 @import url('https://fonts.googleapis.com/css2?family=Sarabun:wght@400;600;700&display=swap');
-
 
 body {
   font-family: 'Sarabun', sans-serif;
@@ -556,7 +542,6 @@ body {
   background: #fff;
 }
 
-
 .container {
   width: 100%;
   min-height: calc(297mm - 30mm);
@@ -564,11 +549,8 @@ body {
   margin: 0 auto;
   padding: 20mm;
   background: #fff;
-
-  /* แถบสีซ้าย */
   border-left: 8px solid #facc15;
 }
-
 
 /* =========================================
    HEADER
@@ -581,13 +563,11 @@ body {
   padding-bottom: 18px;
 }
 
-
 .shop {
   display: flex;
   gap: 16px;
   align-items: center;
 }
-
 
 .logo {
   width: 80px;
@@ -598,37 +578,31 @@ body {
   background: #fff;
 }
 
-
 .shop h1 {
   margin: 0;
   font-size: 22px;
   color: #0f3c8a;
 }
 
-
 .shop p {
   margin: 2px 0;
   font-size: 13px;
 }
 
-
 .doc {
   text-align: right;
 }
-
 
 .doc h2 {
   margin: 0;
   color: #0f3c8a;
 }
 
-
 .doc .no {
   color: #b91c1c;
   font-weight: 700;
   margin-top: 4px;
 }
-
 
 /* =========================================
    INFO
@@ -641,14 +615,12 @@ body {
   margin-top: 22px;
 }
 
-
 .box {
   border: 1px solid #d1d5db;
   border-radius: 8px;
   padding: 14px 16px;
   background: #f9fafb;
 }
-
 
 .box h3 {
   margin: 0 0 10px;
@@ -658,19 +630,16 @@ body {
   padding-bottom: 6px;
 }
 
-
 .row {
   display: flex;
   font-size: 14px;
   margin-bottom: 6px;
 }
 
-
 .label {
   width: 90px;
   font-weight: 600;
 }
-
 
 .badge {
   background: #dcfce7;
@@ -680,7 +649,6 @@ body {
   font-size: 13px;
   border: 1px solid #10b981;
 }
-
 
 /* =========================================
    TABLE
@@ -692,7 +660,6 @@ table {
   margin-top: 22px;
 }
 
-
 thead th {
   background: #0f3c8a;
   color: #fff;
@@ -700,13 +667,11 @@ thead th {
   font-size: 14px;
 }
 
-
 tbody td {
   padding: 12px;
   border-bottom: 1px solid #e5e7eb;
   font-size: 14px;
 }
-
 
 /* =========================================
    PRICE
@@ -718,13 +683,11 @@ tbody td {
   font-size: 16px;
 }
 
-
 .price-box span {
   font-size: 18px;
   color: #b91c1c;
   font-weight: 700;
 }
-
 
 /* =========================================
    TERMS
@@ -738,18 +701,16 @@ tbody td {
   font-size: 13px;
 }
 
-
 /* =========================================
-   SIGN
+   SIGNATURE
 ========================================= */
 
 .sign {
-  margin-top: 60px;
+  margin-top: 45px;
   display: flex;
   justify-content: space-between;
   text-align: center;
 }
-
 
 .line {
   width: 40%;
@@ -758,51 +719,50 @@ tbody td {
   font-size: 14px;
 }
 
-
 /* =========================================
    QR CODE
    ไม่มีกรอบ
-   อยู่มุมล่างขวา
+   มุมล่างขวา
 ========================================= */
 
 .qr-website {
-  width: 180px;
+  width: 160px;
   margin-left: auto;
-  margin-top: 30px;
+  margin-top: 18px;
   text-align: center;
-}
 
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
 
 .qr-website img {
   display: block;
-  width: 150px;
-  height: 150px;
-  margin: 0 auto 6px;
+
+  width: 120px;
+  height: 120px;
+
+  margin: 0 auto 5px;
 }
 
-
 .qr-title {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 700;
   color: #0f3c8a;
   margin-bottom: 2px;
 }
 
-
 .qr-url {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 700;
   color: #0f3c8a;
 }
 
-
 .qr-help {
-  font-size: 10px;
-  line-height: 1.35;
+  font-size: 9px;
+  line-height: 1.3;
   color: #374151;
-  margin-top: 3px;
+  margin-top: 2px;
 }
-
 
 /* =========================================
    PRINT
@@ -819,7 +779,6 @@ tbody td {
   border-radius: 999px;
   cursor: pointer;
 }
-
 
 @media print {
 
@@ -842,296 +801,300 @@ tbody td {
 
 </head>
 
-
 <body>
-
 
 <div class="container">
 
+<!-- =========================================
+     HEADER
+========================================== -->
 
-  <!-- =========================================
-       HEADER
-  ========================================== -->
+<div class="header">
 
-  <div class="header">
-
-    <div class="shop">
-
-      <img
-        src="https://www.tui-it.org/customer/logo1.png"
-        class="logo"
-      >
-
-      <div>
-
-        <h1>ร้านตุ้ยไอที โคราช</h1>
-
-        <p>
-          ศูนย์ซ่อมและจำหน่ายอุปกรณ์ไอทีครบวงจร
-        </p>
-
-        <p>
-          โทร 080-4641677
-        </p>
-
-      </div>
-
-    </div>
-
-
-    <div class="doc">
-
-      <h2>
-        ใบรับเครื่องซ่อม
-      </h2>
-
-      <div class="no">
-        No. ${job.receiptNumber}
-      </div>
-
-      <div>
-        วันที่ ${new Date(job.receivedDate).toLocaleDateString("th-TH")}
-      </div>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- =========================================
-       INFO
-  ========================================== -->
-
-  <div class="info">
-
-
-    <div class="box">
-
-      <h3>
-        ข้อมูลลูกค้า
-      </h3>
-
-
-      <div class="row">
-        <div class="label">
-          ชื่อลูกค้า :
-        </div>
-
-        ${job.customerName}
-      </div>
-
-
-      <div class="row">
-        <div class="label">
-          เบอร์โทร :
-        </div>
-
-        ${job.customerPhone || "-"}
-      </div>
-
-
-      <div class="row">
-        <div class="label">
-          ที่อยู่ :
-        </div>
-
-        ${job.customerAddress || "-"}
-      </div>
-
-
-      <div class="row">
-        <div class="label">
-          อุปกรณ์ที่มาด้วย :
-        </div>
-
-        ${job.accessory || "-"}
-      </div>
-
-
-      <div class="row">
-        <div class="label">
-          ประเภทงาน :
-        </div>
-
-        ${job.jobType || "-"}
-      </div>
-
-    </div>
-
-
-
-    <div class="box">
-
-      <h3>
-        สถานะงาน
-      </h3>
-
-
-      <div class="row">
-
-        <div class="label">
-          สถานะ
-        </div>
-
-        <span class="badge">
-          ${job.status}
-        </span>
-
-      </div>
-
-    </div>
-
-  </div>
-
-
-
-  <!-- =========================================
-       TABLE
-  ========================================== -->
-
-  <table>
-
-    <thead>
-
-      <tr>
-
-        <th width="10%">
-          ลำดับ
-        </th>
-
-        <th width="50%">
-          รายละเอียดอุปกรณ์
-        </th>
-
-        <th width="40%">
-          อาการเสีย
-        </th>
-
-      </tr>
-
-    </thead>
-
-
-    <tbody>
-
-      <tr>
-
-        <td>
-          1
-        </td>
-
-        <td>
-          <strong>
-            ${job.deviceType} ${job.deviceModel}
-          </strong>
-        </td>
-
-        <td>
-          ${job.symptom}
-        </td>
-
-      </tr>
-
-    </tbody>
-
-  </table>
-
-
-
-  <!-- =========================================
-       PRICE
-  ========================================== -->
-
-  <div class="price-box">
-
-    ราคาประเมินรวม :
-
-    <span>
-      ${(job.priceQuoted ?? 0).toLocaleString()} บาท
-    </span>
-
-  </div>
-
-
-
-  <!-- =========================================
-       TERMS
-  ========================================== -->
-
-  <div class="terms">
-
-    <strong>
-      เงื่อนไขการรับบริการ
-    </strong>
-
-    <br>
-
-    1. กรุณานำใบรับเครื่องมาแสดงเมื่อรับเครื่องคืน
-    <br>
-
-    2. ร้านไม่รับผิดชอบข้อมูลภายในเครื่อง
-    <br>
-
-    3. ไม่มารับเครื่องภายใน 90 วัน ร้านขอสงวนสิทธิ์
-
-  </div>
-
-
-
-  <!-- =========================================
-       SIGNATURE
-  ========================================== -->
-
-  <div class="sign">
-
-    <div class="line">
-      ผู้ส่งเครื่องซ่อม
-      <br>
-      (${job.customerName})
-    </div>
-
-
-    <div class="line">
-      ผู้รับเครื่อง
-      <br>
-      (ร้านตุ้ยไอที)
-    </div>
-
-  </div>
-
-
-
-  <!-- =========================================
-       QR CODE WEBSITE
-       มุมล่างขวา ไม่มีกรอบ
-  ========================================== -->
-
-  <div class="qr-website">
+  <div class="shop">
 
     <img
-      src="${qrCode}"
-      alt="QR Code เว็บไซต์ร้านตุ้ยไอที"
+      src="https://www.tui-it.org/customer/logo1.png"
+      class="logo"
     >
 
-    <div class="qr-title">
-      สแกนเพื่อเข้าเว็บไซต์ร้านตุ้ยไอที
-    </div>
+    <div>
 
-    <div class="qr-url">
-      www.tui-it.org
-    </div>
+      <h1>ร้านตุ้ยไอที โคราช</h1>
 
-    <div class="qr-help">
-      สำหรับเข้าเว็บไซต์<br>
-      และตรวจสอบสถานะงานซ่อม
+      <p>
+        ศูนย์ซ่อมและจำหน่ายอุปกรณ์ไอทีครบวงจร
+      </p>
+
+      <p>
+        โทร 080-4641677
+      </p>
+
     </div>
 
   </div>
 
+
+  <div class="doc">
+
+    <h2>
+      ใบรับเครื่องซ่อม
+    </h2>
+
+    <div class="no">
+      No. ${job.receiptNumber}
+    </div>
+
+    <div>
+      วันที่ ${new Date(job.receivedDate).toLocaleDateString("th-TH")}
+    </div>
+
+  </div>
 
 </div>
 
+
+<!-- =========================================
+     INFO
+========================================== -->
+
+<div class="info">
+
+  <div class="box">
+
+    <h3>
+      ข้อมูลลูกค้า
+    </h3>
+
+    <div class="row">
+
+      <div class="label">
+        ชื่อลูกค้า :
+      </div>
+
+      ${job.customerName}
+
+    </div>
+
+    <div class="row">
+
+      <div class="label">
+        เบอร์โทร :
+      </div>
+
+      ${job.customerPhone || "-"}
+
+    </div>
+
+    <div class="row">
+
+      <div class="label">
+        ที่อยู่ :
+      </div>
+
+      ${job.customerAddress || "-"}
+
+    </div>
+
+    <div class="row">
+
+      <div class="label">
+        อุปกรณ์ที่มาด้วย :
+      </div>
+
+      ${job.accessory || "-"}
+
+    </div>
+
+    <div class="row">
+
+      <div class="label">
+        ประเภทงาน :
+      </div>
+
+      ${job.jobType || "-"}
+
+    </div>
+
+  </div>
+
+
+  <div class="box">
+
+    <h3>
+      สถานะงาน
+    </h3>
+
+    <div class="row">
+
+      <div class="label">
+        สถานะ
+      </div>
+
+      <span class="badge">
+        ${job.status}
+      </span>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- =========================================
+     TABLE
+========================================== -->
+
+<table>
+
+  <thead>
+
+    <tr>
+
+      <th width="10%">
+        ลำดับ
+      </th>
+
+      <th width="50%">
+        รายละเอียดอุปกรณ์
+      </th>
+
+      <th width="40%">
+        อาการเสีย
+      </th>
+
+    </tr>
+
+  </thead>
+
+
+  <tbody>
+
+    <tr>
+
+      <td>
+        1
+      </td>
+
+      <td>
+
+        <strong>
+          ${job.deviceType} ${job.deviceModel}
+        </strong>
+
+      </td>
+
+      <td>
+        ${job.symptom}
+      </td>
+
+    </tr>
+
+  </tbody>
+
+</table>
+
+
+<!-- =========================================
+     PRICE
+========================================== -->
+
+<div class="price-box">
+
+  ราคาประเมินรวม :
+
+  <span>
+    ${(job.priceQuoted ?? 0).toLocaleString()} บาท
+  </span>
+
+</div>
+
+
+<!-- =========================================
+     TERMS
+========================================== -->
+
+<div class="terms">
+
+  <strong>
+    เงื่อนไขการรับบริการ
+  </strong>
+
+  <br>
+
+  1. กรุณานำใบรับเครื่องมาแสดงเมื่อรับเครื่องคืน
+
+  <br>
+
+  2. ร้านไม่รับผิดชอบข้อมูลภายในเครื่อง
+
+  <br>
+
+  3. ไม่มารับเครื่องภายใน 90 วัน ร้านขอสงวนสิทธิ์
+
+</div>
+
+
+<!-- =========================================
+     SIGNATURE
+========================================== -->
+
+<div class="sign">
+
+  <div class="line">
+
+    ผู้ส่งเครื่องซ่อม
+
+    <br>
+
+    (${job.customerName})
+
+  </div>
+
+
+  <div class="line">
+
+    ผู้รับเครื่อง
+
+    <br>
+
+    (ร้านตุ้ยไอที)
+
+  </div>
+
+</div>
+
+
+<!-- =========================================
+     QR CODE WEBSITE
+     มุมล่างขวา ไม่มีกรอบ
+========================================== -->
+
+<div class="qr-website">
+
+  <img
+    src="${qrCode}"
+    alt="QR Code เว็บไซต์ร้านตุ้ยไอที"
+  >
+
+  <div class="qr-title">
+    สแกนเพื่อเข้าเว็บไซต์
+  </div>
+
+  <div class="qr-url">
+    www.tui-it.org
+  </div>
+
+  <div class="qr-help">
+    สำหรับเข้าเว็บไซต์<br>
+    และตรวจสอบสถานะงานซ่อม
+  </div>
+
+</div>
+
+
+</div>
 
 
 <div
@@ -1146,19 +1109,16 @@ tbody td {
 
 </html>`);
 
-
   } catch (err) {
 
-    console.error(err);
+    console.error("RECEIPT ERROR:", err);
 
     res
       .status(500)
       .send("สร้างใบรับเครื่องไม่สำเร็จ");
 
   }
-
 });
-
 // 🔹 ดึงข้อมูลงานซ่อมตาม ID
 router.get("/:id", auth, async (req, res) => {
   try {
