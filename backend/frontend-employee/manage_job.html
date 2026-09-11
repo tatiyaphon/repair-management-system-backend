@@ -323,14 +323,38 @@
     margin-top: 0;
 }
 
-.receipt-section {
-    display: flex;
+/* ทำให้ปุ่ม 2 ปุ่มขนาดเท่ากัน */
+.action-buttons-row .btn-receipt,
+.action-buttons-row #return-repair-btn {
+    height: 64px;
+    min-width: 220px;
+    padding: 0 30px;
+    box-sizing: border-box;
+
+    display: inline-flex;
     align-items: center;
+    justify-content: center;
+
+    font-size: 20px;
+    font-weight: 700;
+    border-radius: 35px;
+}
+
+/* ปุ่มส่งกลับซ่อม */
+.action-buttons-row #return-repair-btn {
+    border: none;
+    cursor: pointer;
+}
+
+/* ส่วนของปุ่มส่งกลับซ่อมไม่ให้ margin ดันปุ่ม */
+.action-buttons-row #return-repair-section,
+.action-buttons-row #return-repair-section .btn-group {
+    margin: 0;
+    padding: 0;
 }
   </style>
 
 </head>
-<>
 
   <!-- =========================
        HEADER
