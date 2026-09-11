@@ -1,250 +1,881 @@
 <!DOCTYPE html>
 <html lang="th">
+
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
     <title>เข้าสู่ระบบสำหรับพนักงาน</title>
-    <link rel="icon" type="image/png" href="logo1.png">
+
+    <link
+        rel="icon"
+        type="image/png"
+        href="logo1.png"
+    >
+
     <!-- Google Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <link
+        rel="preconnect"
+        href="https://fonts.googleapis.com"
+    >
+
+    <link
+        rel="preconnect"
+        href="https://fonts.gstatic.com"
+        crossorigin
+    >
+
+    <link
+        href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;500;600&display=swap"
+        rel="stylesheet"
+    >
 
     <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --background-color: #ecf0f1;
-            --card-background: #ffffff;
-            --text-color: #333;
-            --light-text-color: #7f8c8d;
-            --danger-color: #e74c3c;
-            --box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        body {
-            font-family: 'Kanit', sans-serif;
-            background: linear-gradient(to bottom, #d9e3f0, #e9eff5);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .login-container {
-            background: var(--card-background);
-            padding: 40px;
-            width: 100%;
-            max-width: 420px;
-            border-radius: 15px;
-            box-shadow: var(--box-shadow);
-            animation: fadeIn 0.6s ease;
-        }
-
-        h1 {
-            text-align: center;
-            color: var(--primary-color);
-            margin-bottom: 30px;
-        }
-
-        h1 i {
-            color: var(--secondary-color);
-            margin-right: 10px;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        label {
-            font-weight: 500;
-            display: block;
-            margin-bottom: 6px;
-        }
-
-        input {
-            width: 100%;
-            padding: 12px;
-            font-family: 'Kanit', sans-serif;
-            border-radius: 8px;
-            border: 1px solid #ddd;
-            font-size: 1rem;
-        }
-
-        input:focus {
-            outline: none;
-            border-color: var(--secondary-color);
-        }
-
-        .error {
-            display: none;
-            color: var(--danger-color);
-            font-weight: 500;
-            margin-bottom: 15px;
-        }
-
-        button {
-            width: 100%;
-            padding: 14px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            border: none;
-            border-radius: 50px;
-            background: var(--secondary-color);
-            color: white;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #2980b9;
-        }
-
-        /* 🔽 สมัครสมาชิก */
-        .signup-link {
-            margin-top: 15px;
-            text-align: center;
-            font-size: 0.9rem;
-        }
-
-        .signup-link a {
-            color: var(--secondary-color);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .signup-link a:hover {
-            text-decoration: underline;
-        }
+    <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        rel="stylesheet"
+    >
 
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-    </style>
+<style>
+
+/* =========================================
+   VARIABLES
+========================================= */
+
+:root {
+
+    --primary-color: #2c3e50;
+
+    --secondary-color: #3498db;
+
+    --secondary-hover: #2980b9;
+
+    --background-color: #ecf0f1;
+
+    --card-background: #ffffff;
+
+    --text-color: #333;
+
+    --light-text-color: #7f8c8d;
+
+    --danger-color: #e74c3c;
+
+    --danger-bg: #fef2f2;
+
+    --danger-border: #fecaca;
+
+    --success-color: #16a34a;
+
+    --box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+
+/* =========================================
+   BODY
+========================================= */
+
+body {
+
+    font-family: 'Kanit', sans-serif;
+
+    background:
+        linear-gradient(
+            to bottom,
+            #d9e3f0,
+            #e9eff5
+        );
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    height: 100vh;
+
+    margin: 0;
+}
+
+
+/* =========================================
+   LOGIN CARD
+========================================= */
+
+.login-container {
+
+    background: var(--card-background);
+
+    padding: 40px;
+
+    width: 100%;
+
+    max-width: 420px;
+
+    border-radius: 15px;
+
+    box-shadow: var(--box-shadow);
+
+    animation: fadeIn .6s ease;
+
+    box-sizing: border-box;
+}
+
+
+/* =========================================
+   TITLE
+========================================= */
+
+h1 {
+
+    text-align: center;
+
+    color: var(--primary-color);
+
+    margin-bottom: 30px;
+}
+
+
+h1 i {
+
+    color: var(--secondary-color);
+
+    margin-right: 10px;
+}
+
+
+/* =========================================
+   FORM
+========================================= */
+
+.form-group {
+
+    margin-bottom: 20px;
+}
+
+
+label {
+
+    font-weight: 500;
+
+    display: block;
+
+    margin-bottom: 6px;
+}
+
+
+input {
+
+    width: 100%;
+
+    padding: 12px;
+
+    font-family: 'Kanit', sans-serif;
+
+    border-radius: 8px;
+
+    border: 1px solid #ddd;
+
+    font-size: 1rem;
+
+    box-sizing: border-box;
+
+    transition: .2s;
+}
+
+
+input:focus {
+
+    outline: none;
+
+    border-color: var(--secondary-color);
+
+    box-shadow:
+        0 0 0 3px rgba(52,152,219,.12);
+}
+
+
+/* =========================================
+   INPUT ERROR
+========================================= */
+
+input.input-error {
+
+    border-color: var(--danger-color);
+
+    background: #fffafa;
+}
+
+
+/* =========================================
+   ERROR BOX
+========================================= */
+
+.error {
+
+    display: none;
+
+    color: var(--danger-color);
+
+    background: var(--danger-bg);
+
+    border: 1px solid var(--danger-border);
+
+    border-radius: 10px;
+
+    padding: 12px 14px;
+
+    margin-bottom: 15px;
+
+    font-weight: 500;
+
+    font-size: .9rem;
+
+    line-height: 1.5;
+
+    animation: errorIn .25s ease;
+}
+
+
+.error i {
+
+    margin-right: 6px;
+}
+
+
+/* =========================================
+   BUTTON
+========================================= */
+
+button {
+
+    width: 100%;
+
+    padding: 14px;
+
+    font-size: 1.1rem;
+
+    font-weight: 600;
+
+    font-family: 'Kanit', sans-serif;
+
+    border: none;
+
+    border-radius: 50px;
+
+    background: var(--secondary-color);
+
+    color: white;
+
+    cursor: pointer;
+
+    transition: .2s;
+}
+
+
+button:hover:not(:disabled) {
+
+    background: var(--secondary-hover);
+
+    transform: translateY(-1px);
+}
+
+
+button:disabled {
+
+    opacity: .7;
+
+    cursor: not-allowed;
+
+    transform: none;
+}
+
+
+/* =========================================
+   LOADING
+========================================= */
+
+.loading-spinner {
+
+    display: inline-block;
+
+    width: 16px;
+
+    height: 16px;
+
+    border: 2px solid rgba(255,255,255,.4);
+
+    border-top-color: #fff;
+
+    border-radius: 50%;
+
+    animation: spin .7s linear infinite;
+
+    vertical-align: -3px;
+
+    margin-right: 7px;
+}
+
+
+/* =========================================
+   FORGOT PASSWORD
+========================================= */
+
+.signup-link {
+
+    margin-top: 15px;
+
+    text-align: center;
+
+    font-size: .9rem;
+}
+
+
+.signup-link a {
+
+    color: var(--secondary-color);
+
+    text-decoration: none;
+
+    font-weight: 500;
+}
+
+
+.signup-link a:hover {
+
+    text-decoration: underline;
+}
+
+
+/* =========================================
+   ANIMATION
+========================================= */
+
+@keyframes fadeIn {
+
+    from {
+
+        opacity: 0;
+
+        transform: translateY(20px);
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform: translateY(0);
+    }
+}
+
+
+@keyframes errorIn {
+
+    from {
+
+        opacity: 0;
+
+        transform: translateY(-5px);
+    }
+
+    to {
+
+        opacity: 1;
+
+        transform: translateY(0);
+    }
+}
+
+
+@keyframes spin {
+
+    to {
+
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media(max-width:480px) {
+
+    .login-container {
+
+        margin: 20px;
+
+        padding: 30px 25px;
+    }
+
+}
+
+</style>
+
 </head>
+
+
 <body>
 
+
 <div class="login-container">
-    <h1><i class="fas fa-user-lock"></i> เข้าสู่ระบบพนักงาน</h1>
+
+
+    <h1>
+
+        <i class="fas fa-user-lock"></i>
+
+        เข้าสู่ระบบพนักงาน
+
+    </h1>
+
+
 
     <form id="loginForm">
-        <div class="form-group">
-            <label for="email">อีเมล</label>
-            <input type="email" id="email" placeholder="admin@example.com" required />
-        </div>
+
+
+        <!-- EMAIL -->
 
         <div class="form-group">
-            <label for="password">รหัสผ่าน</label>
-            <input type="password" id="password" required />
+
+            <label for="email">
+                อีเมล
+            </label>
+
+            <input
+                type="email"
+                id="email"
+                placeholder="admin@example.com"
+                autocomplete="email"
+                required
+            >
+
         </div>
 
-        <div id="login-error" class="error">
-            <i class="fas fa-exclamation-circle"></i> อีเมลหรือรหัสผ่านไม่ถูกต้อง
+
+
+        <!-- PASSWORD -->
+
+        <div class="form-group">
+
+            <label for="password">
+                รหัสผ่าน
+            </label>
+
+            <input
+                type="password"
+                id="password"
+                placeholder="กรอกรหัสผ่าน"
+                autocomplete="current-password"
+                required
+            >
+
         </div>
 
-        <button type="submit">เข้าสู่ระบบ</button>
+
+
+        <!-- ERROR -->
+
+        <div
+            id="login-error"
+            class="error"
+        >
+
+            <i class="fas fa-exclamation-circle"></i>
+
+            <span id="login-error-text">
+                อีเมลหรือรหัสผ่านไม่ถูกต้อง
+            </span>
+
+        </div>
+
+
+
+        <!-- LOGIN BUTTON -->
+
+        <button
+            type="submit"
+            id="loginButton"
+        >
+
+            <i class="fas fa-right-to-bracket"></i>
+
+            เข้าสู่ระบบ
+
+        </button>
+
+
     </form>
-<div class="signup-link">
-    <a href="/employee/forgot_password.html">
-        ลืมรหัสผ่าน?
-    </a>
+
+
+
+    <!-- FORGOT PASSWORD -->
+
+    <div class="signup-link">
+
+        <a href="/employee/forgot_password.html">
+
+            ลืมรหัสผ่าน?
+
+        </a>
+
+    </div>
+
+
 </div>
 
 
+
 <script>
-/* =========================
+
+/* =========================================
    CONFIG
-========================= */
-const API_BASE = ""; // ✅ ใช้ relative path
+========================================= */
 
-const form = document.getElementById("loginForm");
-const errorBox = document.getElementById("login-error");
+const API_BASE = "";
 
-if (!form) {
-  console.error("❌ ไม่พบ form login");
+
+/* =========================================
+   ELEMENTS
+========================================= */
+
+const form =
+    document.getElementById("loginForm");
+
+const emailInput =
+    document.getElementById("email");
+
+const passwordInput =
+    document.getElementById("password");
+
+const errorBox =
+    document.getElementById("login-error");
+
+const errorText =
+    document.getElementById("login-error-text");
+
+const loginButton =
+    document.getElementById("loginButton");
+
+
+/* =========================================
+   SHOW ERROR
+========================================= */
+
+function showError(message) {
+
+    errorText.textContent = message;
+
+    errorBox.style.display = "block";
+
+    emailInput.classList.add("input-error");
+
+    passwordInput.classList.add("input-error");
 }
 
-/* =========================
-   SUBMIT LOGIN
-========================= */
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  errorBox.style.display = "none";
 
-  const email = document.getElementById("email").value.trim();
-  const password = document.getElementById("password").value.trim();
+/* =========================================
+   HIDE ERROR
+========================================= */
 
-  if (!email || !password) {
-    showError("กรุณากรอกอีเมลและรหัสผ่าน");
-    return;
-  }
+function hideError() {
 
-  try {
-    const res = await fetch(`${API_BASE}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password })
-    });
+    errorBox.style.display = "none";
 
-    const data = await res.json();
+    emailInput.classList.remove("input-error");
 
-    if (!res.ok) {
-      showError(data.message || "เข้าสู่ระบบไม่สำเร็จ");
-      return;
-    }
-
-    /* =========================
-       SAVE LOGIN DATA
-    ========================= */
-    localStorage.setItem("token", data.token);
-    localStorage.setItem("role", data.user.role);
-    localStorage.setItem("userId", data.user.id);
-    localStorage.setItem(
-      "userName",
-      `${data.user.firstName} ${data.user.lastName}`
-    );
-    localStorage.setItem(
-      "avatar",
-      data.user.avatar || "/uploads/profile/default.jpg"
-    );
-
-    /* =========================
-       FORCE CHANGE PASSWORD
-    ========================= */
-    if (data.user.mustChangePassword === true) {
-      location.replace("/employee/change_password.html");
-      return;
-    }
-
-    /* =========================
-       REDIRECT BY ROLE
-    ========================= */
-    if (data.user.role === "staff") {
-      location.replace("/employee/staff_dashboard.html");
-    } else {
-      // tech / staff
-      location.replace("/employee/technician_jobs.html");
-    }
-
-  } catch (err) {
-    console.error(err);
-    showError("ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้");
-  }
-});
-
-/* =========================
-   ERROR HANDLER
-========================= */
-function showError(msg) {
-  errorBox.textContent = msg;
-  errorBox.style.display = "block";
+    passwordInput.classList.remove("input-error");
 }
+
+
+/* =========================================
+   REMOVE ERROR WHEN USER TYPES
+========================================= */
+
+emailInput.addEventListener(
+    "input",
+    hideError
+);
+
+
+passwordInput.addEventListener(
+    "input",
+    hideError
+);
+
+
+/* =========================================
+   LOGIN
+========================================= */
+
+form.addEventListener(
+    "submit",
+    async (e) => {
+
+        e.preventDefault();
+
+
+        hideError();
+
+
+        const email =
+            emailInput.value.trim();
+
+
+        const password =
+            passwordInput.value.trim();
+
+
+        /* ==============================
+           CHECK INPUT
+        ============================== */
+
+        if (!email && !password) {
+
+            showError(
+                "กรุณากรอกอีเมลและรหัสผ่าน"
+            );
+
+            return;
+        }
+
+
+        if (!email) {
+
+            showError(
+                "กรุณากรอกอีเมล"
+            );
+
+            emailInput.focus();
+
+            return;
+        }
+
+
+        if (!password) {
+
+            showError(
+                "กรุณากรอกรหัสผ่าน"
+            );
+
+            passwordInput.focus();
+
+            return;
+        }
+
+
+        /* ==============================
+           LOADING
+        ============================== */
+
+        loginButton.disabled = true;
+
+        loginButton.innerHTML = `
+
+            <span class="loading-spinner"></span>
+
+            กำลังเข้าสู่ระบบ...
+
+        `;
+
+
+        try {
+
+
+            /* ==========================
+               REQUEST
+            ========================== */
+
+            const res = await fetch(
+                `${API_BASE}/api/auth/login`,
+                {
+
+                    method: "POST",
+
+                    headers: {
+
+                        "Content-Type":
+                            "application/json"
+
+                    },
+
+                    body: JSON.stringify({
+
+                        email,
+                        password
+
+                    })
+
+                }
+            );
+
+
+            /* ==========================
+               READ RESPONSE
+            ========================== */
+
+            let data = {};
+
+            try {
+
+                data =
+                    await res.json();
+
+            } catch (jsonError) {
+
+                data = {};
+
+            }
+
+
+            /* ==========================
+               LOGIN ERROR
+            ========================== */
+
+            if (!res.ok) {
+
+                showError(
+
+                    data.message ||
+
+                    data.error ||
+
+                    "เข้าสู่ระบบไม่สำเร็จ"
+
+                );
+
+
+                loginButton.disabled = false;
+
+                loginButton.innerHTML = `
+
+                    <i class="fas fa-right-to-bracket"></i>
+
+                    เข้าสู่ระบบ
+
+                `;
+
+
+                return;
+            }
+
+
+            /* ==========================
+               SAVE LOGIN DATA
+            ========================== */
+
+            localStorage.setItem(
+                "token",
+                data.token
+            );
+
+
+            localStorage.setItem(
+                "role",
+                data.user.role
+            );
+
+
+            localStorage.setItem(
+                "userId",
+                data.user.id
+            );
+
+
+            localStorage.setItem(
+                "userName",
+                `${data.user.firstName} ${data.user.lastName}`
+            );
+
+
+            localStorage.setItem(
+                "avatar",
+                data.user.avatar ||
+                "/uploads/profile/default.jpg"
+            );
+
+
+            /* ==========================
+               FORCE CHANGE PASSWORD
+            ========================== */
+
+            if (
+                data.user.mustChangePassword === true
+            ) {
+
+                location.replace(
+                    "/employee/change_password.html"
+                );
+
+                return;
+            }
+
+
+            /* ==========================
+               REDIRECT BY ROLE
+            ========================== */
+
+            if (
+                data.user.role === "staff"
+            ) {
+
+                location.replace(
+                    "/employee/staff_dashboard.html"
+                );
+
+            } else {
+
+                location.replace(
+                    "/employee/technician_jobs.html"
+                );
+
+            }
+
+        } catch (err) {
+
+
+            console.error(
+                "LOGIN ERROR:",
+                err
+            );
+
+
+            /* ==========================
+               SERVER CONNECTION ERROR
+            ========================== */
+
+            showError(
+                "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง"
+            );
+
+
+            loginButton.disabled = false;
+
+            loginButton.innerHTML = `
+
+                <i class="fas fa-right-to-bracket"></i>
+
+                เข้าสู่ระบบ
+
+            `;
+
+        }
+
+    }
+);
+
 </script>
 
+
 </body>
+
 </html>
