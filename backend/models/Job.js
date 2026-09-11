@@ -88,6 +88,11 @@ const jobSchema = new mongoose.Schema(
   ],
   default: "รับเครื่อง"
 },
+returnRepairNote: {
+  type: String,
+  default: null,
+  trim: true
+},
     // ===============================
     // วันที่
     // ===============================

@@ -277,12 +277,14 @@ router.put("/:id/return-repair", auth, async (req, res) => {
       });
     }
 
-    const reason =
-      String(req.body.reason || "ไม่ได้ระบุเหตุผล").trim();
+   const reason =
+  String(req.body.reason || "ไม่ได้ระบุเหตุผล").trim();
 
-    // เปลี่ยนกลับเป็นกำลังซ่อม
-    job.status = "กำลังซ่อม";
+// 📝 เก็บหมายเหตุการส่งกลับซ่อมไว้ในงาน
+job.returnRepairNote = reason;
 
+// เปลี่ยนกลับเป็นกำลังซ่อม
+job.status = "กำลังซ่อม";
     // ล้างวันที่ซ่อมเสร็จ
     job.finishDate = null;
 

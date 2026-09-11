@@ -360,6 +360,26 @@
 .upload-btn input {
   display: none;
 }
+.return-repair-note-row td {
+  padding: 0 15px 12px !important;
+  border: none !important;
+  background: transparent !important;
+}
+
+.return-repair-note {
+  margin-top: -2px;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: #fff7ed;
+  border-left: 5px solid #f39c12;
+  color: #7c2d12;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.return-repair-note strong {
+  color: #c2410c;
+}
     </style>
 </head>
 <body>
@@ -781,6 +801,26 @@ function renderJobsGrouped(jobs) {
     `;
 
     tbody.appendChild(tr);
+
+    if (
+  job.returnRepairNote &&
+  !["ซ่อมเสร็จ", "ยกเลิก"].includes(job.status)
+) {
+  const noteRow = document.createElement("tr");
+  noteRow.className = "return-repair-note-row";
+
+  noteRow.innerHTML = `
+    <td colspan="6">
+      <div class="return-repair-note">
+        🔄 <strong>หมายเหตุ:</strong>
+        งานนี้ถูกส่งกลับมาซ่อมอีกครั้ง
+        เนื่องจากพบปัญหา: ${job.returnRepairNote}
+      </div>
+    </td>
+  `;
+
+  tbody.appendChild(noteRow);
+}
   });
 
   container.appendChild(table);
