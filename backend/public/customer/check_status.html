@@ -340,6 +340,24 @@ footer{
 .nav-btn:hover{
   background:#1d4ed8;
 }
+/* ================= ERROR MESSAGE ================= */
+
+.search-error {
+    display: none;
+    margin-top: 15px;
+    padding: 12px 16px;
+    border-radius: 12px;
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #dc2626;
+    text-align: center;
+    font-size: .95rem;
+    font-weight: 500;
+}
+
+.search-error.show {
+    display: block;
+}
 </style>
 </head>
 
@@ -370,12 +388,23 @@ footer{
             <h2>🔍 ตรวจสอบสถานะงาน</h2>
             <p>กรุณากรอกเลขที่ใบรับเครื่องของคุณ</p>
 
-            <input id="receipt_number" placeholder="เช่น IN20250101-001">
-            <button>
-                <i class="fas fa-search"></i> ตรวจสอบสถานะ
-            </button>
+          <input
+    id="receipt_number"
+    placeholder="เช่น IN20250101-001"
+    autocomplete="off"
+>
+
+<div
+    id="searchError"
+    class="search-error"
+>
+    ❌ ไม่พบข้อมูลงานซ่อม
+</div>
+
+<button>
+    <i class="fas fa-search"></i> ตรวจสอบสถานะ
+</button>
         </div>
-    </div>
 
     <!-- FEATURES -->
     <section class="summary">
@@ -449,40 +478,90 @@ function showError(msg) {
 }
 
 async function checkStatus(){
-    const receiptNumber = receiptInput.value.trim().toUpperCase();
 
+    const receiptNumber =
+        receiptInput.value.trim().toUpperCase();
+
+    const errorBox =
+        document.getElementById("searchError");
+
+
+    // ซ่อนข้อความแจ้งเตือนเดิม
+    errorBox.classList.remove("show");
+
+
+    // ตรวจสอบว่ากรอกเลขหรือยัง
     if (receiptNumber.length < 3) {
-        showError("กรุณากรอกเลขให้ถูกต้อง");
+
+        errorBox.textContent =
+            "❌ กรุณากรอกเลขที่ใบรับเครื่อง";
+
+        errorBox.classList.add("show");
+
         return;
     }
 
-    // 🔥 loading
+
+    // Loading
     button.disabled = true;
-    button.innerHTML = `<div class="spinner"></div>`;
+
+    button.innerHTML =
+        `<div class="spinner"></div>`;
+
 
     try {
-        const res = await fetch(`${API_BASE}/${encodeURIComponent(receiptNumber)}`);
+
+        const res = await fetch(
+            `${API_BASE}/${encodeURIComponent(receiptNumber)}`
+        );
+
+
+        // ==============================
+        // ไม่พบข้อมูล
+        // ==============================
 
         if (!res.ok) {
-            button.disabled = false;
-            button.innerHTML = "ตรวจสอบสถานะ";
 
-            document.body.insertAdjacentHTML("beforeend", `
-              <div class="error-box">❌ ไม่พบข้อมูลงานซ่อม</div>
-            `);
+            errorBox.textContent =
+                "❌ ไม่พบข้อมูลงานซ่อม กรุณาตรวจสอบเลขที่ใบรับเครื่องอีกครั้ง";
+
+            errorBox.classList.add("show");
+
+
+            button.disabled = false;
+
+            button.innerHTML =
+                `<i class="fas fa-search"></i> ตรวจสอบสถานะ`;
+
+
             return;
         }
 
+
+        // ==============================
+        // พบข้อมูล
+        // ==============================
+
         window.location.href =
-          `/customer/status_page.html?receipt_number=${encodeURIComponent(receiptNumber)}`;
+            `/customer/status_page.html?receipt_number=${encodeURIComponent(receiptNumber)}`;
+
 
     } catch (err) {
-        button.disabled = false;
-        button.innerHTML = "ตรวจสอบสถานะ";
 
-        document.body.insertAdjacentHTML("beforeend", `
-          <div class="error-box">❌ เชื่อมต่อเซิร์ฟเวอร์ไม่ได้</div>
-        `);
+        console.error(err);
+
+
+        errorBox.textContent =
+            "❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาลองใหม่อีกครั้ง";
+
+        errorBox.classList.add("show");
+
+
+        button.disabled = false;
+
+        button.innerHTML =
+            `<i class="fas fa-search"></i> ตรวจสอบสถานะ`;
+
     }
 }
 
