@@ -312,273 +312,708 @@
   display:none;
 }
 .action-buttons-row {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 20px;
-  margin-top: 20px;
-  flex-wrap: wrap;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    margin-top: 25px;
+}
+
+.action-buttons-row .btn-group {
+    margin-top: 0;
+}
+
+.receipt-section {
+    display: flex;
+    align-items: center;
 }
   </style>
 
 </head>
-<body>
+<>
+
+  <!-- =========================
+       HEADER
+  ========================= -->
   <header class="main-header">
 
-  <div class="logo">
-    <i class="fas fa-tools"></i>
-    ระบบจัดการงานซ่อม
-  </div>
-
-  <nav class="nav-links">
-    <a href="employee_dashboard.html" class="nav-link">
-      <i class="fas fa-home"></i> หน้าหลัก
-    </a>
-
-    <a href="new_job.html" class="nav-link">
-      <i class="fas fa-plus-circle"></i> รับเครื่องซ่อม
-    </a>
-
-    <a href="stock_management.html" class="nav-link">
-      <i class="fas fa-box-open"></i> จัดการสต็อก
-    </a>
-
-    <a href="technician_jobs.html" class="nav-link">
-      <i class="fas fa-tools"></i> งานของฉัน
-    </a>
-
-    <a href="reports.html" class="nav-link">
-      <i class="fas fa-chart-line"></i> รายงาน
-    </a>
-
-    <a href="staff_dashboard.html" class="nav-link">
-      <i class="fas fa-user-shield"></i> ผู้ดูแลระบบ
-    </a>
-  </nav>
-
-  <!-- profile -->
-  <div class="profile-menu" id="profileMenu">
-    <div class="profile-trigger" onclick="toggleProfile()">
-      <img id="profileAvatar" src="/uploads/profile/default.jpg">
+    <div class="logo">
+      <i class="fas fa-tools"></i>
+      ระบบจัดการงานซ่อม
     </div>
 
 
-    <div class="profile-dropdown" id="profileDropdown">
-      <div class="profile-header">
-        <img id="profileAvatarLarge"
-             src="/uploads/profile/default.jpg"
-             alt="avatar-large"
-             class="profile-avatar-large">
-        <div>
-          <strong id="profileNameLarge">ผู้ใช้งาน</strong><br>
-          <small id="profileRole">—</small>
+    <!-- NAVIGATION -->
+    <nav class="nav-links">
+
+      <a href="employee_dashboard.html" class="nav-link">
+        <i class="fas fa-home"></i>
+        หน้าหลัก
+      </a>
+
+      <a href="new_job.html" class="nav-link">
+        <i class="fas fa-plus-circle"></i>
+        รับเครื่องซ่อม
+      </a>
+
+      <a href="stock_management.html" class="nav-link">
+        <i class="fas fa-box-open"></i>
+        จัดการสต็อก
+      </a>
+
+      <a href="technician_jobs.html" class="nav-link">
+        <i class="fas fa-tools"></i>
+        งานของฉัน
+      </a>
+
+      <a href="reports.html" class="nav-link">
+        <i class="fas fa-chart-line"></i>
+        รายงาน
+      </a>
+
+      <a href="staff_dashboard.html" class="nav-link">
+        <i class="fas fa-user-shield"></i>
+        ผู้ดูแลระบบ
+      </a>
+
+    </nav>
+
+
+    <!-- =========================
+         PROFILE
+    ========================= -->
+    <div class="profile-menu" id="profileMenu">
+
+      <div
+        class="profile-trigger"
+        onclick="toggleProfile()"
+      >
+        <img
+          id="profileAvatar"
+          src="/uploads/profile/default.jpg"
+          alt="profile"
+        >
+      </div>
+
+
+      <!-- PROFILE DROPDOWN -->
+      <div
+        class="profile-dropdown"
+        id="profileDropdown"
+      >
+
+        <div class="profile-header">
+
+          <img
+            id="profileAvatarLarge"
+            src="/uploads/profile/default.jpg"
+            alt="avatar-large"
+            class="profile-avatar-large"
+          >
+
+          <div>
+
+            <strong id="profileNameLarge">
+              ผู้ใช้งาน
+            </strong>
+
+            <br>
+
+            <small id="profileRole">
+              —
+            </small>
+
+          </div>
+
         </div>
+
+
+        <div class="profile-divider"></div>
+
+
+        <!-- เปลี่ยนรูปโปรไฟล์ -->
+        <label class="profile-item upload-btn">
+
+          <i class="fas fa-camera"></i>
+          เปลี่ยนรูปโปรไฟล์
+
+          <input
+            type="file"
+            accept="image/*"
+            onchange="uploadAvatar(event)"
+          >
+
+        </label>
+
+
+        <!-- ข้อมูลส่วนตัว -->
+        <a
+          class="profile-item"
+          href="profile.html"
+        >
+          <i class="fas fa-user"></i>
+          ข้อมูลส่วนตัว
+        </a>
+
+
+        <!-- เปลี่ยนรหัสผ่าน -->
+        <a
+          class="profile-item"
+          href="change_password.html"
+        >
+          <i class="fas fa-lock"></i>
+          เปลี่ยนรหัสผ่าน
+        </a>
+
+
+        <!-- ประวัติการซ่อม -->
+        <a
+          class="profile-item"
+          href="repair_history.html"
+        >
+          <i class="fas fa-history"></i>
+          ประวัติการซ่อม
+        </a>
+
+
+        <div class="profile-divider"></div>
+
+
+        <!-- ออกจากระบบ -->
+        <button
+          class="profile-logout"
+          onclick="logout()"
+        >
+          <i class="fas fa-sign-out-alt"></i>
+          ออกจากระบบ
+        </button>
+
       </div>
-      
-       <div class="profile-divider"></div>
-        
-
-      <label class="profile-item upload-btn">
-  <i class="fas fa-camera"></i> เปลี่ยนรูปโปรไฟล์
-  <input type="file" accept="image/*" onchange="uploadAvatar(event)">
-</label>
-
-
-      <a class="profile-item" href="profile.html">
-        <i class="fas fa-user"></i> ข้อมูลส่วนตัว
-      </a>
-
-      <a class="profile-item" href="change_password.html">
-        <i class="fas fa-lock"></i> เปลี่ยนรหัสผ่าน
-      </a>
-
-      <a class="profile-item" href="repair_history.html">
-        <i class="fas fa-history"></i> ประวัติการซ่อม
-      </a>
-
-     <div class="profile-divider"></div>
-
-<button class="profile-logout" onclick="logout()">
-  <i class="fas fa-sign-out-alt"></i> ออกจากระบบ
-</button>
 
     </div>
-  </div>
 
-</header>
+  </header>
 
 
+  <!-- =========================
+       MAIN CONTAINER
+  ========================= -->
   <div class="container">
+
     <div class="card">
-      <h2><i class="fas fa-cogs"></i> จัดการงานซ่อม</h2>
 
-<div id="job-details"></div>
 
-<div id="manage-section">
+      <!-- TITLE -->
+      <h2>
+        <i class="fas fa-cogs"></i>
+        จัดการงานซ่อม
+      </h2>
 
-<hr>
 
-<div class="accordion-item">
-  <div class="accordion-header">
-    <span><i class="fas fa-tag"></i> แก้ไขประเภทงานซ่อม</span>
-    <i class="fas fa-chevron-down"></i>
-  </div>
+      <!-- =========================
+           รายละเอียดงานซ่อม
+      ========================= -->
+      <div id="job-details"></div>
 
-  <div class="accordion-content">
-    <form id="job-type-form">
-      <select id="new-job-type" required>
-        <option value="">-- เลือกประเภท --</option>
-        <option value="ซ่อมใหม่">ซ่อมใหม่</option>
-        <option value="เคลม">เคลม</option>
-      </select>
 
-      <div class="btn-group">
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-save"></i> บันทึกประเภท
-        </button>
+      <!-- ==================================================
+           ปุ่มการทำงาน
+           แยกเป็นคนละส่วน แต่จัดให้อยู่ข้างกัน
+      ================================================== -->
+      <div class="action-buttons-row">
+
+
+        <!-- =========================
+             ส่วนดูใบรับเครื่อง
+        ========================= -->
+        <div class="receipt-section">
+
+          <a
+            id="receipt-btn"
+            href="#"
+            target="_blank"
+            class="btn-receipt"
+          >
+
+            <i class="fas fa-file-pdf"></i>
+            ดูใบรับเครื่อง
+
+          </a>
+
+        </div>
+
+
+        <!-- =========================
+             ส่วนส่งกลับซ่อม
+             Staff เท่านั้น
+        ========================= -->
+        <div
+          id="return-repair-section"
+          style="display:none;"
+        >
+
+          <div class="btn-group">
+
+            <button
+              id="return-repair-btn"
+              type="button"
+              class="btn btn-approve"
+            >
+
+              <i class="fas fa-rotate-left"></i>
+              ส่งกลับซ่อม
+
+            </button>
+
+          </div>
+
+        </div>
+
+
       </div>
 
-    </form>
-  </div>
-</div>
+
+      <!-- ==================================================
+           ส่วนจัดการงานซ่อม
+      ================================================== -->
+      <div id="manage-section">
+
+
+        <!-- =========================
+             แก้ไขประเภทงาน
+        ========================= -->
+        <hr>
+
+        <div class="accordion-item">
+
+          <div class="accordion-header">
+
+            <span>
+              <i class="fas fa-tag"></i>
+              แก้ไขประเภทงานซ่อม
+            </span>
+
+            <i class="fas fa-chevron-down"></i>
+
+          </div>
+
+
+          <div class="accordion-content">
+
+            <form id="job-type-form">
+
+              <select
+                id="new-job-type"
+                required
+              >
+
+                <option value="">
+                  -- เลือกประเภท --
+                </option>
+
+                <option value="ซ่อมใหม่">
+                  ซ่อมใหม่
+                </option>
+
+                <option value="เคลม">
+                  เคลม
+                </option>
+
+              </select>
+
+
+              <div class="btn-group">
+
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                >
+
+                  <i class="fas fa-save"></i>
+                  บันทึกประเภท
+
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+        </div>
+
+
+        <!-- =========================
+             แก้ไขวันที่
+        ========================= -->
+        <hr>
+
+        <div class="accordion-item">
+
+          <div class="accordion-header">
+
+            <span>
+              <i class="fas fa-calendar-alt"></i>
+              แก้ไขวันที่งานซ่อม
+            </span>
+
+            <i class="fas fa-chevron-down"></i>
+
+          </div>
+
+
+          <div class="accordion-content">
+
+            <form id="date-form">
+
+              <label>
+                วันที่รับเครื่อง
+              </label>
+
+              <input
+                type="date"
+                id="received-date"
+                required
+              >
+
+
+              <label>
+                วันเริ่มซ่อม
+              </label>
+
+              <input
+                type="date"
+                id="start-date"
+              >
+
+
+              <label>
+                วันที่ซ่อมเสร็จ
+              </label>
+
+              <input
+                type="date"
+                id="finish-date"
+              >
+
+
+              <div class="btn-group">
+
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                >
+
+                  <i class="fas fa-save"></i>
+                  บันทึกวันที่
+
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+        </div>
+
+
+        <!-- =========================
+             อัปเดตสถานะ
+        ========================= -->
+        <hr>
+
+        <div class="accordion-item">
+
+          <div class="accordion-header">
+
+            <span>
+              <i class="fas fa-sync"></i>
+              อัปเดตสถานะงานซ่อม
+            </span>
+
+            <i class="fas fa-chevron-down"></i>
+
+          </div>
+
+
+          <div class="accordion-content">
+
+            <form id="status-form">
+
+              <select id="new-status">
+
+                <option value="รับเครื่อง">
+                  รับเครื่อง
+                </option>
+
+                <option value="กำลังซ่อม">
+                  กำลังซ่อม
+                </option>
+
+                <option value="รออะไหล่">
+                  รออะไหล่
+                </option>
+
+                <option value="ซ่อมเสร็จ">
+                  ซ่อมเสร็จ
+                </option>
+
+                <option value="ยกเลิก">
+                  ยกเลิก
+                </option>
+
+              </select>
+
+
+              <div class="btn-group">
+
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                >
+
+                  <i class="fas fa-save"></i>
+                  บันทึกสถานะ
+
+                </button>
+
+              </div>
+
+            </form>
+
+          </div>
+
+        </div>
+
+
+        <!-- =========================
+             ค่าใช้จ่าย
+        ========================= -->
+        <hr>
+
+        <div class="accordion-item">
+
+          <div class="accordion-header">
+
+            <span>
+              <i class="fas fa-money-bill-wave"></i>
+              ค่าใช้จ่าย
+            </span>
+
+            <i class="fas fa-chevron-down"></i>
+
+          </div>
+
+
+          <div class="accordion-content">
+
+            <form id="price-form">
+
+
+              <div class="form-group">
+
+                <label for="new-price">
+                  ราคา (บาท):
+                </label>
+
+                <input
+                  type="number"
+                  id="new-price"
+                  min="0"
+                  step="100"
+                  placeholder="เช่น 1500"
+                >
+
+              </div>
+
+
+              <div class="btn-group">
+
+                <!-- บันทึกราคา -->
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                >
+
+                  <i class="fas fa-save"></i>
+                  บันทึกราคา
+
+                </button>
+
+
+                <!-- ปิดงาน -->
+                <button
+                  type="button"
+                  id="approve-price-btn"
+                  class="btn btn-approve"
+                >
+
+                  <i class="fas fa-check-circle"></i>
+                  อนุมัติราคา (ปิดงาน)
+
+                </button>
+
+              </div>
+
+
+            </form>
+
+          </div>
+
+        </div>
+
+
+        <!-- =========================
+             ขอเบิกอะไหล่
+        ========================= -->
+        <hr>
+
+        <div class="accordion-item">
+
+          <div class="accordion-header">
+
+            <span>
+              <i class="fas fa-box-open"></i>
+              ขอเบิกอะไหล่
+            </span>
+
+            <i class="fas fa-chevron-down"></i>
+
+          </div>
+
+
+          <div class="accordion-content">
+
+            <form id="part-form">
+
+
+              <div class="form-group">
+
+                <label>
+                  เลือกอะไหล่:
+                </label>
+
+                <select id="part-name">
+
+                  <option value="">
+                    -- เลือกอะไหล่ --
+                  </option>
+
+                </select>
+
+
+                <label>
+                  เลือกรุ่น:
+                </label>
+
+                <select
+                  id="part-model"
+                  disabled
+                >
+
+                  <option value="">
+                    -- เลือกรุ่น --
+                  </option>
+
+                </select>
+
+              </div>
+
+
+              <div class="form-group">
+
+                <label for="part-qty">
+                  จำนวน:
+                </label>
+
+                <input
+                  type="number"
+                  id="part-qty"
+                  min="1"
+                  value="1"
+                  required
+                >
+
+              </div>
+
+
+              <div class="btn-group">
+
+                <button
+                  type="submit"
+                  class="btn btn-primary"
+                >
+
+                  <i class="fas fa-truck"></i>
+                  ขอเบิก
+
+                </button>
+
+              </div>
+
+
+            </form>
+
+          </div>
+
+        </div>
+
+
+        <!-- =========================
+             ยกเลิกงาน
+        ========================= -->
+        <div class="btn-group">
+
+          <button
+            id="cancel-job-btn"
+            class="btn btn-cancel"
+          >
+
+            <i class="fas fa-ban"></i>
+            ยกเลิกงานซ่อม
+
+          </button>
+
+        </div>
+
+
+      </div>
+      <!-- ปิด manage-section -->
+
+
+      <!-- =========================
+           รายการอะไหล่ที่ใช้
+      ========================= -->
       <hr>
 
-      <div class="accordion-item">
-  <div class="accordion-header">
-    <span><i class="fas fa-calendar-alt"></i> แก้ไขวันที่งานซ่อม</span>
-    <i class="fas fa-chevron-down"></i>
-  </div>
-  <div class="accordion-content">
-    <form id="date-form">
-      <label>วันที่รับเครื่อง</label>
-      <input type="date" id="received-date" required />
-      <label>วันเริ่มซ่อม</label>
-      <input type="date" id="start-date" />
-      <label>วันที่ซ่อมเสร็จ</label>
-      <input type="date" id="finish-date" />
-      <div class="btn-group">
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-save"></i> บันทึกวันที่
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
+      <h3 class="section-header">
 
-      <hr>
+        <i class="fas fa-list"></i>
+        รายการอะไหล่ที่ใช้
 
-     <div class="accordion-item">
-  <div class="accordion-header">
-    <span><i class="fas fa-sync"></i> อัปเดตสถานะงานซ่อม</span>
-    <i class="fas fa-chevron-down"></i>
-  </div>
-  <div class="accordion-content">
-    <form id="status-form">
-      <select id="new-status">
-        <option value="รับเครื่อง">รับเครื่อง</option>
-        <option value="กำลังซ่อม">กำลังซ่อม</option>
-        <option value="รออะไหล่">รออะไหล่</option>
-        <option value="ซ่อมเสร็จ">ซ่อมเสร็จ</option>
-        <option value="ยกเลิก">ยกเลิก</option>
-      </select>
-      <div class="btn-group">
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-save"></i> บันทึกสถานะ
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
+      </h3>
 
 
-      <hr>
+      <div id="parts-list"></div>
 
-     <!-- ================= ค่าใช้จ่าย ================= -->
- <div class="accordion-item">
-  <div class="accordion-header">
-    <span><i class="fas fa-money-bill-wave"></i> ค่าใช้จ่าย</span>
-    <i class="fas fa-chevron-down"></i>
-  </div>
 
-  <div class="accordion-content">
-    <form id="price-form">
-      <div class="form-group">
-        <label for="new-price">ราคา (บาท):</label>
-        <input type="number" id="new-price" min="0" step="100" placeholder="เช่น 1500" />
-      </div>
-      <div class="btn-group">
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-save"></i> บันทึกราคา
-        </button>
-        <button type="button" id="approve-price-btn" class="btn btn-approve">
-          <i class="fas fa-check-circle"></i> อนุมัติราคา (ปิดงาน)
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-
-<hr>
-
-<!-- ================= ขอเบิกอะไหล่ ================= -->
- <div class="accordion-item">
-  <div class="accordion-header">
-    <span><i class="fas fa-box-open"></i> ขอเบิกอะไหล่</span>
-    <i class="fas fa-chevron-down"></i>
-  </div>
-
-  <div class="accordion-content">
-    <form id="part-form">
-      <div class="form-group">
-        <label>เลือกอะไหล่:</label>
-        <select id="part-name">
-          <option value="">-- เลือกอะไหล่ --</option>
-        </select>
-
-        <label>เลือกรุ่น:</label>
-        <select id="part-model" disabled>
-          <option value="">-- เลือกรุ่น --</option>
-        </select>
-      </div>
-
-      <div class="form-group">
-        <label for="part-qty">จำนวน:</label>
-        <input type="number" id="part-qty" min="1" value="1" required />
-      </div>
-
-      <div class="btn-group">
-        <button type="submit" class="btn btn-primary">
-          <i class="fas fa-truck"></i> ขอเบิก
-        </button>
-      </div>
-    </form>
-  </div>
-</div>
-</div>
-    <div class="btn-group">
-        <button id="cancel-job-btn" class="btn btn-cancel">
-            <i class="fas fa-ban"></i> ยกเลิกงานซ่อม
-        </button>
     </div>
+    <!-- ปิด card -->
 
-</div> <!-- ปิด manage-section -->
-
-<hr>
-
-<h3 class="section-header">
-    <i class="fas fa-list"></i> รายการอะไหล่ที่ใช้
-</h3>
-
-<div id="parts-list"></div>
+  </div>
+  <!-- ปิด container -->
 
 <script>
 /* ==========================================================
    manage_job.html — PRODUCTION READY
-========================================================== */
+   ========================================================== */
+
 
 /* =========================
    CONFIG
 ========================= */
+
 const API_BASE = "/api";
 const token = localStorage.getItem("token");
 
@@ -592,16 +1027,26 @@ const headers = {
   Authorization: `Bearer ${token}`
 };
 
+
 /* =========================
    PROFILE
 ========================= */
+
 async function loadProfile() {
+
   const userId = localStorage.getItem("userId");
+
   if (!userId) return;
 
-  const res = await fetch(`${API_BASE}/employees/${userId}/profile`, {
-    headers: { Authorization: `Bearer ${token}` }
-  });
+  const res = await fetch(
+    `${API_BASE}/employees/${userId}/profile`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    }
+  );
+
   if (!res.ok) return;
 
   const user = await res.json();
@@ -617,20 +1062,34 @@ async function loadProfile() {
   }
 
   if (document.getElementById("profileRole")) {
-    document.getElementById("profileRole").textContent = user.role;
+    document.getElementById("profileRole").textContent =
+      user.role;
   }
 }
+
 
 /* =========================
    UTILS
 ========================= */
+
 function formatInputDate(d) {
-  return d ? new Date(d).toISOString().slice(0, 10) : "";
+
+  return d
+    ? new Date(d).toISOString().slice(0, 10)
+    : "";
 }
+
+
 function formatTH(d) {
-  return d ? new Date(d).toLocaleDateString("th-TH") : "-";
+
+  return d
+    ? new Date(d).toLocaleDateString("th-TH")
+    : "-";
 }
+
+
 function statusBadgeClass(status) {
+
   return {
     "รับเครื่อง": "new",
     "กำลังซ่อม": "in_progress",
@@ -640,167 +1099,344 @@ function statusBadgeClass(status) {
   }[status] || "new";
 }
 
+
 /* =========================
    STATE
 ========================= */
+
 let currentJob = null;
 let stockList = [];
+
 
 /* =========================
    FETCH JOB
 ========================= */
+
 function getJobId() {
+
   return new URLSearchParams(location.search).get("id");
 }
 
+
 async function fetchJob() {
+
   const jobId = getJobId();
 
   if (!jobId) {
+
     alert("ไม่พบ Job ID");
+
     location.replace("employee_dashboard.html");
+
     return;
   }
 
-  const res = await fetch(`${API_BASE}/jobs/${jobId}`, {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem("token")}`
+
+  const res = await fetch(
+    `${API_BASE}/jobs/${jobId}`,
+    {
+      headers: {
+        Authorization:
+          `Bearer ${localStorage.getItem("token")}`
+      }
     }
-  });
+  );
+
 
   if (!res.ok) {
+
     alert("ไม่พบงานซ่อม");
+
     location.replace("employee_dashboard.html");
+
     return;
   }
+
 
   currentJob = await res.json();
 
-renderJob();
-renderParts();
-lockJobIfClosed();
+
+  renderJob();
+
+  renderParts();
+
+  lockJobIfClosed();
 }
+
+
 /* =========================
    FETCH STOCK
 ========================= */
+
 async function fetchStock() {
-  const res = await fetch(`${API_BASE}/stocks`, { headers });
+
+  const res = await fetch(
+    `${API_BASE}/stocks`,
+    {
+      headers
+    }
+  );
+
   stockList = await res.json();
 
-  const nameSel = document.getElementById("part-name");
-  const modelSel = document.getElementById("part-model");
+
+  const nameSel =
+    document.getElementById("part-name");
+
+  const modelSel =
+    document.getElementById("part-model");
+
+
   if (!nameSel || !modelSel) return;
 
-  const names = [...new Set(stockList.map(s => s.name))];
-  nameSel.innerHTML = `<option value="">-- เลือกอะไหล่ --</option>`;
-  names.forEach(n => nameSel.innerHTML += `<option>${n}</option>`);
+
+  const names =
+    [...new Set(stockList.map(s => s.name))];
+
+
+  nameSel.innerHTML =
+    `<option value="">-- เลือกอะไหล่ --</option>`;
+
+
+  names.forEach(n => {
+
+    nameSel.innerHTML +=
+      `<option>${n}</option>`;
+  });
+
 
   nameSel.onchange = e => {
-    modelSel.innerHTML = `<option value="">-- เลือกรุ่น --</option>`;
-    const models = stockList.filter(
-      s => s.name === e.target.value && s.quantity > 0
-    );
-    if (!models.length) return (modelSel.disabled = true);
+
+    modelSel.innerHTML =
+      `<option value="">-- เลือกรุ่น --</option>`;
+
+
+    const models =
+      stockList.filter(
+        s =>
+          s.name === e.target.value &&
+          s.quantity > 0
+      );
+
+
+    if (!models.length) {
+
+      modelSel.disabled = true;
+
+      return;
+    }
+
 
     models.forEach(m => {
+
       modelSel.innerHTML += `
         <option value="${m._id}">
           ${m.model} (คงเหลือ ${m.quantity})
-        </option>`;
+        </option>
+      `;
     });
+
+
     modelSel.disabled = false;
   };
 }
 
+
 /* =========================
    RENDER JOB
 ========================= */
+
 function renderJob() {
-  const div = document.getElementById("job-details");
+
+  const div =
+    document.getElementById("job-details");
+
   if (!div) return;
 
+
   div.innerHTML = `
-  <div><strong>ลูกค้า:</strong> ${currentJob.customerName}</div>
-  <div><strong>อุปกรณ์:</strong> ${currentJob.deviceType} ${currentJob.deviceModel}</div>
-  <div><strong>อาการ:</strong> ${currentJob.symptom}</div>
-  <div>
-    <strong>สถานะ:</strong>
-    <span class="badge ${statusBadgeClass(currentJob.status)}">
-      ${currentJob.status}
-    </span>
-  </div>
-  <div><strong>วันที่รับ:</strong> ${formatTH(currentJob.receivedDate)}</div>
-  <div><strong>ราคา:</strong> ${currentJob.priceQuoted || "-"} บาท</div>
-  <div><strong>ประเภทงาน:</strong> ${currentJob.jobType}</div>
-  
-
-<div class="action-buttons-row">
-
-  <!-- ส่วนดูใบรับเครื่อง -->
-  <div>
-    <a
-      href="receipt.html?id=${currentJob._id}"
-      target="_blank"
-      class="btn-receipt"
-    >
-      <i class="fas fa-file-pdf"></i> ดูใบรับเครื่อง
-    </a>
-  </div>
-
-  <!-- ส่วนส่งกลับซ่อม -->
-  <div id="return-repair-section" style="display:none;">
-    <div class="btn-group">
-      <button
-        id="return-repair-btn"
-        type="button"
-        class="btn btn-approve"
-      >
-        <i class="fas fa-rotate-left"></i>
-        ส่งกลับซ่อม
-      </button>
+    <div>
+      <strong>ลูกค้า:</strong>
+      ${currentJob.customerName}
     </div>
-  </div>
 
-</div>
-`;
+    <div>
+      <strong>อุปกรณ์:</strong>
+      ${currentJob.deviceType}
+      ${currentJob.deviceModel}
+    </div>
 
-  document.getElementById("received-date").value =
-    formatInputDate(currentJob.receivedDate);
-  document.getElementById("start-date").value =
-    formatInputDate(currentJob.startDate);
-  document.getElementById("finish-date").value =
-    formatInputDate(currentJob.finishDate);
-  document.getElementById("new-status").value = currentJob.status;
-  document.getElementById("new-price").value =
-  currentJob.priceQuoted ?? "";
-  document.getElementById("new-job-type").value = currentJob.jobType || "";
+    <div>
+      <strong>อาการ:</strong>
+      ${currentJob.symptom}
+    </div>
+
+    <div>
+      <strong>สถานะ:</strong>
+
+      <span class="badge ${statusBadgeClass(currentJob.status)}">
+        ${currentJob.status}
+      </span>
+    </div>
+
+    <div>
+      <strong>วันที่รับ:</strong>
+      ${formatTH(currentJob.receivedDate)}
+    </div>
+
+    <div>
+      <strong>ราคา:</strong>
+      ${currentJob.priceQuoted || "-"} บาท
+    </div>
+
+    <div>
+      <strong>ประเภทงาน:</strong>
+      ${currentJob.jobType}
+    </div>
+  `;
+
+
+  /* ==========================================
+     ตั้งลิงก์ใบรับเครื่อง
+     ========================================== */
+
+  const receiptBtn =
+    document.getElementById("receipt-btn");
+
+
+  if (receiptBtn) {
+
+    receiptBtn.href =
+      `receipt.html?id=${currentJob._id}`;
+  }
+
+
+  /* ==========================================
+     เติมข้อมูลในฟอร์ม
+     ========================================== */
+
+  const receivedDate =
+    document.getElementById("received-date");
+
+  if (receivedDate) {
+
+    receivedDate.value =
+      formatInputDate(currentJob.receivedDate);
+  }
+
+
+  const startDate =
+    document.getElementById("start-date");
+
+  if (startDate) {
+
+    startDate.value =
+      formatInputDate(currentJob.startDate);
+  }
+
+
+  const finishDate =
+    document.getElementById("finish-date");
+
+  if (finishDate) {
+
+    finishDate.value =
+      formatInputDate(currentJob.finishDate);
+  }
+
+
+  const newStatus =
+    document.getElementById("new-status");
+
+  if (newStatus) {
+
+    newStatus.value =
+      currentJob.status;
+  }
+
+
+  const newPrice =
+    document.getElementById("new-price");
+
+  if (newPrice) {
+
+    newPrice.value =
+      currentJob.priceQuoted ?? "";
+  }
+
+
+  const newJobType =
+    document.getElementById("new-job-type");
+
+  if (newJobType) {
+
+    newJobType.value =
+      currentJob.jobType || "";
+  }
 }
+
 
 /* =========================
    UPDATE HELPERS
 ========================= */
-async function updateJob(body, successMessage = "บันทึกข้อมูลเรียบร้อยแล้ว") {
+
+async function updateJob(
+  body,
+  successMessage = "บันทึกข้อมูลเรียบร้อยแล้ว"
+) {
+
   if (!currentJob || !currentJob._id) {
+
     alert("ไม่พบ Job ID");
+
     return false;
   }
 
-  const res = await fetch(`${API_BASE}/jobs/${currentJob._id}`, {
-    method: "PUT",
-    headers,
-    body: JSON.stringify(body)
-  });
 
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    alert(err.message || "อัปเดตงานไม่สำเร็จ");
+  try {
+
+    const res = await fetch(
+      `${API_BASE}/jobs/${currentJob._id}`,
+      {
+        method: "PUT",
+        headers,
+        body: JSON.stringify(body)
+      }
+    );
+
+
+    if (!res.ok) {
+
+      const err =
+        await res.json().catch(() => ({}));
+
+      alert(
+        err.message ||
+        err.error ||
+        "อัปเดตงานไม่สำเร็จ"
+      );
+
+      return false;
+    }
+
+
+    await fetchJob();
+
+
+    alert("✅ " + successMessage);
+
+    return true;
+
+  } catch (err) {
+
+    console.error(err);
+
+    alert(
+      "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"
+    );
+
     return false;
   }
-
-  await fetchJob();
-
-  alert("✅ " + successMessage);
-  return true;
 }
 
 
@@ -808,426 +1444,900 @@ async function updateJob(body, successMessage = "บันทึกข้อม�
    EVENTS
 ========================= */
 
-// ✅ อัปเดตสถานะ
-document.getElementById("status-form")?.addEventListener("submit", async e => {
-  e.preventDefault();
 
-  await updateJob(
-    { status: document.getElementById("new-status").value },
-    "อัปเดตสถานะเรียบร้อยแล้ว"
-  );
-});
+/* ===== อัปเดตสถานะ ===== */
 
-// ✅ อัปเดตวันที่
-document.getElementById("date-form")?.addEventListener("submit", async e => {
-  e.preventDefault();
+document
+  .getElementById("status-form")
+  ?.addEventListener(
+    "submit",
+    async e => {
 
-  await updateJob({
-   receivedDate: document.getElementById("received-date").value || null,
-  startDate: document.getElementById("start-date").value || null,
-  finishDate: document.getElementById("finish-date").value || null
-  }, "บันทึกวันที่เรียบร้อยแล้ว");
-});
+      e.preventDefault();
 
-// ✅ อัปเดตราคา
-document.getElementById("price-form")?.addEventListener("submit", async e => {
-  e.preventDefault();
 
-  const priceInput = document.getElementById("new-price").value;
-  const price = Number(priceInput);
-
-  await updateJob({
-    priceQuoted: isNaN(price) ? 0 : price
-  }, "บันทึกราคาเรียบร้อยแล้ว");
-});
-
-// ✅ ปิดงาน
-document.getElementById("approve-price-btn")?.addEventListener("click", async () => {
-  if (!confirm("ยืนยันปิดงาน?")) return;
-
-  const success = await updateJob(
-    { status: "ซ่อมเสร็จ" },
-    "ปิดงานเรียบร้อยแล้ว"
+      await updateJob(
+        {
+          status:
+            document.getElementById(
+              "new-status"
+            ).value
+        },
+        "อัปเดตสถานะเรียบร้อยแล้ว"
+      );
+    }
   );
 
-  if (success) {
-    window.location.href = "technician_jobs.html";
-  }
-});
 
-// ✅ ยกเลิกงาน
-document.getElementById("cancel-job-btn")?.addEventListener("click", async () => {
-  if (!confirm("ยืนยันการยกเลิกงานนี้?")) return;
+/* ===== อัปเดตวันที่ ===== */
 
-  const success = await updateJob(
-    { status: "ยกเลิก" },
-    "ยกเลิกงานเรียบร้อยแล้ว"
+document
+  .getElementById("date-form")
+  ?.addEventListener(
+    "submit",
+    async e => {
+
+      e.preventDefault();
+
+
+      await updateJob(
+        {
+          receivedDate:
+            document.getElementById(
+              "received-date"
+            ).value || null,
+
+          startDate:
+            document.getElementById(
+              "start-date"
+            ).value || null,
+
+          finishDate:
+            document.getElementById(
+              "finish-date"
+            ).value || null
+        },
+        "บันทึกวันที่เรียบร้อยแล้ว"
+      );
+    }
   );
 
-  if (success) {
-    window.location.href = "technician_jobs.html";
-  }
-});
 
-// ✅ แก้ประเภทงาน
-document.getElementById("job-type-form")?.addEventListener("submit", async e => {
-  e.preventDefault();
+/* ===== อัปเดตราคา ===== */
 
-  const newType = document.getElementById("new-job-type").value;
+document
+  .getElementById("price-form")
+  ?.addEventListener(
+    "submit",
+    async e => {
 
-  if (!newType) {
-    alert("กรุณาเลือกประเภทงาน");
-    return;
-  }
+      e.preventDefault();
 
-  await updateJob(
-    { jobType: newType },
-    "บันทึกประเภทงานเรียบร้อยแล้ว"
+
+      const priceInput =
+        document.getElementById(
+          "new-price"
+        ).value;
+
+
+      const price =
+        Number(priceInput);
+
+
+      await updateJob(
+        {
+          priceQuoted:
+            isNaN(price)
+              ? 0
+              : price
+        },
+        "บันทึกราคาเรียบร้อยแล้ว"
+      );
+    }
   );
-});
+
+
+/* ===== ปิดงาน ===== */
+
+document
+  .getElementById("approve-price-btn")
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      if (!confirm("ยืนยันปิดงาน?")) {
+        return;
+      }
+
+
+      const success =
+        await updateJob(
+          {
+            status: "ซ่อมเสร็จ"
+          },
+          "ปิดงานเรียบร้อยแล้ว"
+        );
+
+
+      if (success) {
+
+        window.location.href =
+          "technician_jobs.html";
+      }
+    }
+  );
+
+
+/* ===== ยกเลิกงาน ===== */
+
+document
+  .getElementById("cancel-job-btn")
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      if (
+        !confirm(
+          "ยืนยันการยกเลิกงานนี้?"
+        )
+      ) {
+        return;
+      }
+
+
+      const success =
+        await updateJob(
+          {
+            status: "ยกเลิก"
+          },
+          "ยกเลิกงานเรียบร้อยแล้ว"
+        );
+
+
+      if (success) {
+
+        window.location.href =
+          "technician_jobs.html";
+      }
+    }
+  );
+
+
+/* ===== แก้ประเภทงาน ===== */
+
+document
+  .getElementById("job-type-form")
+  ?.addEventListener(
+    "submit",
+    async e => {
+
+      e.preventDefault();
+
+
+      const newType =
+        document.getElementById(
+          "new-job-type"
+        ).value;
+
+
+      if (!newType) {
+
+        alert("กรุณาเลือกประเภทงาน");
+
+        return;
+      }
+
+
+      await updateJob(
+        {
+          jobType: newType
+        },
+        "บันทึกประเภทงานเรียบร้อยแล้ว"
+      );
+    }
+  );
+
+
+/* ===== เบิกอะไหล่ ===== */
 
 document
   .getElementById("part-form")
-  ?.addEventListener("submit", async (e) => {
-    e.preventDefault();
+  ?.addEventListener(
+    "submit",
+    async e => {
 
-    if (!currentJob || !currentJob._id) {
-      alert("ไม่พบ Job ID");
-      return;
-    }
+      e.preventDefault();
 
-    const partId = document.getElementById("part-model").value;
-    const qty = Number(document.getElementById("part-qty").value);
 
-    if (!partId) {
-      alert("กรุณาเลือกอะไหล่และรุ่น");
-      return;
-    }
+      if (
+        !currentJob ||
+        !currentJob._id
+      ) {
 
-    if (qty <= 0) {
-      alert("จำนวนต้องมากกว่า 0");
-      return;
-    }
+        alert("ไม่พบ Job ID");
 
-    const res = await fetch(
-  `${API_BASE}/jobs/${currentJob._id}/use-part`,
-  {
-    method: "POST",
-    headers,
-    body: JSON.stringify({
-      stockId: partId,
-      quantity: qty
-    })
-  }
-    );
+        return;
+      }
 
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      alert(err.message || "ขอเบิกอะไหล่ไม่สำเร็จ");
-      return;
-    }
 
-    alert("ขอเบิกอะไหล่เรียบร้อยแล้ว");
+      const partId =
+        document.getElementById(
+          "part-model"
+        ).value;
 
-    // reset ฟอร์ม
-    document.getElementById("part-form").reset();
-    document.getElementById("part-model").disabled = true;
 
-    // โหลดงานใหม่ (อัปเดตรายการอะไหล่ที่ใช้)
-    await fetchJob();
-  });
-/* ===== Accordion Toggle ===== */
-document.addEventListener("click", function(e){
-  const header = e.target.closest(".accordion-header");
-  if(!header) return;
+      const qty =
+        Number(
+          document.getElementById(
+            "part-qty"
+          ).value
+        );
 
-  const item = header.parentElement;
 
-  // ปิดอันอื่นก่อน
-  document.querySelectorAll(".accordion-item").forEach(el=>{
-    if(el !== item) el.classList.remove("active");
-  });
-
-  item.classList.toggle("active");
-});
-function toggleSection(header) {
-  const item = header.parentElement;
-  item.classList.toggle("active");
-}
-function renderParts() {
-  const list = document.getElementById("parts-list");
-  if (!list) return;
-
-  if (!currentJob.usedParts || currentJob.usedParts.length === 0) {
-    list.innerHTML = `
-      <div style="color:#999;text-align:center;padding:10px">
-        ยังไม่มีการเบิกอะไหล่
-      </div>`;
-    return;
-  }
-
-  list.innerHTML = currentJob.usedParts.map(p => `
-    <div class="history-item">
-      <div>
-        <strong>${p.name || "-"}</strong>
-        (${p.model || "-"})
-        <br>
-        จำนวน: ${p.quantity}
-      </div>
-      <div>
-        ${p.usedAt ? new Date(p.usedAt).toLocaleDateString("th-TH") : ""}
-      </div>
-    </div>
-  `).join("");
-}
-
-function lockJobIfClosed() {
-
-  if (!currentJob) return;
-
-  const manageSection =
-    document.getElementById("manage-section");
-
-  const returnSection =
-    document.getElementById("return-repair-section");
-
-  const role =
-    localStorage.getItem("role");
-
-
-  // ==========================================
-  // งานซ่อมเสร็จ
-  // ==========================================
-
-  if (currentJob.status === "ซ่อมเสร็จ") {
-
-    // ยังแสดงส่วน manage เพื่อให้เห็นปุ่มส่งกลับซ่อม
-    if (manageSection) {
-      manageSection.style.display = "block";
-    }
-
-    // ซ่อนส่วนแก้ไขทั้งหมด
-    document
-      .querySelectorAll(
-        "#manage-section .accordion-item, " +
-        "#manage-section > hr, " +
-        "#cancel-job-btn"
-      )
-      .forEach(el => {
-
-        el.style.display = "none";
-
-      });
-
-
-    // Staff เท่านั้นที่เห็นปุ่ม
-    if (returnSection) {
-
-      returnSection.style.display =
-        role === "staff"
-          ? "block"
-          : "none";
-
-    }
-
-    return;
-  }
-
-
-  // ==========================================
-  // งานยกเลิก
-  // ==========================================
-
-  if (currentJob.status === "ยกเลิก") {
-
-    if (manageSection) {
-      manageSection.style.display = "none";
-    }
-
-    return;
-  }
-
-
-  // ==========================================
-  // งานปกติ
-  // ==========================================
-
-  if (returnSection) {
-
-    returnSection.style.display = "none";
-
-  }
-
-}
-// ==================================================
-// ส่งงานที่ซ่อมเสร็จแล้วกลับมาซ่อม
-// Staff เท่านั้น
-// ==================================================
-
-document
-  .getElementById("return-repair-btn")
-  ?.addEventListener("click", async () => {
-
-    if (
-      !currentJob ||
-      currentJob.status !== "ซ่อมเสร็จ"
-    ) {
-      return;
-    }
-
-
-    const reason = prompt(
-      "กรุณาระบุเหตุผลที่ส่งกลับซ่อม:"
-    );
-
-
-    // กดยกเลิก
-    if (reason === null) {
-      return;
-    }
-
-
-    // ไม่กรอกเหตุผล
-    if (!reason.trim()) {
-
-      alert("กรุณาระบุเหตุผล");
-
-      return;
-    }
-
-
-    // ยืนยัน
-    if (
-      !confirm(
-        "ยืนยันส่งงานกลับซ่อม?\n\n" +
-        "เหตุผล: " +
-        reason.trim()
-      )
-    ) {
-
-      return;
-    }
-
-
-    try {
-
-      const res = await fetch(
-        `${API_BASE}/jobs/${currentJob._id}/return-repair`,
-        {
-          method: "PUT",
-
-          headers,
-
-          body: JSON.stringify({
-            reason: reason.trim()
-          })
-        }
-      );
-
-
-      const data =
-        await res.json().catch(() => ({}));
-
-
-      if (!res.ok) {
+      if (!partId) {
 
         alert(
-          data.message ||
-          "ไม่สามารถส่งงานกลับซ่อมได้"
+          "กรุณาเลือกอะไหล่และรุ่น"
         );
 
         return;
       }
 
 
-      alert(
-        "✅ ส่งงานกลับซ่อมเรียบร้อยแล้ว"
+      if (qty <= 0) {
+
+        alert(
+          "จำนวนต้องมากกว่า 0"
+        );
+
+        return;
+      }
+
+
+      try {
+
+        const res =
+          await fetch(
+            `${API_BASE}/jobs/${currentJob._id}/use-part`,
+            {
+              method: "POST",
+              headers,
+              body: JSON.stringify({
+                stockId: partId,
+                quantity: qty
+              })
+            }
+          );
+
+
+        if (!res.ok) {
+
+          const err =
+            await res.json()
+              .catch(() => ({}));
+
+
+          alert(
+            err.message ||
+            err.error ||
+            "ขอเบิกอะไหล่ไม่สำเร็จ"
+          );
+
+          return;
+        }
+
+
+        alert(
+          "ขอเบิกอะไหล่เรียบร้อยแล้ว"
+        );
+
+
+        /* reset ฟอร์ม */
+
+        document
+          .getElementById(
+            "part-form"
+          )
+          .reset();
+
+
+        document
+          .getElementById(
+            "part-model"
+          )
+          .disabled = true;
+
+
+        /* โหลดงานใหม่ */
+
+        await fetchJob();
+
+      } catch (err) {
+
+        console.error(err);
+
+        alert(
+          "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"
+        );
+      }
+    }
+  );
+
+
+/* =========================
+   ACCORDION TOGGLE
+========================= */
+
+document.addEventListener(
+  "click",
+  function(e) {
+
+    const header =
+      e.target.closest(
+        ".accordion-header"
       );
 
 
-      // โหลดข้อมูลงานใหม่
-      await fetchJob();
+    if (!header) return;
 
-    } catch (err) {
 
-      console.error(err);
+    const item =
+      header.parentElement;
 
-      alert(
-        "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"
-      );
 
+    /* ปิดอันอื่นก่อน */
+
+    document
+      .querySelectorAll(
+        ".accordion-item"
+      )
+      .forEach(el => {
+
+        if (el !== item) {
+
+          el.classList.remove(
+            "active"
+          );
+        }
+      });
+
+
+    item.classList.toggle(
+      "active"
+    );
+  }
+);
+
+
+function toggleSection(header) {
+
+  const item =
+    header.parentElement;
+
+
+  item.classList.toggle(
+    "active"
+  );
+}
+
+
+/* =========================
+   RENDER PARTS
+========================= */
+
+function renderParts() {
+
+  const list =
+    document.getElementById(
+      "parts-list"
+    );
+
+
+  if (!list) return;
+
+
+  if (
+    !currentJob.usedParts ||
+    currentJob.usedParts.length === 0
+  ) {
+
+    list.innerHTML = `
+      <div
+        style="
+          color:#999;
+          text-align:center;
+          padding:10px
+        "
+      >
+        ยังไม่มีการเบิกอะไหล่
+      </div>
+    `;
+
+    return;
+  }
+
+
+  list.innerHTML =
+    currentJob.usedParts
+      .map(p => `
+        <div class="history-item">
+
+          <div>
+
+            <strong>
+              ${p.name || "-"}
+            </strong>
+
+            (${p.model || "-"})
+
+            <br>
+
+            จำนวน:
+            ${p.quantity}
+
+          </div>
+
+
+          <div>
+
+            ${
+              p.usedAt
+                ? new Date(
+                    p.usedAt
+                  ).toLocaleDateString(
+                    "th-TH"
+                  )
+                : ""
+            }
+
+          </div>
+
+        </div>
+      `)
+      .join("");
+}
+
+
+/* ==================================================
+   LOCK JOB IF CLOSED
+   ================================================== */
+
+function lockJobIfClosed() {
+
+  if (!currentJob) return;
+
+
+  const manageSection =
+    document.getElementById(
+      "manage-section"
+    );
+
+
+  const returnSection =
+    document.getElementById(
+      "return-repair-section"
+    );
+
+
+  const role =
+    localStorage.getItem(
+      "role"
+    );
+
+
+  const controls =
+    document.querySelectorAll(
+      "#manage-section .accordion-item, " +
+      "#manage-section > hr, " +
+      "#cancel-job-btn"
+    );
+
+
+  /* ==========================================
+     งานซ่อมเสร็จ
+  ========================================== */
+
+  if (
+    currentJob.status ===
+    "ซ่อมเสร็จ"
+  ) {
+
+    /* แสดง manage-section */
+
+    if (manageSection) {
+
+      manageSection.style.display =
+        "block";
     }
 
-});
+
+    /* ซ่อนส่วนแก้ไขทั้งหมด */
+
+    controls.forEach(el => {
+
+      el.style.display =
+        "none";
+    });
+
+
+    /* Staff เท่านั้น */
+
+    if (returnSection) {
+
+      returnSection.style.display =
+        role === "staff"
+          ? "block"
+          : "none";
+    }
+
+
+    return;
+  }
+
+
+  /* ==========================================
+     งานยกเลิก
+  ========================================== */
+
+  if (
+    currentJob.status ===
+    "ยกเลิก"
+  ) {
+
+    if (manageSection) {
+
+      manageSection.style.display =
+        "none";
+    }
+
+
+    if (returnSection) {
+
+      returnSection.style.display =
+        "none";
+    }
+
+
+    return;
+  }
+
+
+  /* ==========================================
+     งานปกติ
+  ========================================== */
+
+  if (manageSection) {
+
+    manageSection.style.display =
+      "block";
+  }
+
+
+  /* คืนค่าการแสดงผลของปุ่ม
+     หลังจากงานถูกส่งกลับมาซ่อม */
+
+  controls.forEach(el => {
+
+    el.style.display = "";
+  });
+
+
+  /* งานปกติไม่แสดง
+     ส่งกลับซ่อม */
+
+  if (returnSection) {
+
+    returnSection.style.display =
+      "none";
+  }
+}
+
+
+/* ==================================================
+   ส่งงานที่ซ่อมเสร็จแล้วกลับมาซ่อม
+   Staff เท่านั้น
+================================================== */
+
+document
+  .getElementById(
+    "return-repair-btn"
+  )
+  ?.addEventListener(
+    "click",
+    async () => {
+
+      /* ตรวจสอบงาน */
+
+      if (
+        !currentJob ||
+        currentJob.status !==
+          "ซ่อมเสร็จ"
+      ) {
+
+        return;
+      }
+
+
+      /* ตรวจสอบ Role */
+
+      const role =
+        localStorage.getItem(
+          "role"
+        );
+
+
+      if (role !== "staff") {
+
+        alert(
+          "คุณไม่มีสิทธิ์ส่งงานกลับซ่อม"
+        );
+
+        return;
+      }
+
+
+      /* ขอเหตุผล */
+
+      const reason =
+        prompt(
+          "กรุณาระบุเหตุผลที่ส่งกลับซ่อม:"
+        );
+
+
+      /* กดยกเลิก */
+
+      if (reason === null) {
+
+        return;
+      }
+
+
+      /* ไม่กรอกเหตุผล */
+
+      if (!reason.trim()) {
+
+        alert(
+          "กรุณาระบุเหตุผล"
+        );
+
+        return;
+      }
+
+
+      /* ยืนยัน */
+
+      if (
+        !confirm(
+          "ยืนยันส่งงานกลับซ่อม?\n\n" +
+          "เหตุผล: " +
+          reason.trim()
+        )
+      ) {
+
+        return;
+      }
+
+
+      try {
+
+        const res =
+          await fetch(
+            `${API_BASE}/jobs/${currentJob._id}/return-repair`,
+            {
+              method: "PUT",
+              headers,
+              body: JSON.stringify({
+                reason:
+                  reason.trim()
+              })
+            }
+          );
+
+
+        const data =
+          await res.json()
+            .catch(() => ({}));
+
+
+        if (!res.ok) {
+
+          alert(
+            data.message ||
+            data.error ||
+            "ไม่สามารถส่งงานกลับซ่อมได้"
+          );
+
+          return;
+        }
+
+
+        alert(
+          "✅ ส่งงานกลับซ่อมเรียบร้อยแล้ว"
+        );
+
+
+        /* โหลดข้อมูลงานใหม่ */
+
+        await fetchJob();
+
+      } catch (err) {
+
+        console.error(err);
+
+        alert(
+          "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"
+        );
+      }
+    }
+  );
+
 
 /* =========================
    INIT
 ========================= */
-document.addEventListener("DOMContentLoaded", async () => {
-  await loadProfile();
-  await fetchStock();
-  await fetchJob();
 
-  lockJobIfClosed(); 
-});
+document.addEventListener(
+  "DOMContentLoaded",
+  async () => {
 
-function toggleProfile(){
-  document.getElementById("profileDropdown")
-          .classList.toggle("show");
+    await loadProfile();
+
+    await fetchStock();
+
+    await fetchJob();
+
+    lockJobIfClosed();
+  }
+);
+
+
+/* =========================
+   PROFILE DROPDOWN
+========================= */
+
+function toggleProfile() {
+
+  document
+    .getElementById(
+      "profileDropdown"
+    )
+    .classList.toggle(
+      "show"
+    );
 }
 
-document.addEventListener("click", function(e){
-  const menu = document.getElementById("profileMenu");
-  if(!menu.contains(e.target)){
-    document.getElementById("profileDropdown")
-            .classList.remove("show");
+
+document.addEventListener(
+  "click",
+  function(e) {
+
+    const menu =
+      document.getElementById(
+        "profileMenu"
+      );
+
+
+    if (
+      menu &&
+      !menu.contains(e.target)
+    ) {
+
+      document
+        .getElementById(
+          "profileDropdown"
+        )
+        .classList.remove(
+          "show"
+        );
+    }
   }
-});
-// =============================
-// UPLOAD AVATAR
-// =============================
-async function uploadAvatar(event){
+);
 
-  const file = event.target.files[0];
-  if(!file) return;
 
-  const token = localStorage.getItem("token");
+/* =============================
+   UPLOAD AVATAR
+============================= */
 
-  const formData = new FormData();
-  formData.append("avatar", file);
+async function uploadAvatar(event) {
 
-  try{
+  const file =
+    event.target.files[0];
 
-    const res = await fetch("/api/employees/profile/avatar",{
-      method:"POST",
-      headers:{
-        Authorization:`Bearer ${token}`
-      },
-      body:formData
-    });
 
-    const data = await res.json();
+  if (!file) return;
 
-    if(!res.ok){
-      alert(data.message || "อัปโหลดไม่สำเร็จ");
+
+  const token =
+    localStorage.getItem(
+      "token"
+    );
+
+
+  const formData =
+    new FormData();
+
+
+  formData.append(
+    "avatar",
+    file
+  );
+
+
+  try {
+
+    const res =
+      await fetch(
+        "/api/employees/profile/avatar",
+        {
+          method: "POST",
+
+          headers: {
+            Authorization:
+              `Bearer ${token}`
+          },
+
+          body: formData
+        }
+      );
+
+
+    const data =
+      await res.json();
+
+
+    if (!res.ok) {
+
+      alert(
+        data.message ||
+        "อัปโหลดไม่สำเร็จ"
+      );
+
       return;
     }
 
-    // เปลี่ยนรูปทันที
-    const avatarSmall = document.getElementById("profileAvatar");
-    const avatarLarge = document.getElementById("profileAvatarLarge");
 
-    if(avatarSmall) avatarSmall.src = data.avatar;
-    if(avatarLarge) avatarLarge.src = data.avatar;
+    /* เปลี่ยนรูปทันที */
 
-    alert("เปลี่ยนรูปโปรไฟล์เรียบร้อย");
+    const avatarSmall =
+      document.getElementById(
+        "profileAvatar"
+      );
 
-  }catch(err){
+
+    const avatarLarge =
+      document.getElementById(
+        "profileAvatarLarge"
+      );
+
+
+    if (avatarSmall) {
+
+      avatarSmall.src =
+        data.avatar;
+    }
+
+
+    if (avatarLarge) {
+
+      avatarLarge.src =
+        data.avatar;
+    }
+
+
+    alert(
+      "เปลี่ยนรูปโปรไฟล์เรียบร้อย"
+    );
+
+
+  } catch (err) {
+
     console.error(err);
-    alert("เกิดข้อผิดพลาด");
+
+    alert(
+      "เกิดข้อผิดพลาด"
+    );
   }
 }
-
 
 </script>
 </div>
