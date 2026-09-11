@@ -189,6 +189,11 @@
   from { opacity: 0; transform: translateY(-10px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+.required {
+    color: #e74c3c;
+    font-weight: 700;
+    margin-left: 3px;
+}
     </style>
 </head>
 
@@ -303,15 +308,15 @@
                         </div>
 
                         <div class="form-group">
-                            <label for="employee-id">เลขที่ใบเสร็จ/อ้างอิง:</label>
-                            <input type="text"id="employee-id"readonlyplaceholder="ระบบจะสร้างให้อัตโนมัติ"/>
+                            <label for="employee-id">เลขที่ใบรับงาน/อ้างอิง:</label>
+                            <input type="text" id="employee-id" readonly placeholder="ระบบจะสร้างให้อัตโนมัติ" />
                         </div>
                         <div class="form-group">
-                            <label for="customer-name">ชื่อ-นามสกุล:</label>
+                            <label for="customer-name">ชื่อ-นามสกุล <span class="required">*</span></label>
                             <input type="text" id="customer-name" required placeholder="กรอกชื่อลูกค้า" />
                         </div>
                         <div class="form-group">
-                            <label for="customer-phone">เบอร์โทรศัพท์:</label>
+                            <label for="customer-phone">เบอร์โทรศัพท์ <span class="required">*</span></label>
                             <input type="tel" id="customer-phone" required placeholder="เช่น 08x-xxx-xxxx" />
                         </div>
                         <div class="form-group">
@@ -325,7 +330,10 @@
                     <h3><i class="fas fa-laptop-code"></i> ข้อมูลเครื่องและอาการ</h3>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="device-type">ประเภทเครื่อง:</label>
+                            <label for="device-type">
+                                ประเภทเครื่อง: <span class="required">*</span>
+                            </label>
+
                             <select id="device-type" required>
                                 <option value="" disabled selected>--- เลือกประเภท ---</option>
                                 <option value="Laptop">โน้ตบุ๊ก (Laptop)</option>
@@ -334,20 +342,34 @@
                                 <option value="Monitor">หน้าจอ/อุปกรณ์ต่อพ่วง</option>
                                 <option value="Other">อื่นๆ</option>
                             </select>
+
+                            <!-- ช่องกรอกเมื่อเลือกอื่นๆ -->
+                            <div id="other-device-container" style="display: none; margin-top: 10px;">
+                                <label for="other-device">
+                                    ระบุประเภทเครื่อง:
+                                </label>
+                                <input
+                                    type="text"
+                                    id="other-device"
+                                    placeholder="กรุณาระบุประเภทเครื่อง"
+                                >
+                            </div>
                            <div class="form-group">
-                                <label for="assigned-tech">ผู้รับผิดชอบ (ช่าง):</label>
+                                <label for="assigned-tech">
+                                    ผู้รับผิดชอบ (ช่าง): <span class="required">*</span>
+                                </label>
                                     <select id="assigned-tech" required>
                                         <option value="" disabled selected>--- เลือกช่าง ---</option>
                                     </select>
                         </div>
                         </div>
                         <div class="form-group">
-                            <label for="device-model">ยี่ห้อ/รุ่น:</label>
+                            <label for="device-model">ยี่ห้อ/รุ่น: <span class="required">*</span></label>
                             <input type="text" id="device-model" required placeholder="ยี่ห้อ รุ่น (เช่น Dell Inspiron 15)" />
                         </div>
                     </div>
                     <div class="form-group full-width">
-                        <label for="symptom">อาการเสียที่แจ้ง:</label>
+                        <label for="symptom">อาการเสียที่แจ้ง: <span class="required">*</span></label>
                         <textarea id="symptom" rows="4" required placeholder="เช่น เปิดไม่ติด, จอแตก, ชาร์จไม่เข้า"></textarea>
                     </div>
                     <div class="form-group full-width">
@@ -360,11 +382,11 @@
                     <h3><i class="fas fa-file-invoice-dollar"></i> การเงินและกำหนดเวลา</h3>
                     <div class="form-grid">
                         <div class="form-group">
-                            <label for="price-quoted">ราคาที่แจ้งลูกค้า (บาท):</label>
+                            <label for="price-quoted">ราคาที่แจ้งลูกค้า (บาท): <span class="required">*</span></label>
                             <input type="number" id="price-quoted" step="1" min="0" placeholder="0" required />
                         </div>
                         <div class="form-group">
-                        <label for="received-date">วันที่รับเครื่อง:</label>
+                        <label for="received-date">วันที่รับเครื่อง: <span class="required">*</span></label>
                         <input type="date" id="received-date" required />
                         </div>
 
@@ -485,7 +507,9 @@ document.getElementById("new-job-form")?.addEventListener("submit", async e => {
     customerPhone: document.getElementById("customer-phone")?.value.trim(),
     customerAddress: document.getElementById("customer-address")?.value.trim() || null,
 
-    deviceType: document.getElementById("device-type")?.value,
+    deviceType:document.getElementById("device-type")?.value === "Other"
+        ? document.getElementById("other-device")?.value.trim()
+        : document.getElementById("device-type")?.value,
     deviceModel: document.getElementById("device-model")?.value.trim(),
     symptom: document.getElementById("symptom")?.value.trim(),
     accessory: document.getElementById("accessory")?.value.trim() || null,
@@ -656,6 +680,23 @@ async function uploadAvatar(event){
     alert("เกิดข้อผิดพลาด");
   }
 }
+const deviceTypeSelect = document.getElementById("device-type");
+const otherDeviceContainer = document.getElementById("other-device-container");
+const otherDevice = document.getElementById("other-device");
+
+deviceTypeSelect?.addEventListener("change", function () {
+
+    if (this.value === "Other") {
+        otherDeviceContainer.style.display = "block";
+        otherDevice.required = true;
+        otherDevice.focus();
+    } else {
+        otherDeviceContainer.style.display = "none";
+        otherDevice.required = false;
+        otherDevice.value = "";
+    }
+
+});
 // FIX: เดิมมีฟังก์ชัน loadProfile ซ้อนผิดตำแหน่งอยู่ข้างใน uploadAvatar
 // (วงเล็บปิดไม่ตรงตำแหน่ง ทำให้กลายเป็น local function ที่ไม่มีใครเรียกใช้)
 // ลบออกแล้ว เพราะมี loadProfile ตัวจริงที่ผูกกับ DOMContentLoaded อยู่แล้วด้านบน
