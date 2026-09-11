@@ -560,7 +560,22 @@
     ...
 
     <hr>
+<div id="return-repair-section" style="display:none;">
 
+  <div class="btn-group">
+
+    <button
+      id="return-repair-btn"
+      type="button"
+      class="btn btn-approve"
+    >
+      <i class="fas fa-rotate-left"></i>
+      ส่งกลับซ่อม
+    </button>
+
+  </div>
+
+</div>
     <div class="btn-group">
         <button id="cancel-job-btn" class="btn btn-cancel">
             <i class="fas fa-ban"></i> ยกเลิกงานซ่อม
@@ -971,16 +986,183 @@ function renderParts() {
 
 function lockJobIfClosed() {
 
-    if (!currentJob) return;
+  if (!currentJob) return;
 
-    if (
-        currentJob.status === "ซ่อมเสร็จ" ||
-        currentJob.status === "ยกเลิก"
-    ) {
-        document.getElementById("manage-section").style.display = "none";
+  const manageSection =
+    document.getElementById("manage-section");
+
+  const returnSection =
+    document.getElementById("return-repair-section");
+
+  const role =
+    localStorage.getItem("role");
+
+
+  // ==========================================
+  // งานซ่อมเสร็จ
+  // ==========================================
+
+  if (currentJob.status === "ซ่อมเสร็จ") {
+
+    // ยังแสดงส่วน manage เพื่อให้เห็นปุ่มส่งกลับซ่อม
+    if (manageSection) {
+      manageSection.style.display = "block";
     }
 
+    // ซ่อนส่วนแก้ไขทั้งหมด
+    document
+      .querySelectorAll(
+        "#manage-section .accordion-item, " +
+        "#manage-section > hr, " +
+        "#cancel-job-btn"
+      )
+      .forEach(el => {
+
+        el.style.display = "none";
+
+      });
+
+
+    // Staff เท่านั้นที่เห็นปุ่ม
+    if (returnSection) {
+
+      returnSection.style.display =
+        role === "staff"
+          ? "block"
+          : "none";
+
+    }
+
+    return;
+  }
+
+
+  // ==========================================
+  // งานยกเลิก
+  // ==========================================
+
+  if (currentJob.status === "ยกเลิก") {
+
+    if (manageSection) {
+      manageSection.style.display = "none";
+    }
+
+    return;
+  }
+
+
+  // ==========================================
+  // งานปกติ
+  // ==========================================
+
+  if (returnSection) {
+
+    returnSection.style.display = "none";
+
+  }
+
 }
+// ==================================================
+// ส่งงานที่ซ่อมเสร็จแล้วกลับมาซ่อม
+// Staff เท่านั้น
+// ==================================================
+
+document
+  .getElementById("return-repair-btn")
+  ?.addEventListener("click", async () => {
+
+    if (
+      !currentJob ||
+      currentJob.status !== "ซ่อมเสร็จ"
+    ) {
+      return;
+    }
+
+
+    const reason = prompt(
+      "กรุณาระบุเหตุผลที่ส่งกลับซ่อม:"
+    );
+
+
+    // กดยกเลิก
+    if (reason === null) {
+      return;
+    }
+
+
+    // ไม่กรอกเหตุผล
+    if (!reason.trim()) {
+
+      alert("กรุณาระบุเหตุผล");
+
+      return;
+    }
+
+
+    // ยืนยัน
+    if (
+      !confirm(
+        "ยืนยันส่งงานกลับซ่อม?\n\n" +
+        "เหตุผล: " +
+        reason.trim()
+      )
+    ) {
+
+      return;
+    }
+
+
+    try {
+
+      const res = await fetch(
+        `${API_BASE}/jobs/${currentJob._id}/return-repair`,
+        {
+          method: "PUT",
+
+          headers,
+
+          body: JSON.stringify({
+            reason: reason.trim()
+          })
+        }
+      );
+
+
+      const data =
+        await res.json().catch(() => ({}));
+
+
+      if (!res.ok) {
+
+        alert(
+          data.message ||
+          "ไม่สามารถส่งงานกลับซ่อมได้"
+        );
+
+        return;
+      }
+
+
+      alert(
+        "✅ ส่งงานกลับซ่อมเรียบร้อยแล้ว"
+      );
+
+
+      // โหลดข้อมูลงานใหม่
+      await fetchJob();
+
+    } catch (err) {
+
+      console.error(err);
+
+      alert(
+        "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้"
+      );
+
+    }
+
+});
+
 /* =========================
    INIT
 ========================= */

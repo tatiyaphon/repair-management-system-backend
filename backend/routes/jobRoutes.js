@@ -246,6 +246,79 @@ router.post("/", auth, async (req, res) => {
     });
   }
 });
+
+// ==================================================
+// PUT /api/jobs/:id/return-repair
+// ส่งงานที่ซ่อมเสร็จแล้วกลับมาซ่อมอีกครั้ง
+// Staff เท่านั้น
+// ==================================================
+router.put("/:id/return-repair", auth, async (req, res) => {
+  try {
+
+    // Staff เท่านั้น
+    if (req.user.role !== "staff") {
+      return res.status(403).json({
+        message: "เฉพาะ Staff เท่านั้นที่สามารถส่งกลับซ่อมได้"
+      });
+    }
+
+    const job = await Job.findById(req.params.id);
+
+    if (!job) {
+      return res.status(404).json({
+        message: "ไม่พบงานซ่อม"
+      });
+    }
+
+    // ต้องเป็นงานที่ซ่อมเสร็จแล้วเท่านั้น
+    if (job.status !== "ซ่อมเสร็จ") {
+      return res.status(400).json({
+        message: "สามารถส่งกลับซ่อมได้เฉพาะงานที่ซ่อมเสร็จแล้วเท่านั้น"
+      });
+    }
+
+    const reason =
+      String(req.body.reason || "ไม่ได้ระบุเหตุผล").trim();
+
+    // เปลี่ยนกลับเป็นกำลังซ่อม
+    job.status = "กำลังซ่อม";
+
+    // ล้างวันที่ซ่อมเสร็จ
+    job.finishDate = null;
+
+    await job.save();
+
+    // Activity Log
+    try {
+      await Activity.create({
+        userId: req.user.userId,
+        userName: req.user.userName || "Unknown",
+        action: "RETURN_REPAIR",
+        detail:
+          `ส่งงาน ${job.receiptNumber || "-"} กลับซ่อม ` +
+          `(สถานะ: ซ่อมเสร็จ → กำลังซ่อม) ` +
+          `เหตุผล: ${reason}`,
+        jobId: job._id,
+        ipAddress: req.ip
+      });
+    } catch (logErr) {
+      console.error("ACTIVITY LOG ERROR:", logErr);
+    }
+
+    res.json({
+      message: "ส่งงานกลับซ่อมเรียบร้อย",
+      job
+    });
+
+  } catch (err) {
+
+    console.error("RETURN REPAIR ERROR:", err);
+
+    res.status(500).json({
+      message: "ไม่สามารถส่งงานกลับซ่อมได้"
+    });
+  }
+});
 /* ==================================================
    PUT /api/jobs/:id
    อัปเดตข้อมูลงานซ่อม (สถานะ / วันที่ / ราคา)
@@ -258,10 +331,16 @@ router.put("/:id", auth, async (req, res) => {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
 
-    if (job.status === "ซ่อมเสร็จ" || job.status === "ยกเลิก") {
-    return res.status(400).json({
-        message: "งานนี้ถูกปิดแล้ว ไม่สามารถแก้ไขได้"
-    });
+    if (job.status === "ยกเลิก") {
+  return res.status(400).json({
+    message: "งานนี้ถูกยกเลิกแล้ว ไม่สามารถแก้ไขได้"
+  });
+}
+
+if (job.status === "ซ่อมเสร็จ") {
+  return res.status(400).json({
+    message: "งานนี้ซ่อมเสร็จแล้ว กรุณาใช้เมนูส่งกลับซ่อม"
+  });
 }
     // 🔒 ตรวจสิทธิ์
     if (
@@ -1130,5 +1209,6 @@ router.get("/:id", auth, async (req, res) => {
     res.status(500).json({ message: "ดึงข้อมูลงานไม่สำเร็จ" });
   }
 });
+
 
 module.exports = router;
