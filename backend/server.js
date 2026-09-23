@@ -151,11 +151,6 @@ app.use(
 );
 
 app.use(
-  "/api/customers",
-  require("./routes/customers")
-);
-
-app.use(
   "/api/stocks",
   stockRoutes
 );
