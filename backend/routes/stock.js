@@ -4,8 +4,10 @@ const Stock = require("../models/Stock");
 const verifyToken = require("../middleware/auth");
 
 /* ดึงทั้งหมด */
+// FIX: เพิ่ม verifyToken เพื่อให้ต้อง login ก่อนถึงจะดึงข้อมูลสต็อกได้
 router.get("/", verifyToken, async (_req, res) => {
   try {
+  
     res.set("Cache-Control", "no-store"); // กัน cache
     const stocks = await Stock.find();
     res.json(stocks);
@@ -16,6 +18,7 @@ router.get("/", verifyToken, async (_req, res) => {
 });
 
 /* เพิ่ม */
+// FIX: เพิ่ม verifyToken เพื่อให้ต้อง login ก่อนถึงจะเพิ่มสต็อกได้
 router.post("/", verifyToken, async (req, res) => {
   try {
     const item = await Stock.create(req.body);

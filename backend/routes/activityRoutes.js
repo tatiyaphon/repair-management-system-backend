@@ -4,9 +4,9 @@ const Activity = require("../models/ActivityLog");
 const verifyToken = require("../middleware/auth");
 const requireRole = require("../middleware/requireRole");
 
-/* =========================
-   GET ALL ACTIVITY (ADMIN ONLY)
-========================= */
+//=========================
+// GET ALL ACTIVITY (ADMIN ONLY)
+//=========================
 router.get("/", verifyToken, requireRole("staff"), async (req, res) => {
   try {
 
@@ -23,9 +23,9 @@ router.get("/", verifyToken, requireRole("staff"), async (req, res) => {
   }
 });
 
-/* =========================
-   CREATE ACTIVITY (INTERNAL USE)
-========================= */
+//=========================
+// CREATE ACTIVITY LOG
+//=========================
 router.post("/", verifyToken, async (req, res) => {
   try {
 
@@ -34,7 +34,7 @@ router.post("/", verifyToken, async (req, res) => {
     if (!action) {
       return res.status(400).json({ message: "action จำเป็นต้องระบุ" });
     }
-
+// 🔹 ถ้า req.user.userName ไม่มีค่า ให้ใช้ "Unknown" แทน
     const activity = await Activity.create({
       userId: req.user.userId,
       userName: req.user.userName || "Unknown",

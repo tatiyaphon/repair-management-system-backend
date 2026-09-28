@@ -1033,7 +1033,6 @@
    manage_job.html — PRODUCTION READY
    ========================================================== */
 
-
 /* =========================
    CONFIG
 ========================= */
@@ -1140,8 +1139,9 @@ function getJobId() {
 
   return new URLSearchParams(location.search).get("id");
 }
-
-
+//=========================
+// FETCH JOB
+//=========================
 async function fetchJob() {
 
   const jobId = getJobId();

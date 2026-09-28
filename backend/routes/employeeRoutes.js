@@ -25,15 +25,17 @@ const transporter = nodemailer.createTransport({
   family: 4
 });
 
-/* =====================================
-   GET /api/employees (admin)
-===================================== */
+//=============================
+// GET ALL EMPLOYEES (STAFF ONLY)
+// ดึงรายชื่อพนักงานทั้งหมด พร้อมสถานะออนไลน์ (online) หรือไม่
+// ดึงข้อมูลจาก mongoose field lastSeen ว่าเป็นเวลาไม่เกิน 2 นาทีหรือไม่
+//=============================
 router.get("/", verifyToken, requireRole("staff"), async (req, res) => {
   const employees = await Employee.find()
     .select("_id firstName lastName email role phone active avatar lastSeen");
 
   const now = Date.now();
-
+// 🔹 เพิ่มฟิลด์ isOnline ให้แต่ละพนักงาน โดยเช็คจาก lastSeen ว่าเป็นเวลาไม่เกิน 2 นาที
   const result = employees.map(emp => ({
     ...emp.toObject(),
     isOnline:
@@ -46,6 +48,7 @@ router.get("/", verifyToken, requireRole("staff"), async (req, res) => {
 
 /* =====================================
    GET /api/employees/tech
+    ดึงรายชื่อช่างซ่อมทั้งหมด (สำหรับ dropdown เลือกช่าง)
 ===================================== */
 router.get("/tech", verifyToken, async (req, res) => {
   try {
@@ -61,7 +64,8 @@ router.get("/tech", verifyToken, async (req, res) => {
 });
 
 /* =====================================
-   POST /api/employees (admin)
+   POST /api/employees (staff only)
+    เพิ่มพนักงานใหม่ (สร้างบัญชีผู้ใช้ใหม่)
 ===================================== */
 router.post("/", verifyToken, requireRole("staff"), async (req, res) => {
   try {
@@ -88,7 +92,7 @@ router.post("/", verifyToken, requireRole("staff"), async (req, res) => {
         message: "รูปแบบอีเมลไม่ถูกต้อง"
       });
     }
-
+// 🔹 ตรวจสอบว่ามีอีเมลนี้อยู่แล้วหรือไม่ (ไม่สนใจตัวพิมพ์เล็ก/ใหญ่)
     const exists = await Employee.findOne({
       email: { $regex: new RegExp(`^${email}$`, "i") }
     });
@@ -98,9 +102,9 @@ router.post("/", verifyToken, requireRole("staff"), async (req, res) => {
         message: "อีเมลนี้ถูกใช้แล้ว"
       });
     }
-
+// 🔹 เข้ารหัสรหัสผ่านก่อนบันทึกลง DB
     const hash = await bcrypt.hash(password, 10);
-
+// 🔹 สร้างพนักงานใหม่
     const user = await Employee.create({
       firstName: firstName.trim(),
       lastName: lastName.trim(),
@@ -159,7 +163,7 @@ router.post("/", verifyToken, requireRole("staff"), async (req, res) => {
 });
 
 /* =====================================
-   PUT /api/employees/:id (admin)
+   PUT /api/employees/:id (staff only)
 ===================================== */
 router.put("/:id", verifyToken, requireRole("staff"), async (req, res) => {
   try {
@@ -198,7 +202,7 @@ router.put("/:id", verifyToken, requireRole("staff"), async (req, res) => {
 router.get("/:id/profile", verifyToken, async (req, res) => {
   try {
     if (
-      req.user.role !== "admin" &&
+      req.user.role !== "staff" &&
       req.user.userId !== req.params.id
     ) {
       return res.status(403).json({ message: "Forbidden" });
@@ -254,7 +258,8 @@ router.get("/me", verifyToken, async (req, res) => {
   }
 });
 /* =====================================
-   SEND RESET LINK (admin)
+   SEND RESET LINK (STAFF ONLY)
+
 ===================================== */
 router.post("/:id/send-reset-link",
   verifyToken,
@@ -269,11 +274,11 @@ router.post("/:id/send-reset-link",
       const resetToken = jwt.sign(
         { id: user._id },
         process.env.JWT_SECRET,
-        { expiresIn: "15m" }
+        { expiresIn: "20m" }
       );
 
       user.resetToken = resetToken;
-      user.resetTokenExpire = Date.now() + 15 * 60 * 1000;
+      user.resetTokenExpire = Date.now() + 20 * 60 * 1000;
       await user.save();
 
       const resetLink =
@@ -290,7 +295,7 @@ router.post("/:id/send-reset-link",
              style="padding:10px 20px;background:#2563eb;color:#fff;text-decoration:none;border-radius:6px;">
              ตั้งรหัสผ่านใหม่
           </a>
-          <p>ลิงก์นี้จะหมดอายุใน 15 นาที</p>
+          <p>ลิงก์นี้จะหมดอายุใน 20 นาที</p>
         `
       };
 
@@ -304,58 +309,8 @@ router.post("/:id/send-reset-link",
     }
   }
 );
-router.post("/forgot-password", async (req, res) => {
-  try {
-    const { email } = req.body;
 
-    if (!email) {
-      return res.status(400).json({ message: "กรุณากรอกอีเมล" });
-    }
 
-    const emailLower = email.trim().toLowerCase();
-
-const user = await Employee.findOne({
-  email: { $regex: new RegExp(`^${emailLower}$`, "i") }
-});
-
-    if (!user) {
-      return res.status(404).json({ message: "ไม่พบอีเมลนี้" });
-    }
-
-    const resetToken = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "15m" }
-    );
-
-    user.resetToken = resetToken;
-    user.resetTokenExpire = Date.now() + 15 * 60 * 1000;
-    await user.save();
-
-    const resetLink =
-      `${process.env.BASE_URL}/employee/reset_password.html?token=${resetToken}`;
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: "รีเซ็ตรหัสผ่าน",
-      html: `
-        <h2>รีเซ็ตรหัสผ่าน</h2>
-        <p>คลิกด้านล่างเพื่อตั้งรหัสใหม่</p>
-        <a href="${resetLink}"
-           style="padding:10px 20px;background:#2563eb;color:#fff;border-radius:6px;text-decoration:none;">
-           ตั้งรหัสผ่านใหม่
-        </a>
-      `
-    });
-
-    res.json({ message: "ส่งลิงก์รีเซ็ตแล้ว" });
-
-  } catch (err) {
-    console.error("FORGOT PASSWORD ERROR:", err);
-    res.status(500).json({ message: "ส่งลิงก์ไม่สำเร็จ" });
-  }
-});
 // FIX: เดิมสร้าง multer storage ของตัวเองที่นี่ ซ้ำซ้อนกับ middleware/uploadAvatar.js
 // ที่มีอยู่แล้ว (และตั้งชื่อไฟล์เป็น Date.now() ทำให้ไฟล์เก่าค้างสะสมไม่ถูกลบ)
 // เปลี่ยนมาใช้ uploadAvatar.js แทน เหลือระบบอัปโหลด avatar ทางเดียว

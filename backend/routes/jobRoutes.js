@@ -11,6 +11,9 @@ const QRCode = require("qrcode");
 console.log("✅ jobRoutes loaded");
 
 // ✅ DASHBOARD: ทุก role เห็นทุกงาน
+// ✅ TECH: เห็นเฉพาะงานที่ตัวเองรับผิดชอบ
+// ✅ STAFF: เห็นทุกงาน
+// ต้นหา job ทั้งหมด
 router.get("/", auth, async (req, res) => {
   try {
     const jobs = await Job.find({})
@@ -25,20 +28,23 @@ router.get("/", auth, async (req, res) => {
   }
 });
 
+// GET /api/jobs/my
+// 🔹 ดึงข้อมูลงานซ่อมของตัวเอง (สำหรับ TECH)
+// 🔹 STAFF เห็นทุกงาน
 router.get("/my", auth, async (req, res) => {
   try {
     let query = {};
-
+    // 🔹 TECH เห็นเฉพาะงานที่ตัวเองรับผิดชอบ
     if (req.user.role === "tech") {
     query = { assignedTo: req.user.userId };
 } else if (req.user.role === "staff") {
     query = {};
 }
-
+// 🔹 ถ้าเป็น role อื่นๆ (เช่น customer) จะได้งานว่างเปล่า
     const jobs = await Job.find(query)
       .populate("assignedTo", "firstName lastName")
       .sort({ createdAt: -1 });
-
+// 🔹 STAFF เห็นทุกงาน
     res.json(jobs);
   } catch (err) {
     console.error(err);
@@ -51,38 +57,44 @@ router.get("/my", auth, async (req, res) => {
    ลูกค้าเช็คสถานะงานซ่อม (ไม่ต้อง login)
 ================================================== */
 router.get("/receipt/:receiptNumber", async (req, res) => {
+// 🔹 หา Job ตามเลขใบรับเครื่อง
   try {
-    // FIX: เดิม res.json(job) ส่งทั้ง document กลับไปดิบๆ
-    // รวมถึง createdBy/assignedTo (ข้อมูลพนักงาน) และ usedParts
-    // เป็น route public ไม่ต้อง login จึงเลือกเฉพาะ field ที่ลูกค้าควรเห็น
+
     const job = await Job.findOne({
       receiptNumber: req.params.receiptNumber
+// 🔹 ดึงเฉพาะ field ที่ลูกค้าควรเห็น
     }).select(
       "receiptNumber customerName customerPhone customerAddress " +
       "deviceType deviceModel symptom accessory jobType status " +
       "priceQuoted receivedDate startDate finishDate"
     );
-
+// 🔹 ถ้าไม่พบงานซ่อมด้วยเลขใบรับเครื่องที่ระบุ
     if (!job) {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
-
+// 🔹 ส่งข้อมูลงานซ่อมที่ลูกค้าควรเห็นกลับไป
     res.json(job);
+  // 🔹 ถ้าเกิด error อื่นๆ
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-
+// ==================================================
+// PUT /api/jobs/:id/complete
+// ปิดงานซ่อม (เปลี่ยนสถานะเป็น "ซ่อมเสร็จ")
+// Staff ปิดได้ทุกงาน
+// Tech ปิดได้เฉพาะงานของตัวเอง
+// ==================================================
 router.put("/:id/complete", auth, async (req, res) => {
   try {
-
+// 🔹 หา Job ตาม ID
     const job = await Job.findById(req.params.id);
     if (!job) {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
-
+// 🔐 ตรวจสิทธิ์
     if (job.status === "ซ่อมเสร็จ" || job.status === "ยกเลิก") {
   return res.status(400).json({
     message: "งานนี้ถูกปิดแล้ว ไม่สามารถแก้ไขได้"
@@ -142,20 +154,12 @@ if (
   }
 });
 
-/* ==================================================
-   GET /api/jobs (พนักงาน / แอดมิน)
-================================================== */
+// ==================================================
+// POST /api/jobs
+// สร้างงานซ่อมใหม่
+// Staff และ Tech สร้างได้
+// ==================================================
 
-
-/* ==================================================
-   GET /api/jobs/my
-================================================== */
-
-
-/* ==================================================
-   POST /api/jobs
-   รับเครื่องใหม่
-================================================== */
 router.post("/", auth, async (req, res) => {
   try {
 
@@ -183,10 +187,13 @@ router.post("/", auth, async (req, res) => {
 
     /* =========================
        GENERATE RECEIPT NUMBER (กันชน)
+       สร้างเลขใบรับเครื่องใหม่ทุกวัน โดยนับจำนวนงานที่สร้างในวันนั้น
+       รูปแบบ: INYYYYMMDD-XXX (XXX = 001, 002, ...)
     ========================= */
+  // 🔹 สร้างวันที่ปัจจุบันในรูปแบบ YYYYMMDD
     const now = new Date();
     const dateStr = now.toISOString().slice(0, 10).replace(/-/g, "");
-
+// 🔹 นับจำนวนงานที่สร้างในวันนั้น
     const start = new Date();
     start.setHours(0, 0, 0, 0);
 
@@ -196,12 +203,13 @@ router.post("/", auth, async (req, res) => {
     const countToday = await Job.countDocuments({
       createdAt: { $gte: start, $lte: end }
     });
-
+// 🔹 สร้างเลขใบรับเครื่องใหม่ โดยเพิ่ม 1 จากจำนวนงานที่นับได้
     const receiptNumber =
       `IN${dateStr}-${String(countToday + 1).padStart(3, "0")}`;
 
     /* =========================
        CREATE JOB
+    สร้างงานซ่อมใหม่ในฐานข้อมูล
     ========================= */
     const job = await Job.create({
       customerName: customerName.trim(),
@@ -220,10 +228,11 @@ router.post("/", auth, async (req, res) => {
     });
 
     /* =========================
-       🔥 ACTIVITY LOG
-       FIX: เดิมใช้ action "COMPLETE_JOB" (label สลับกับ route /:id/complete)
-            ทำให้ activity_log.html filter ผิดมาตลอด แก้เป็น "CREATE_JOB"
-            และใช้ field ให้ตรงกับ schema (userId/userName/jobId/detail)
+        🔥 ACTIVITY LOG
+        FIX: เดิมใช้ action "CREATE_JOB" (label สลับกับ route PUT /:id/complete)
+              และอ้างตัวแปร receiptNumber ที่ไม่เคยถูกประกาศ -> ReferenceError
+              ทำให้ "สร้างงาน" พังทุกครั้ง ตอนนี้แก้เป็น action ที่ถูกต้อง
+              และใช้ field ให้ตรงกับ schema (userId/userName/jobId/detail)
     ========================= */
     await Activity.create({
       userId: req.user.userId,
@@ -261,22 +270,21 @@ router.put("/:id/return-repair", auth, async (req, res) => {
         message: "เฉพาะ Staff เท่านั้นที่สามารถส่งกลับซ่อมได้"
       });
     }
-
+// 🔹 หา Job ตาม ID
     const job = await Job.findById(req.params.id);
-
+// 🔹 ถ้าไม่พบงานซ่อมด้วย ID ที่ระบุ
     if (!job) {
       return res.status(404).json({
         message: "ไม่พบงานซ่อม"
       });
     }
-
     // ต้องเป็นงานที่ซ่อมเสร็จแล้วเท่านั้น
     if (job.status !== "ซ่อมเสร็จ") {
       return res.status(400).json({
         message: "สามารถส่งกลับซ่อมได้เฉพาะงานที่ซ่อมเสร็จแล้วเท่านั้น"
       });
     }
-
+// 🔹 รับเหตุผลจากการส่งกลับซ่อม
    const reason =
   String(req.body.reason || "ไม่ได้ระบุเหตุผล").trim();
 
@@ -325,14 +333,15 @@ job.status = "กำลังซ่อม";
    PUT /api/jobs/:id
    อัปเดตข้อมูลงานซ่อม (สถานะ / วันที่ / ราคา)
 ================================================== */
+// 🔹 ดึงข้อมูลงานซ่อมตาม ID
 router.put("/:id", auth, async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
-
+// 🔹 ถ้าไม่พบงานซ่อมด้วย ID ที่ระบุ
     if (!job) {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
-
+// 🔹 ถ้างานถูกยกเลิกหรือซ่อมเสร็จแล้ว ไม่สามารถแก้ไขได้
     if (job.status === "ยกเลิก") {
   return res.status(400).json({
     message: "งานนี้ถูกยกเลิกแล้ว ไม่สามารถแก้ไขได้"
@@ -356,12 +365,9 @@ if (job.status === "ซ่อมเสร็จ") {
     message: "ไม่มีสิทธิ์แก้ไขงานนี้"
   });
 }
-
+// 🔹 บันทึกสถานะเดิม
     const oldStatus = job.status;
 
-    /* =========================
-       🔧 HELPER
-    ========================= */
     const cleanDate = (v) => (v === "" || v === null ? null : v);
 
     const cleanNumber = (v) => {
@@ -390,7 +396,7 @@ if (job.status === "ซ่อมเสร็จ") {
     if (req.body.receivedDate !== undefined) {
       job.receivedDate = cleanDate(req.body.receivedDate);
     }
-
+// อัปเดตสถานะงานซ่อม (สำคัญสุด)
     if (req.body.startDate !== undefined) {
       job.startDate = cleanDate(req.body.startDate);
     }
@@ -400,27 +406,29 @@ if (job.status === "ซ่อมเสร็จ") {
     }
 
     // 📊 สถานะ (สำคัญสุด)
+    // 🔹 ตรวจสอบว่าค่าที่ส่งมาถูกต้องหรือไม่
     if (req.body.status !== undefined) {
       const status = String(req.body.status)
         .trim()
         .replace(/\s+/g, " ");
-
+// 🔹 ถ้าไม่อยู่ใน validStatus ให้ส่ง error กลับไป
       if (!validStatus.includes(status)) {
         console.log("❌ INVALID STATUS:", status);
         return res.status(400).json({
           message: "สถานะไม่ถูกต้อง"
         });
       }
-
+// 🔹 อัปเดตสถานะงานซ่อม
       job.status = status;
     }
 
-    // 💰 ราคา
+// อัปเดตราคาประเมิน (priceQuoted) ให้เป็นตัวเลข
     if (req.body.priceQuoted !== undefined) {
       job.priceQuoted = cleanNumber(req.body.priceQuoted);
     }
 
     // 🛠 ประเภทงาน
+    // 🔹 ถ้า req.body.jobType เป็น undefined ให้ไม่แก้ไข
     if (req.body.jobType !== undefined) {
       job.jobType = req.body.jobType || null;
     }
@@ -467,9 +475,11 @@ if (job.status === "ซ่อมเสร็จ") {
     });
   }
 });
-
-// POST /api/jobs/:id/withdraw
-// routes/jobRoutes.js
+// ==================================================
+// POST /api/jobs/:id/use-part
+// เบิกอะไหล่จาก Stock สำหรับงานซ่อม
+// Staff และ Tech สามารถเบิกได้
+// ==================================================
 router.post("/:id/use-part", auth, async (req, res) => {
   try {
     const { stockId, quantity } = req.body;
@@ -480,9 +490,7 @@ router.post("/:id/use-part", auth, async (req, res) => {
       });
     }
 
-    /* =========================
-       1️⃣ หา Job
-    ========================= */
+ // 🔹 หา Job ตาม ID
     const job = await Job.findById(req.params.id);
     if (!job) {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
@@ -500,25 +508,20 @@ router.post("/:id/use-part", auth, async (req, res) => {
       });
     }
 
-    /* =========================
-       2️⃣ หา Stock
-    ========================= */
+   // 🔹 หา Stock ตาม stockId
     const stock = await Stock.findById(stockId);
     if (!stock) {
       return res.status(404).json({ message: "ไม่พบอะไหล่" });
     }
-
+// 🔹 ตรวจสอบจำนวนอะไหล่ใน Stock
     if (stock.quantity < quantity) {
       return res.status(400).json({
         message: "จำนวนอะไหล่ไม่เพียงพอ"
       });
     }
-
-    /* =========================
-       3️⃣ ตัดสต็อก
-    ========================= */
+// 🔹 เบิกอะไหล่จาก Stock
     stock.quantity -= quantity;
-
+// 🔹 บันทึกประวัติการเบิกอะไหล่ใน Stock
     stock.withdrawHistory.push({
       quantity,
       employeeName: req.user.userName || "Unknown",
@@ -528,13 +531,10 @@ router.post("/:id/use-part", auth, async (req, res) => {
 
     await stock.save();
 
-    /* =========================
-       4️⃣ บันทึกในงาน
-    ========================= */
+ // 🔹 บันทึกอะไหล่ที่ใช้ในงานซ่อม
     job.usedParts = job.usedParts || [];
 
-    // FIX: schema Job.usedParts กำหนด field อ้างอิงว่า "stock" ไม่ใช่ "stockId"
-    // เดิมใช้ "stockId" ทำให้ mongoose ตัดทิ้งเงียบๆ และเสียการอ้างอิงไปยัง Stock จริง
+// 🔹 เพิ่มอะไหล่ที่ใช้ในงานซ่อม
     job.usedParts.push({
       stock: stock._id,
       name: stock.name,
@@ -565,21 +565,15 @@ router.post("/:id/use-part", auth, async (req, res) => {
   }
 });
 
-
-
-/* ==================================================
-   PUT /api/jobs/:id/complete
-================================================== */
-
-
-/* ==================================================
-   GET /api/jobs/:id/receipt
-   สร้าง PDF ใบรับเครื่อง (Render ใช้ได้)
-================================================== */
+// ==================================================
+// GET /api/jobs/:id/receipt
+// สร้างใบรับเครื่องซ่อม (HTML)
+// Staff และ Tech สามารถสร้างได้
+// ==================================================
 router.get("/:id/receipt", auth, async (req, res) => {
   try {
     const job = await Job.findById(req.params.id);
-
+// 🔹 ถ้าไม่พบงานซ่อมด้วย ID ที่ระบุ
     if (!job) {
       return res.status(404).send("ไม่พบงานซ่อม");
     }
@@ -598,7 +592,9 @@ router.get("/:id/receipt", auth, async (req, res) => {
     errorCorrectionLevel: "M"
   }
 );
-
+// ==================================================
+// ส่ง HTML ใบรับเครื่องซ่อมกลับไป
+// ==================================================
     res.send(`<!DOCTYPE html>
 
 <html lang="th">
@@ -1195,16 +1191,17 @@ tbody td {
   }
 });
 // 🔹 ดึงข้อมูลงานซ่อมตาม ID
+
 router.get("/:id", auth, async (req, res) => {
   try {
     const job = await Job.findById(req.params.id)
        .populate("assignedTo", "firstName lastName")
       .populate("createdBy", "firstName lastName");
-
+// 🔹 ถ้าไม่พบงานซ่อมด้วย ID ที่ระบุ
     if (!job) {
       return res.status(404).json({ message: "ไม่พบงานซ่อม" });
     }
-
+// 🔹 ส่งข้อมูลงานซ่อมกลับไป
     res.json(job);
   } catch (err) {
     console.error(err);
