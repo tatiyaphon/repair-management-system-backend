@@ -820,7 +820,7 @@ if (!token) {
 /* ================= DOM ================= */
 const tableBody = document.querySelector("#stockTable tbody");
 const typeFilterSelect = document.getElementById("typeFilter");
-const searchInput = document.getElementById("searchInput");
+const searchInput = document.getElementById("stockSearch");
 
 const stockModal = document.getElementById("stockModal");
 const withdrawModal = document.getElementById("withdrawModal");
@@ -847,6 +847,7 @@ const withdrawSearchInput = document.getElementById("withdrawSearch");
 const withdrawFilter = document.getElementById("withdrawFilter");
 const withdrawQuantityInput = document.getElementById("withdrawQuantity");
 const withdrawEmployeeNameInput = document.getElementById("withdrawEmployeeName");
+const withdrawJobIdInput = document.getElementById("withdrawJobId");
 
 let stockData = [];
 
@@ -1019,17 +1020,12 @@ async function openWithdrawModal(id) {
 
   withdrawStockIdInput.value = id;
 
-  withdrawItemNameDisplay.textContent =
-    item.name;
+  withdrawItemNameDisplay.textContent = item.name;
 
-  currentQuantityDisplay.textContent =
-    item.quantity;
+  currentQuantityDisplay.textContent = item.quantity;
 
-  withdrawQuantityInput.max =
-    item.quantity;
-
+  withdrawQuantityInput.max = item.quantity;
   withdrawQuantityInput.value = 1;
-
 
   // =========================
   // วันที่ปัจจุบัน
@@ -1045,9 +1041,7 @@ async function openWithdrawModal(id) {
       .toISOString()
       .slice(0, 16);
 
-  withdrawDateInput.value =
-    localDateTime;
-
+  withdrawDateInput.value = localDateTime;
 
   // =========================
   // โหลดรายชื่อช่าง
@@ -1055,45 +1049,39 @@ async function openWithdrawModal(id) {
 
   await loadWithdrawEmployees();
 
-
   // =========================
-  // โหลดงานซ่อม
+  // โหลดรายการงานซ่อม
   // =========================
 
   await loadWithdrawJobs();
 
+  // =========================
+  // เปิด Modal
+  // =========================
 
-  withdrawModal.style.display =
-    "block";
+  withdrawModal.style.display = "block";
 }
 
 
 // =====================================================
-// โหลดรายชื่อผู้เบิก
+// LOAD WITHDRAW EMPLOYEES
 // =====================================================
 
 async function loadWithdrawEmployees() {
 
   try {
 
-    const select =
-      withdrawEmployeeNameInput;
+    const select = withdrawEmployeeNameInput;
 
-    const meRes =
-      await apiFetch("/employees/me");
+    const me = await apiFetch("/employees/me");
 
-    if (!meRes) {
-      throw new Error(
-        "ไม่สามารถตรวจสอบผู้ใช้งาน"
-      );
+    if (!me) {
+      throw new Error("ไม่สามารถตรวจสอบผู้ใช้งาน");
     }
 
-    const me = meRes;
-
-
-    // =========================
+    // =================================================
     // TECH
-    // =========================
+    // =================================================
 
     if (me.role === "tech") {
 
@@ -1107,22 +1095,22 @@ async function loadWithdrawEmployees() {
 
       option.value = me._id;
 
-      option.textContent =
-        fullName;
+      option.textContent = fullName;
 
       select.appendChild(option);
 
       select.value = me._id;
 
+      // ช่างเลือกตัวเองไม่ได้
       select.disabled = true;
 
       return;
     }
 
 
-    // =========================
+    // =================================================
     // STAFF
-    // =========================
+    // =================================================
 
     if (me.role === "staff") {
 
@@ -1138,9 +1126,7 @@ async function loadWithdrawEmployees() {
       }
 
       select.innerHTML =
-        `<option value="">
-          -- เลือกช่าง --
-        </option>`;
+        `<option value="">-- เลือกช่าง --</option>`;
 
       employees
         .filter(emp =>
@@ -1155,11 +1141,10 @@ async function loadWithdrawEmployees() {
           const option =
             document.createElement("option");
 
-          option.value =
-            emp._id;
+          // ส่ง ID ของช่าง
+          option.value = emp._id;
 
-          option.textContent =
-            fullName;
+          option.textContent = fullName;
 
           select.appendChild(option);
 
@@ -1174,15 +1159,13 @@ async function loadWithdrawEmployees() {
     );
 
     withdrawEmployeeNameInput.innerHTML =
-      `<option value="">
-        โหลดรายชื่อไม่สำเร็จ
-      </option>`;
+      `<option value="">โหลดรายชื่อไม่สำเร็จ</option>`;
   }
 }
 
 
 // =====================================================
-// โหลดรายการงานซ่อม
+// LOAD WITHDRAW JOBS
 // =====================================================
 
 async function loadWithdrawJobs() {
@@ -1200,8 +1183,7 @@ async function loadWithdrawJobs() {
 
     withdrawJobList.innerHTML = "";
 
-    window.withdrawJobs =
-      jobs;
+    window.withdrawJobs = jobs;
 
     jobs.forEach(job => {
 
@@ -1212,11 +1194,9 @@ async function loadWithdrawJobs() {
         job.receiptNumber;
 
       option.label =
-        `${job.receiptNumber} - ${job.customerName} - ${job.deviceModel || ""}`;
+        `${job.receiptNumber} - ${job.customerName || ""} - ${job.deviceModel || ""}`;
 
-      withdrawJobList.appendChild(
-        option
-      );
+      withdrawJobList.appendChild(option);
 
     });
 
@@ -1247,41 +1227,7 @@ withdrawJobSearchInput.addEventListener(
 
     const job =
       jobs.find(
-        j =>
-          j.receiptNumber ===
-          receiptNumber
-      );
-
-    if (job) {
-
-      withdrawJobIdInput.value =
-        job._id;
-
-    } else {
-
-      withdrawJobIdInput.value =
-        "";
-
-    }
-
-  }
-);
-
-withdrawJobSearchInput.addEventListener(
-  "change",
-  function () {
-
-    const receiptNumber =
-      this.value.trim();
-
-    const jobs =
-      window.withdrawJobs || [];
-
-    const job =
-      jobs.find(
-        j =>
-          j.receiptNumber ===
-          receiptNumber
+        j => j.receiptNumber === receiptNumber
       );
 
     if (job) {
@@ -1315,18 +1261,22 @@ withdrawForm.onsubmit = async e => {
     withdrawJobIdInput.value;
 
 
+  // =========================
+  // ตรวจสอบข้อมูล
+  // =========================
+
   if (!id) {
     alert("ไม่พบอะไหล่");
     return;
   }
 
   if (!qty || qty <= 0) {
-    alert("กรุณาระบุจำนวน");
+    alert("กรุณาระบุจำนวนที่เบิก");
     return;
   }
 
   if (!employeeId) {
-    alert("กรุณาเลือกช่าง");
+    alert("กรุณาเลือกช่างผู้เบิก");
     return;
   }
 
@@ -1335,6 +1285,10 @@ withdrawForm.onsubmit = async e => {
     return;
   }
 
+
+  // =========================
+  // วันที่เบิก
+  // =========================
 
   const withdrawnAt =
     withdrawDateInput.value
@@ -1353,28 +1307,22 @@ withdrawForm.onsubmit = async e => {
           method: "PATCH",
 
           body: JSON.stringify({
-
             quantity: qty,
-
             employeeId,
-
             jobId,
-
             withdrawnAt
-
           })
         }
       );
 
-
     if (!res) {
       throw new Error(
-        "เบิกอะไหล่ไม่สำเร็จ"
+        "ไม่สามารถบันทึกการเบิกได้"
       );
     }
 
 
-    alert("✅ เบิกสำเร็จ");
+    alert("✅ เบิกอะไหล่สำเร็จ");
 
     withdrawModal.style.display =
       "none";
@@ -1389,19 +1337,15 @@ withdrawForm.onsubmit = async e => {
     );
 
     alert(
-      "❌ " + error.message
+      "❌ " +
+      (error.message ||
+        "เกิดข้อผิดพลาดในการเบิกอะไหล่")
     );
 
   }
 
 };
-  // 🔥 โหลดข้อมูลใหม่จริง
-  await loadStock();                 
-  renderWithdrawHistory(
-    document.getElementById("withdrawFilter")?.value || "all",
-    document.getElementById("withdrawSearch")?.value || ""
-  );
-  await loadStock();
+
 
 
 /* ================= INIT ================= */
