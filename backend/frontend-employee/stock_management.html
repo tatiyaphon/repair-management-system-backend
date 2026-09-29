@@ -576,13 +576,23 @@
                     </select>
                 </div>
                 
+                <div class="stock-controls">
+
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="stockSearch" placeholder="ค้นหาอะไหล่, รุ่น, ยี่ห้อ..." oninput="filterStock()">
-                                
+                    <input
+                        type="text"
+                        id="stockSearch"
+                        placeholder="ค้นหาอะไหล่, รุ่น, ยี่ห้อ..."
+                        oninput="filterStock()"
+                    >
+                </div>
+
                 <button id="addStockBtn" class="btn">
-                    <i class="fas fa-plus-square"></i> เพิ่มอะไหล่ใหม่
+                    <i class="fas fa-plus-square"></i>
+                    เพิ่มอะไหล่ใหม่
                 </button>
+
             </div>
 
             <div class="table-responsive bg-white rounded-xl shadow-lg overflow-x-auto">
