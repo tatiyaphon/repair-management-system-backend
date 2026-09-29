@@ -435,20 +435,84 @@ if (job.status === "ซ่อมเสร็จ") {
 
     await job.save();
 
-    /* =========================
-       🔥 ACTIVITY LOG
-    ========================= */
-    try {
-  await Activity.create({
-    userId: req.user.userId,
-    userName: req.user.userName || "Unknown",
-    action: "UPDATE_STATUS",
-    detail: `เปลี่ยนสถานะงาน ${job.receiptNumber || "-"} (${oldStatus} → ${job.status})`,
-    jobId: job._id,
-    ipAddress: req.ip
-  });
+   /* =========================
+   ACTIVITY LOG
+========================= */
+
+try {
+
+  // =========================
+  // เปลี่ยนสถานะ
+  // =========================
+  if (
+    req.body.status !== undefined &&
+    oldStatus !== job.status
+  ) {
+
+    await Activity.create({
+      userId: req.user.userId,
+      userName: req.user.userName || "Unknown",
+      action: "UPDATE_STATUS",
+      detail:
+        `เปลี่ยนสถานะงาน ${job.receiptNumber || "-"} ` +
+        `(${oldStatus} → ${job.status})`,
+      jobId: job._id,
+      ipAddress: req.ip
+    });
+
+  }
+
+
+  // =========================
+  // เปลี่ยนราคา
+  // =========================
+  if (
+    req.body.priceQuoted !== undefined &&
+    oldPrice !== job.priceQuoted
+  ) {
+
+    await Activity.create({
+      userId: req.user.userId,
+      userName: req.user.userName || "Unknown",
+      action: "UPDATE_PRICE",
+      detail:
+        `แก้ไขราคางาน ${job.receiptNumber || "-"} ` +
+        `(${oldPrice} → ${job.priceQuoted} บาท)`,
+      jobId: job._id,
+      ipAddress: req.ip
+    });
+
+  }
+
+
+  // =========================
+  // เปลี่ยนประเภทงาน
+  // =========================
+  if (
+    req.body.jobType !== undefined &&
+    oldJobType !== job.jobType
+  ) {
+
+    await Activity.create({
+      userId: req.user.userId,
+      userName: req.user.userName || "Unknown",
+      action: "UPDATE_JOB_TYPE",
+      detail:
+        `เปลี่ยนประเภทงาน ${job.receiptNumber || "-"} ` +
+        `(${oldJobType || "-"} → ${job.jobType || "-"})`,
+      jobId: job._id,
+      ipAddress: req.ip
+    });
+
+  }
+
 } catch (logErr) {
-  console.error("ACTIVITY LOG ERROR:", logErr);
+
+  console.error(
+    "ACTIVITY LOG ERROR:",
+    logErr
+  );
+
 }
 
     /* =========================
