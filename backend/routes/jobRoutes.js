@@ -439,17 +439,17 @@ if (job.status === "ซ่อมเสร็จ") {
        🔥 ACTIVITY LOG
     ========================= */
     try {
-      await Activity.create({
-        userId: req.user.userId,
-        userName: req.user.userName || "Unknown",
-        action: "UPDATE_JOB",
-        detail: `แก้ไขงาน ${job.receiptNumber || "-"} (สถานะ: ${oldStatus} → ${job.status})`,
-        jobId: job._id,
-        ipAddress: req.ip
-      });
-    } catch (logErr) {
-      console.error("ACTIVITY LOG ERROR:", logErr);
-    }
+  await Activity.create({
+    userId: req.user.userId,
+    userName: req.user.userName || "Unknown",
+    action: "UPDATE_STATUS",
+    detail: `เปลี่ยนสถานะงาน ${job.receiptNumber || "-"} (${oldStatus} → ${job.status})`,
+    jobId: job._id,
+    ipAddress: req.ip
+  });
+} catch (logErr) {
+  console.error("ACTIVITY LOG ERROR:", logErr);
+}
 
     /* =========================
        RESPONSE
