@@ -578,9 +578,8 @@
                 
                 <div class="search-box">
                     <i class="fas fa-search"></i>
-                    <input type="text" id="searchInput" onkeyup="filterStock()" placeholder="ค้นหา ID, ชื่อ, รุ่นอะไหล่...">
-                </div>
-                
+                    <input type="text" id="stockSearch" placeholder="ค้นหาอะไหล่, รุ่น, ยี่ห้อ..." oninput="filterStock()">
+                                
                 <button id="addStockBtn" class="btn">
                     <i class="fas fa-plus-square"></i> เพิ่มอะไหล่ใหม่
                 </button>
@@ -733,13 +732,12 @@
     <label for="withdrawEmployeeName" class="block font-medium text-gray-700">
       ผู้เบิก
     </label>
-    <input
-      type="text"
-      id="withdrawEmployeeName"
-      required
-      placeholder="ชื่อ-นามสกุล"
-      class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-    >
+    <select
+  id="withdrawEmployeeName"
+  required
+>
+  <option value="">กำลังโหลด...</option>
+</select>
   </div>
 
   <!-- จำนวน -->
@@ -760,33 +758,39 @@
     </p>
   </div>
 
-  <!-- อ้างอิงงาน -->
-  <div>
-    <label for="withdrawJobId" class="block font-medium text-gray-700">
-      อ้างอิงงาน
-    </label>
-    <input
-      type="text"
-      id="withdrawJobId"
-      placeholder="เช่น JOB001"
-      class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-    >
-  </div>
+  <div class="form-group">
+  <label>อ้างอิงงานซ่อม</label>
 
-  <!-- วันที่เบิก -->
-  <div>
-    <label for="withdrawDate" class="block font-medium text-gray-700">
-      วันที่เบิก
-    </label>
-    <input
-      type="datetime-local"
-      id="withdrawDate"
-      class="w-full p-2.5 border border-gray-300 rounded-lg focus:ring-orange-500 focus:border-orange-500"
-    >
-    <p class="text-xs text-gray-500 mt-1">
-      * หากไม่เลือก ระบบจะใช้เวลาปัจจุบัน
-    </p>
-  </div>
+  <input
+    type="text"
+    id="withdrawJobSearch"
+    list="withdrawJobList"
+    placeholder="ค้นหาเลขที่งาน / ชื่อลูกค้า"
+    autocomplete="off"
+    required
+  />
+
+  <datalist id="withdrawJobList"></datalist>
+
+  <input
+    type="hidden"
+    id="withdrawJobId"
+  />
+</div>
+
+  <div class="form-group">
+  <label>วันที่เบิก</label>
+
+  <input
+    type="datetime-local"
+    id="withdrawDate"
+    readonly
+  />
+
+  <small>
+    ระบบกำหนดวันและเวลาปัจจุบันให้อัตโนมัติ
+  </small>
+</div>
 
   <!-- ปุ่ม -->
   <button
@@ -836,12 +840,13 @@ const itemStockCodeInput = document.getElementById("itemStockCode");
 const withdrawStockIdInput = document.getElementById("withdrawStockId");
 const withdrawItemNameDisplay = document.getElementById("withdrawItemName");
 const currentQuantityDisplay = document.getElementById("currentQuantity");
-const withdrawEmployeeNameInput = document.getElementById("withdrawEmployeeName");
-const withdrawQuantityInput = document.getElementById("withdrawQuantity");
-const withdrawJobIdInput = document.getElementById("withdrawJobId");
+const withdrawJobSearchInput = document.getElementById("withdrawJobSearch");
+const withdrawDateInput = document.getElementById("withdrawDate");
+const withdrawJobList = document.getElementById("withdrawJobList");
 const withdrawSearchInput = document.getElementById("withdrawSearch");
 const withdrawFilter = document.getElementById("withdrawFilter");
-
+const withdrawQuantityInput = document.getElementById("withdrawQuantity");
+const withdrawEmployeeNameInput = document.getElementById("withdrawEmployeeName");
 
 let stockData = [];
 
@@ -1006,48 +1011,390 @@ async function deleteStock(id) {
   alert("ลบเรียบร้อย");
   loadStock();
 }
+async function openWithdrawModal(id) {
 
-/* ================= WITHDRAW ================= */
-function openWithdrawModal(id) {
   const item = stockData.find(i => i._id === id);
+
   if (!item) return;
 
   withdrawStockIdInput.value = id;
-  withdrawItemNameDisplay.textContent = item.name;
-  currentQuantityDisplay.textContent = item.quantity;
-  withdrawQuantityInput.max = item.quantity;
+
+  withdrawItemNameDisplay.textContent =
+    item.name;
+
+  currentQuantityDisplay.textContent =
+    item.quantity;
+
+  withdrawQuantityInput.max =
+    item.quantity;
+
   withdrawQuantityInput.value = 1;
 
-  withdrawModal.style.display = "block";
+
+  // =========================
+  // วันที่ปัจจุบัน
+  // =========================
+
+  const now = new Date();
+
+  const localDateTime =
+    new Date(
+      now.getTime() -
+      now.getTimezoneOffset() * 60000
+    )
+      .toISOString()
+      .slice(0, 16);
+
+  withdrawDateInput.value =
+    localDateTime;
+
+
+  // =========================
+  // โหลดรายชื่อช่าง
+  // =========================
+
+  await loadWithdrawEmployees();
+
+
+  // =========================
+  // โหลดงานซ่อม
+  // =========================
+
+  await loadWithdrawJobs();
+
+
+  withdrawModal.style.display =
+    "block";
 }
 
+
+// =====================================================
+// โหลดรายชื่อผู้เบิก
+// =====================================================
+
+async function loadWithdrawEmployees() {
+
+  try {
+
+    const select =
+      withdrawEmployeeNameInput;
+
+    const meRes =
+      await apiFetch("/employees/me");
+
+    if (!meRes) {
+      throw new Error(
+        "ไม่สามารถตรวจสอบผู้ใช้งาน"
+      );
+    }
+
+    const me = meRes;
+
+
+    // =========================
+    // TECH
+    // =========================
+
+    if (me.role === "tech") {
+
+      const fullName =
+        `${me.firstName || ""} ${me.lastName || ""}`.trim();
+
+      select.innerHTML = "";
+
+      const option =
+        document.createElement("option");
+
+      option.value = me._id;
+
+      option.textContent =
+        fullName;
+
+      select.appendChild(option);
+
+      select.value = me._id;
+
+      select.disabled = true;
+
+      return;
+    }
+
+
+    // =========================
+    // STAFF
+    // =========================
+
+    if (me.role === "staff") {
+
+      select.disabled = false;
+
+      const employees =
+        await apiFetch("/employees");
+
+      if (!employees) {
+        throw new Error(
+          "โหลดรายชื่อพนักงานไม่สำเร็จ"
+        );
+      }
+
+      select.innerHTML =
+        `<option value="">
+          -- เลือกช่าง --
+        </option>`;
+
+      employees
+        .filter(emp =>
+          emp.role === "tech" &&
+          emp.active !== false
+        )
+        .forEach(emp => {
+
+          const fullName =
+            `${emp.firstName || ""} ${emp.lastName || ""}`.trim();
+
+          const option =
+            document.createElement("option");
+
+          option.value =
+            emp._id;
+
+          option.textContent =
+            fullName;
+
+          select.appendChild(option);
+
+        });
+    }
+
+  } catch (error) {
+
+    console.error(
+      "LOAD WITHDRAW EMPLOYEES ERROR:",
+      error
+    );
+
+    withdrawEmployeeNameInput.innerHTML =
+      `<option value="">
+        โหลดรายชื่อไม่สำเร็จ
+      </option>`;
+  }
+}
+
+
+// =====================================================
+// โหลดรายการงานซ่อม
+// =====================================================
+
+async function loadWithdrawJobs() {
+
+  try {
+
+    const jobs =
+      await apiFetch("/jobs");
+
+    if (!jobs) {
+      throw new Error(
+        "โหลดงานซ่อมไม่สำเร็จ"
+      );
+    }
+
+    withdrawJobList.innerHTML = "";
+
+    window.withdrawJobs =
+      jobs;
+
+    jobs.forEach(job => {
+
+      const option =
+        document.createElement("option");
+
+      option.value =
+        job.receiptNumber;
+
+      option.label =
+        `${job.receiptNumber} - ${job.customerName} - ${job.deviceModel || ""}`;
+
+      withdrawJobList.appendChild(
+        option
+      );
+
+    });
+
+  } catch (error) {
+
+    console.error(
+      "LOAD WITHDRAW JOBS ERROR:",
+      error
+    );
+
+  }
+}
+
+
+// =====================================================
+// เลือกงานซ่อม
+// =====================================================
+
+withdrawJobSearchInput.addEventListener(
+  "change",
+  function () {
+
+    const receiptNumber =
+      this.value.trim();
+
+    const jobs =
+      window.withdrawJobs || [];
+
+    const job =
+      jobs.find(
+        j =>
+          j.receiptNumber ===
+          receiptNumber
+      );
+
+    if (job) {
+
+      withdrawJobIdInput.value =
+        job._id;
+
+    } else {
+
+      withdrawJobIdInput.value =
+        "";
+
+    }
+
+  }
+);
+
+withdrawJobSearchInput.addEventListener(
+  "change",
+  function () {
+
+    const receiptNumber =
+      this.value.trim();
+
+    const jobs =
+      window.withdrawJobs || [];
+
+    const job =
+      jobs.find(
+        j =>
+          j.receiptNumber ===
+          receiptNumber
+      );
+
+    if (job) {
+
+      withdrawJobIdInput.value =
+        job._id;
+
+    } else {
+
+      withdrawJobIdInput.value = "";
+
+    }
+
+  }
+);
+
 withdrawForm.onsubmit = async e => {
+
   e.preventDefault();
 
-  const id = withdrawStockIdInput.value;
-  const qty = Number(withdrawQuantityInput.value);
+  const id =
+    withdrawStockIdInput.value;
 
-  // FIX: เดิมฟิลด์ "วันที่เบิก" ใน modal มีให้กรอก แต่ไม่เคยถูกส่งไป backend เลย
-  // ทำให้ backend ใช้เวลาปัจจุบันเสมอ ไม่ว่าจะเลือกวันที่ย้อนหลังหรือไม่
-  const withdrawDateInput = document.getElementById("withdrawDate");
-  const withdrawnAt = withdrawDateInput?.value
-    ? new Date(withdrawDateInput.value).toISOString()
-    : undefined;
+  const qty =
+    Number(withdrawQuantityInput.value);
 
-  await apiFetch(`/stocks/${id}/withdraw`, {
-    method: "PATCH",
-    body: JSON.stringify({
-      quantity: qty,
-      employeeName: withdrawEmployeeNameInput.value,
-      jobRef: withdrawJobIdInput.value,
-      withdrawnAt
-    })
-  });
+  const employeeId =
+    withdrawEmployeeNameInput.value;
 
-  alert("✅ เบิกสำเร็จ");
+  const jobId =
+    withdrawJobIdInput.value;
 
-  withdrawModal.style.display = "none";
 
+  if (!id) {
+    alert("ไม่พบอะไหล่");
+    return;
+  }
+
+  if (!qty || qty <= 0) {
+    alert("กรุณาระบุจำนวน");
+    return;
+  }
+
+  if (!employeeId) {
+    alert("กรุณาเลือกช่าง");
+    return;
+  }
+
+  if (!jobId) {
+    alert("กรุณาเลือกงานซ่อม");
+    return;
+  }
+
+
+  const withdrawnAt =
+    withdrawDateInput.value
+      ? new Date(
+          withdrawDateInput.value
+        ).toISOString()
+      : new Date().toISOString();
+
+
+  try {
+
+    const res =
+      await apiFetch(
+        `/stocks/${id}/withdraw`,
+        {
+          method: "PATCH",
+
+          body: JSON.stringify({
+
+            quantity: qty,
+
+            employeeId,
+
+            jobId,
+
+            withdrawnAt
+
+          })
+        }
+      );
+
+
+    if (!res) {
+      throw new Error(
+        "เบิกอะไหล่ไม่สำเร็จ"
+      );
+    }
+
+
+    alert("✅ เบิกสำเร็จ");
+
+    withdrawModal.style.display =
+      "none";
+
+    await loadStock();
+
+  } catch (error) {
+
+    console.error(
+      "WITHDRAW ERROR:",
+      error
+    );
+
+    alert(
+      "❌ " + error.message
+    );
+
+  }
+
+};
   // 🔥 โหลดข้อมูลใหม่จริง
   await loadStock();                 
   renderWithdrawHistory(
@@ -1055,7 +1402,7 @@ withdrawForm.onsubmit = async e => {
     document.getElementById("withdrawSearch")?.value || ""
   );
   await loadStock();
-};
+
 
 /* ================= INIT ================= */
 document.addEventListener("DOMContentLoaded", async () => {
