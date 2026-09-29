@@ -2,7 +2,8 @@ const express = require("express");
 const router = express.Router();
 const Stock = require("../models/Stock");
 const verifyToken = require("../middleware/auth");
-
+const Employee = require("../models/Employee");
+const Job = require("../models/Job");
 /* ดึงทั้งหมด */
 // FIX: เพิ่ม verifyToken เพื่อให้ต้อง login ก่อนถึงจะดึงข้อมูลสต็อกได้
 router.get("/", verifyToken, async (_req, res) => {
@@ -87,50 +88,229 @@ router.delete("/:id", verifyToken, async (req, res) => {
   }
 });
 
-/* เบิกอะไหล่ */
-// FIX: เดิมมี route เบิกอะไหล่ซ้ำกันสองอัน (path /stocks/:id/withdraw ที่จะกลาย
-// เป็น /api/stocks/stocks/:id/withdraw ผิดด้วย) โค้ดเหมือนกันเป๊ะ เหลือไว้ตัวเดียว
 router.patch("/:id/withdraw", verifyToken, async (req, res) => {
+
   try {
-    const { quantity, employeeName, jobRef, withdrawnAt } = req.body;
 
-    const stock = await Stock.findById(req.params.id);
-    if (!stock) {
-      return res.status(404).json({ message: "ไม่พบอะไหล่" });
-    }
-
-    if (!quantity || quantity <= 0 || quantity > stock.quantity) {
-      return res.status(400).json({ message: "จำนวนเบิกไม่ถูกต้อง" });
-    }
-
-    if (!employeeName) {
-      return res.status(400).json({ message: "กรุณาระบุชื่อผู้เบิก" });
-    }
-
-    // ตัดสต็อก
-    stock.quantity -= quantity;
-
-    // บันทึกประวัติการเบิก
-    stock.withdrawHistory.push({
+    const {
       quantity,
-      employeeName,
-      jobRef: jobRef || "-",
-      // FIX: รองรับ withdrawnAt ที่ frontend ส่งมา (เลือกวันที่ย้อนหลังได้)
-      // เดิม hardcode new Date() เสมอ ทำให้ฟิลด์เลือกวันที่ใน UI ไม่มีผลอะไรเลย
-      withdrawnAt: withdrawnAt ? new Date(withdrawnAt) : new Date()
+      employeeId,
+      jobId,
+      withdrawnAt
+    } = req.body;
+
+
+    // =========================
+    // ตรวจจำนวน
+    // =========================
+
+    const qty =
+      Number(quantity);
+
+    if (!qty || qty <= 0) {
+
+      return res.status(400).json({
+        message: "จำนวนเบิกไม่ถูกต้อง"
+      });
+
+    }
+
+
+    // =========================
+    // หา Stock
+    // =========================
+
+    const stock =
+      await Stock.findById(
+        req.params.id
+      );
+
+    if (!stock) {
+
+      return res.status(404).json({
+        message: "ไม่พบอะไหล่"
+      });
+
+    }
+
+
+    if (qty > stock.quantity) {
+
+      return res.status(400).json({
+        message:
+          `จำนวนที่เบิกเกินจำนวนคงเหลือ (${stock.quantity})`
+      });
+
+    }
+
+
+    // =========================
+    // ตรวจ Job
+    // =========================
+
+    if (!jobId) {
+
+      return res.status(400).json({
+        message: "กรุณาเลือกงานซ่อม"
+      });
+
+    }
+
+    const job =
+      await Job.findById(jobId);
+
+    if (!job) {
+
+      return res.status(404).json({
+        message: "ไม่พบงานซ่อม"
+      });
+
+    }
+
+
+    // =========================
+    // หา Employee
+    // =========================
+
+    let targetEmployee;
+
+
+    // =========================
+    // TECH
+    // =========================
+
+    if (req.user.role === "tech") {
+
+      // บังคับเป็นบัญชีตัวเอง
+      targetEmployee =
+        await Employee.findById(
+          req.user.userId
+        );
+
+    }
+
+
+    // =========================
+    // STAFF
+    // =========================
+
+    else if (req.user.role === "staff") {
+
+      if (!employeeId) {
+
+        return res.status(400).json({
+          message: "กรุณาเลือกช่าง"
+        });
+
+      }
+
+      targetEmployee =
+        await Employee.findById(
+          employeeId
+        );
+
+      if (!targetEmployee) {
+
+        return res.status(404).json({
+          message: "ไม่พบช่าง"
+        });
+
+      }
+
+      if (targetEmployee.role !== "tech") {
+
+        return res.status(400).json({
+          message:
+            "สามารถเบิกให้ช่างเท่านั้น"
+        });
+
+      }
+
+    }
+
+    else {
+
+      return res.status(403).json({
+        message:
+          "ไม่มีสิทธิ์เบิกอะไหล่"
+      });
+
+    }
+
+
+    if (!targetEmployee) {
+
+      return res.status(404).json({
+        message:
+          "ไม่พบข้อมูลผู้เบิก"
+      });
+
+    }
+
+
+    // =========================
+    // ลด Stock
+    // =========================
+
+    stock.quantity -= qty;
+
+
+    // =========================
+    // บันทึกประวัติ
+    // =========================
+
+    stock.withdrawHistory.push({
+
+      quantity: qty,
+
+      employeeId:
+        targetEmployee._id,
+
+      employeeName:
+        `${targetEmployee.firstName} ${targetEmployee.lastName}`,
+
+      jobId:
+        job._id,
+
+      jobRef:
+        job.receiptNumber,
+
+      withdrawnAt:
+        withdrawnAt
+          ? new Date(withdrawnAt)
+          : new Date()
+
     });
+
 
     await stock.save();
 
+
     res.json({
-      message: "เบิกสำเร็จ",
-      quantityLeft: stock.quantity
+
+      message:
+        "เบิกอะไหล่สำเร็จ",
+
+      quantityLeft:
+        stock.quantity
+
     });
 
+
   } catch (err) {
-    console.error("PATCH /api/stocks/:id/withdraw ERROR:", err);
-    res.status(500).json({ message: "เกิดข้อผิดพลาด" });
+
+    console.error(
+      "PATCH /api/stocks/:id/withdraw ERROR:",
+      err
+    );
+
+    res.status(500).json({
+      message:
+        "เกิดข้อผิดพลาดในการเบิกอะไหล่"
+    });
+
   }
+
 });
 
 module.exports = router;

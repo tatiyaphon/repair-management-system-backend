@@ -32,28 +32,39 @@ const stockSchema = new mongoose.Schema({
     // ทำให้พิมพ์ราคาติดลบผ่านได้โดยไม่มีอะไรเตือน
     min: 0
   },
+withdrawHistory: [
+  {
+    quantity: {
+      type: Number,
+      required: true
+    },
 
-  // ✅ เพิ่มตรงนี้
-  withdrawHistory: [
-    {
-      quantity: {
-        type: Number,
-        required: true
-      },
-      employeeName: {
-        type: String,
-        required: true
-      },
-      jobRef: {
-        type: String,
-        default: "-"
-      },
-      withdrawnAt: {
-        type: Date,
-        default: Date.now
-      }
+    employeeId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Employee"
+    },
+
+    employeeName: {
+      type: String,
+      required: true
+    },
+
+    jobId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Job"
+    },
+
+    jobRef: {
+      type: String,
+      default: "-"
+    },
+
+    withdrawnAt: {
+      type: Date,
+      default: Date.now
     }
-  ]
+  }
+]
 
 }, { timestamps: true });
 
