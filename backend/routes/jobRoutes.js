@@ -367,7 +367,8 @@ if (job.status === "ซ่อมเสร็จ") {
 }
 // 🔹 บันทึกสถานะเดิม
     const oldStatus = job.status;
-
+    const oldPrice = Number(job.priceQuoted || 0);
+    const oldJobType = job.jobType || null;
     const cleanDate = (v) => (v === "" || v === null ? null : v);
 
     const cleanNumber = (v) => {
@@ -435,7 +436,7 @@ if (job.status === "ซ่อมเสร็จ") {
 
     await job.save();
 
-   /* =========================
+/* =========================
    ACTIVITY LOG
 ========================= */
 
@@ -460,6 +461,10 @@ try {
       ipAddress: req.ip
     });
 
+    console.log(
+      "✅ ACTIVITY SAVED: UPDATE_STATUS",
+      job.receiptNumber
+    );
   }
 
 
@@ -468,7 +473,7 @@ try {
   // =========================
   if (
     req.body.priceQuoted !== undefined &&
-    oldPrice !== job.priceQuoted
+    oldPrice !== Number(job.priceQuoted || 0)
   ) {
 
     await Activity.create({
@@ -477,11 +482,15 @@ try {
       action: "UPDATE_PRICE",
       detail:
         `แก้ไขราคางาน ${job.receiptNumber || "-"} ` +
-        `(${oldPrice} → ${job.priceQuoted} บาท)`,
+        `(${oldPrice} → ${Number(job.priceQuoted || 0)} บาท)`,
       jobId: job._id,
       ipAddress: req.ip
     });
 
+    console.log(
+      "✅ ACTIVITY SAVED: UPDATE_PRICE",
+      job.receiptNumber
+    );
   }
 
 
@@ -504,15 +513,22 @@ try {
       ipAddress: req.ip
     });
 
+    console.log(
+      "✅ ACTIVITY SAVED: UPDATE_JOB_TYPE",
+      job.receiptNumber
+    );
   }
 
 } catch (logErr) {
 
   console.error(
-    "ACTIVITY LOG ERROR:",
-    logErr
+    "❌ ACTIVITY LOG ERROR:",
+    logErr.message
   );
 
+  console.error(
+    logErr.stack
+  );
 }
 
     /* =========================
@@ -609,17 +625,30 @@ router.post("/:id/use-part", auth, async (req, res) => {
 
     await job.save();
 
-    /* =========================
-       5️⃣ Activity Log
-    ========================= */
-    await Activity.create({
-      userId: req.user.userId,
-      userName: req.user.userName || "Unknown",
-      action: "USE_PART",
-      detail: `เบิก ${stock.name} x${quantity} สำหรับงาน ${job.receiptNumber}`,
-      jobId: job._id,
-      ipAddress: req.ip
-    });
+   try {
+
+  await Activity.create({
+    userId: req.user.userId,
+    userName: req.user.userName || "Unknown",
+    action: "CREATE_JOB",
+    detail: `รับเครื่องใหม่ ${job.receiptNumber}`,
+    jobId: job._id,
+    ipAddress: req.ip
+  });
+
+  console.log(
+    "✅ ACTIVITY SAVED: CREATE_JOB",
+    job.receiptNumber
+  );
+
+} catch (logErr) {
+
+  console.error(
+    "❌ ACTIVITY LOG ERROR:",
+    logErr.message
+  );
+
+}
 
     res.json({ message: "เบิกอะไหล่สำเร็จ" });
 
